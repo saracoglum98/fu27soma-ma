@@ -8,6 +8,8 @@
 - Implement argument to manage.sh - build
 - Implement argument to manage.sh - start
 - Implement argument to manage.sh - stop
+- Rent a server 
+- Implement Github Actions CI/CD Pipeline
 
 # Data Model
 - Implement data model in API Schemas
