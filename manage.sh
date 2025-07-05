@@ -96,7 +96,7 @@ if [ "$1" = "build" ]; then
     layer_build "communication"
     layer_build "data"
     layer_build "llm"
-    #init
+    init
 
     echo -e "\n🎉 All services are running\n"
 fi

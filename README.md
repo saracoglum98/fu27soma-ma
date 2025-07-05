@@ -35,3 +35,14 @@ Finally, run the following command to build all services. This can take 5 to 30 
 ```
 ./manage.sh build
 ```
+
+The output of build command should look like this.
+```
+🚀 Building      communication
+🚀 Building      data
+🚀 Building      llm
+
+🧹 Initializing services
+
+🎉 All services are running
+```
