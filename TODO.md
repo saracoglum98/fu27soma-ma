@@ -1,7 +1,4 @@
 # Infrastructre and Services
-- llm layer (ollama)
-- LLM layer gpu and cpu support
-- ollama init with default models
 - management layer (?)
 - Rent a server 
 - Implement Github Actions CI/CD Pipeline
@@ -11,4 +8,6 @@
 - Implement data model in SQL Seed
 
 # Functions
-- 
+- Upload file - to MinIO
+- Upload file - register to PostgreSQL
+- Upload file - Generate embeddings into Qdrant

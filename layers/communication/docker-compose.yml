@@ -1,9 +1,9 @@
 services:
-  communication-layer-api:
+  communication-api:
     build:
       context: ./api
       dockerfile: Dockerfile
-    container_name: communication-layer-api
+    container_name: communication-api
     ports:
       - "8000:8000"
     networks:

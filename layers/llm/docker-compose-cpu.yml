@@ -1,17 +1,17 @@
 services:
-  llm-layer-inference:
-    container_name: llm-layer-inference
+  llm-inference:
+    container_name: llm-inference
     image: ollama/ollama:latest
     ports:
       - "11434:11434"
     volumes:
-      - llm-layer-inference-data:/root/.ollama
+      - llm-inference-data:/root/.ollama
     restart: unless-stopped
 
 volumes:
-  llm-layer-inference-data:
+  llm-inference-data:
 
 networks:
   app-network:
     external: true
-    name: llm-layer_app-network 
+    name: llm_app-network 

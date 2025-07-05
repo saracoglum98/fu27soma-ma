@@ -3,21 +3,10 @@
 clear
 
 CONFIG_FILE="config.yaml"
-
-DEBUG=false
-DEPLOYMENT_TYPE="cpu"
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 tool_read_yaml() {
     local keys="$1"
-
-    # Check if yq is installed
-    if ! command -v yq &> /dev/null; then
-        echo "Error: yq is not installed" >&2
-        echo "Please install yq first:" >&2
-        echo "  For macOS: brew install yq" >&2
-        echo "  For Linux: snap install yq" >&2
-        return 1
-    fi
 
     # Add leading dot for yq syntax
     local yq_path=".$keys"
@@ -40,18 +29,17 @@ tool_replace_inplace() {
     sed -i '' "s|${search_string}|${replace_string}|g" "$file_path" 2>/dev/null
 }
 
-service_build() {
+layer_build() {
     local folder=$1
-    cd "$folder"
+    cd "$SCRIPT_DIR/layers/$folder"
     echo -e "🚀 Building \t $folder"
-    if [ "$DEBUG" = true ]; then
-        docker compose down -v
-        docker compose up -d --build
+    
+    if [ "$folder" = "llm" ]; then
+        deployment_type=$(cd "$SCRIPT_DIR" && tool_read_yaml "deployment.type")
+        docker compose -f "docker-compose-${deployment_type}.yml" up -d --build > /dev/null 2>&1
     else
-        docker compose down -v > /dev/null 2>&1
         docker compose up -d --build > /dev/null 2>&1
     fi
-    cd ..
 }
 
 service_destroy() {
@@ -88,7 +76,6 @@ init() {
     python script.py  > /dev/null 2>&1
     deactivate  > /dev/null 2>&1
     rm -rf .venv  > /dev/null 2>&1
-    cd ..  > /dev/null 2>&1
 }
 
 # Check if help argument is provided
@@ -106,60 +93,61 @@ if [ "$1" = "help" ]; then
 fi 
 
 if [ "$1" = "build" ]; then
-    service_build "communication-layer"
-    service_build "data-layer"
-    service_build "llm-layer"
-    init
+    layer_build "communication"
+    layer_build "data"
+    layer_build "llm"
+    #init
 
     echo -e "\n🎉 All services are running\n"
 fi
 
 if [ "$1" = "start" ]; then
-    service_start "communication-layer-api"
-    service_start "llm-layer-inference"
-    service_start "data-layer-relational-storage"
-    service_start "data-layer-non-relational-storage"
-    service_start "data-layer-object-storage"
-    service_start "data-layer-vector-storage"
+    service_start "communication-api"
+    service_start "llm-inference"
+    service_start "data-relational"
+    service_start "data-non-relational"
+    service_start "data-object"
+    service_start "data-vector"
 
     echo -e "\n🎉 All services started\n"
 fi
 
 if [ "$1" = "stop" ]; then
-    service_stop "communication-layer-api"
-    service_stop "llm-layer-inference"
-    service_stop "data-layer-relational-storage"
-    service_stop "data-layer-non-relational-storage"
-    service_stop "data-layer-object-storage"
-    service_stop "data-layer-vector-storage"
+    service_stop "communication-api"
+    service_stop "llm-inference"
+    service_stop "data-relational"
+    service_stop "data-non-relational"
+    service_stop "data-object"
+    service_stop "data-vector"
 
     echo -e "\n🎉 All services stopped\n"
 fi
 
 if [ "$1" = "restart" ]; then
-    service_restart "communication-layer-api"
-    service_restart "llm-layer-inference"
-    service_restart "data-layer-relational-storage"
-    service_restart "data-layer-non-relational-storage"
-    service_restart "data-layer-object-storage"
-    service_restart "data-layer-vector-storage"
+    service_restart "communication-api"
+    service_restart "llm-inference"
+    service_restart "data-relational"
+    service_restart "data-non-relational"
+    service_restart "data-object"
+    service_restart "data-vector"
 
     echo -e "\n🎉 All services restarted\n"
 fi
 
 if [ "$1" = "destroy" ]; then
-    service_destroy "communication-layer-api"
-    service_destroy "llm-layer-inference"
-    service_destroy "data-layer-relational-storage"
-    service_destroy "data-layer-non-relational-storage"
-    service_destroy "data-layer-object-storage"
-    service_destroy "data-layer-vector-storage"
+    service_destroy "communication-api"
+    service_destroy "llm-inference"
+    service_destroy "data-relational"
+    service_destroy "data-non-relational"
+    service_destroy "data-object"
+    service_destroy "data-vector"
 
     echo -e "\n🎉 All services destroyed\n"
 fi
 
 if [ "$1" = "read" ]; then
-    tool_read_yaml "deployment.type"
+    test=$(tool_read_yaml "deployment.type")
+    echo "Test: $test"
 fi
 
 
