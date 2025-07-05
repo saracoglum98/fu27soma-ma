@@ -1,25 +1,2 @@
 deployment:
   type: cpu
-
-layers:
-  communication:
-    api:
-      port: 8000
-    webapp:
-      port: 80
-  data:
-    relational:
-      port: 5432
-      db: postgres
-      auth_user: postgres
-      auth_pass: fu27soma
-    object:
-      port:
-        ui: 9001
-        api: 9000
-    non_relational:
-      port: 6379
-    vector:
-      port:
-        rest: 6333
-        grpc: 6334
