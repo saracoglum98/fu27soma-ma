@@ -6,6 +6,13 @@ services:
       - "11434:11434"
     volumes:
       - llm-layer-inference-data:/root/.ollama
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
     restart: unless-stopped
 
 volumes:

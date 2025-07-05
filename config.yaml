@@ -1,3 +1,6 @@
+deployment:
+  type: cpu
+
 communication_layer:
   api:
     port: 8000

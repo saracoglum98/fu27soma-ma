@@ -48,16 +48,6 @@ services:
     networks:
       - app-network
 
-  data-layer-init:
-    container_name: data-layer-init
-    build:
-      context: .
-      dockerfile: initialization/Dockerfile
-    env_file:
-      - .env
-    networks:
-      - app-network
-
 volumes:
   data-layer-relational-storage-data:
   data-layer-object-storage-data:
@@ -66,5 +56,4 @@ volumes:
 
 networks:
   app-network:
-    external: true
-    name: communication-layer_app-network 
+    driver: bridge 
