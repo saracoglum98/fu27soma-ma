@@ -1,6 +1,6 @@
 # Infrastructre and Services
-- WebApp container
-- management layer (?)
+- Bring WebApp container here
+- Convert from Qdrant to Milvus - with Atto UI
 - Rent a server 
 - Implement Github Actions CI/CD Pipeline
 
@@ -10,6 +10,7 @@
 
 # Functions
 - Develop UI
+- Create Sample Data - make it in init script
 - Upload file - to MinIO
 - Upload file - register to PostgreSQL
 - Upload file - Generate embeddings into Qdrant
