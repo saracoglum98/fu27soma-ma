@@ -14,11 +14,13 @@ services:
               count: all
               capabilities: [gpu]
     restart: unless-stopped
+    networks:
+      - app-network
 
 volumes:
   llm-inference-data:
 
 networks:
   app-network:
-    external: true
-    name: llm_app-network 
+    name: app-network
+    external: true 

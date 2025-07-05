@@ -45,6 +45,7 @@ services:
       - "6334:6334"   # gRPC
     volumes:
       - data-vector-data:/qdrant/storage
+    restart: unless-stopped
     networks:
       - app-network
 
@@ -56,4 +57,5 @@ volumes:
 
 networks:
   app-network:
-    driver: bridge 
+    name: app-network
+    external: true 

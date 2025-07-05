@@ -1,18 +1,13 @@
 from fastapi import FastAPI
-from routers import file
-
+from routers import file, llm
 app = FastAPI(
-    title="File Management API",
-    description="API for managing and processing files in the system",
+    title="fu27soma-ma API",
     version="1.0.0",
-    contact={
-        "name": "API Support",
-        "email": "support@example.com"
-    }
 )
 
 # Include routers
 app.include_router(file.router)
+app.include_router(llm.router)
 
 @app.get("/")
 async def root():

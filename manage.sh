@@ -67,6 +67,12 @@ service_restart() {
     docker restart $service > /dev/null 2>&1
 }
 
+create_network() {
+    echo -e "🌍 Creating network\n"
+    docker network rm app-network > /dev/null 2>&1
+    docker network create app-network > /dev/null 2>&1
+}
+
 init() {
     echo -e "\n🧹 Initializing services"
     cd init  > /dev/null 2>&1
@@ -93,6 +99,7 @@ if [ "$1" = "help" ]; then
 fi 
 
 if [ "$1" = "build" ]; then
+    create_network
     layer_build "communication"
     layer_build "data"
     layer_build "llm"

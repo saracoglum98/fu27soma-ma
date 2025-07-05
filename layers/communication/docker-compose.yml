@@ -6,9 +6,11 @@ services:
     container_name: communication-api
     ports:
       - "8000:8000"
+    restart: unless-stopped
     networks:
       - app-network
 
 networks:
   app-network:
-    name: app-network 
+    name: app-network
+    external: true 
