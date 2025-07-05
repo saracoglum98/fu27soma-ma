@@ -16,7 +16,7 @@ chmod +x manage.sh
 
 This code block will install dependencies, and prepare the operating system. 
 
-The default configraution will use CPU only for LLM inference. If the host machine is a GPU enabled machine, you will have to edit the configuration file accordingly.  Using `nano config.yaml`, or another method, change the `type: cpu` to `type: gpu`. If you want to do LLM inference on CPU only, you can skip this step. If you want to do further configuration for each microservice, you can have a look at `.env` files for each layer under `layers` folder. However, this is not suggested unless you know what you are doing.
+The default configraution will use CPU only for LLM inference. If the host machine is a GPU enabled machine, you will have to edit the configuration file accordingly.  Using `nano config.yaml`, or another method, change the `type: cpu` to `type: gpu`. If you want to do LLM inference on CPU only, you can skip this step. If you want to do further configuration for each microservice, you can have a look at `.env` and `Dockerfile` files for each layer under `layers` folder. However, this is not suggested unless you know what you are doing.
 
 You can use `manage.sh` script to manage the codebase. run `./manage.sh help` and you will see the available options.
 ```
