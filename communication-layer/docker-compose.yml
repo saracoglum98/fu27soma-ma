@@ -1,0 +1,14 @@
+services:
+  communication-layer-api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    container_name: communication-layer-api
+    ports:
+      - "8000:8000"
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge

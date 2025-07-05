@@ -1,0 +1,18 @@
+services:
+  llm-layer-chat:
+    container_name: llm-layer-chat
+    image: ghcr.io/open-webui/open-webui:main
+    ports:
+      - "3000:8080"
+    env_file:
+      - .env
+    networks:
+      - app-network
+
+volumes:
+  llm-layer-inference-data:
+
+networks:
+  app-network:
+    external: true
+    name: communication-layer_app-network 

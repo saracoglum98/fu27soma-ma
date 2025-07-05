@@ -1,0 +1,70 @@
+services:
+  data-layer-relational-storage:
+    container_name: data-layer-relational-storage
+    image: bitnami/postgresql:latest
+    env_file:
+      - .env
+    ports:
+      - "5432:5432"
+    volumes:
+      - data-layer-relational-storage-data:/bitnami/postgresql
+    networks:
+      - app-network
+
+  data-layer-object-storage:
+    container_name: data-layer-object-storage
+    image: bitnami/minio:latest
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    env_file:
+      - .env
+    volumes:
+      - data-layer-object-storage-data:/bitnami/minio
+    command: server /bitnami/minio/data --console-address ":9001"
+    networks:
+      - app-network
+
+  data-layer-non-relational-storage:
+    image: bitnami/redis:latest
+    container_name: data-layer-non-relational-storage
+    ports:
+      - "6379:6379"   # Redis port
+    env_file:
+      - .env  # You should set this in .env file
+    volumes:
+      - data-layer-non-relational-storage-data:/bitnami/redis/data
+    networks:
+      - app-network
+
+  data-layer-vector-storage:
+    container_name: data-layer-vector-storage
+    image: qdrant/qdrant:latest
+    ports:
+      - "6333:6333"   # REST API
+      - "6334:6334"   # gRPC
+    volumes:
+      - data-layer-vector-storage-data:/qdrant/storage
+    networks:
+      - app-network
+
+  data-layer-init:
+    container_name: data-layer-init
+    build:
+      context: .
+      dockerfile: initialization/Dockerfile
+    env_file:
+      - .env
+    networks:
+      - app-network
+
+volumes:
+  data-layer-relational-storage-data:
+  data-layer-object-storage-data:
+  data-layer-vector-storage-data:
+  data-layer-non-relational-storage-data:
+
+networks:
+  app-network:
+    external: true
+    name: communication-layer_app-network 
