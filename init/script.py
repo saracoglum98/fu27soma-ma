@@ -53,8 +53,8 @@ def init_ollama():
 
 if __name__ == "__main__":
     print("Starting initialization...")
-    init_minio()
+    #init_minio()
     init_postgres()
-    init_qdrant()
-    init_ollama()
+    #init_qdrant()
+    #init_ollama()
 
