@@ -10,6 +10,17 @@ services:
     networks:
       - app-network
 
+  communication-webapp:
+    build:
+      context: ./webapp
+      dockerfile: Dockerfile
+    container_name: communication-webapp
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
+    networks:
+      - app-network
+
 networks:
   app-network:
     name: app-network

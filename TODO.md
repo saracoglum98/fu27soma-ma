@@ -1,6 +1,5 @@
 # Infrastructre and Services
-- Bring WebApp container here
-- Rent a server 
+- Rent a server and/or Tailscale and/or DynamicDNS?
 - Implement Github Actions CI/CD Pipeline
 
 # Functions

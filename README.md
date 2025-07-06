@@ -38,6 +38,8 @@ Finally, run the following command to build all services. This can take 5 to 30 
 
 The output of build command should look like this.
 ```
+🌍 Creating network
+
 🚀 Building      communication
 🚀 Building      data
 🚀 Building      llm
@@ -45,4 +47,6 @@ The output of build command should look like this.
 🧹 Initializing services
 
 🎉 All services are running
+
+🌐 Access the webapp at http://localhost:3000
 ```
