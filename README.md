@@ -48,5 +48,5 @@ The output of build command should look like this.
 
 🎉 All services are running
 
-🌐 Access the webapp at http://localhost:3000
+🌐 Access the web app at http://localhost:3000
 ```

@@ -106,7 +106,7 @@ if [ "$1" = "build" ]; then
     init
 
     echo -e "\n🎉 All services are running\n"
-    echo -e "🌐 Access the webapp at http://localhost:3000\n"
+    echo -e "🌐 Access the web app at http://localhost:3000\n"
 fi
 
 if [ "$1" = "start" ]; then
