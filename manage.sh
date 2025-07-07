@@ -36,9 +36,9 @@ layer_build() {
     
     if [ "$folder" = "llm" ]; then
         deployment_type=$(cd "$SCRIPT_DIR" && tool_read_yaml "deployment.type")
-        docker compose -f "docker-compose-${deployment_type}.yml" up -d --build > /dev/null 2>&1
+        docker compose -f "docker-compose-${deployment_type}.yml" up -d --build --force-recreate > /dev/null 2>&1
     else
-        docker compose up -d --build > /dev/null 2>&1
+        docker compose up -d --build --force-recreate > /dev/null 2>&1
     fi
 }
 
@@ -46,7 +46,7 @@ service_destroy() {
     local service=$1
     echo -e "💣 Destroying \t $service"
     service_stop $service > /dev/null 2>&1
-    docker rm $service > /dev/null 2>&1
+    docker rm -f -v $service > /dev/null 2>&1
 }
 
 service_start() {
@@ -103,7 +103,6 @@ if [ "$1" = "build" ]; then
     layer_build "communication"
     layer_build "data"
     layer_build "llm"
-    init
 
     echo -e "\n🎉 All services are running\n"
     echo -e "🌐 Access the web app at http://localhost:3000\n"
@@ -144,6 +143,7 @@ fi
 
 if [ "$1" = "destroy" ]; then
     service_destroy "communication-api"
+    service_destroy "communication-webapp"
     service_destroy "llm-inference"
     service_destroy "data-relational"
     service_destroy "data-non-relational"

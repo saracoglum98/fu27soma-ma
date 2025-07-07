@@ -6,6 +6,8 @@ services:
       - .env
     ports:
       - "5432:5432"
+    volumes:
+      - data-relational-data:/bitnami/postgresql
     networks:
       - app-network
 
@@ -17,6 +19,8 @@ services:
       - "9001:9001"
     env_file:
       - .env
+    volumes:
+      - data-object-data:/bitnami/minio
     command: server /bitnami/minio/data --console-address ":9001"
     networks:
       - app-network
@@ -28,6 +32,8 @@ services:
       - "6379:6379"   # Redis port
     env_file:
       - .env  # You should set this in .env file
+    volumes:
+      - data-non-relational-data:/bitnami/redis/data
     networks:
       - app-network
 
@@ -37,9 +43,17 @@ services:
     ports:
       - "6333:6333"   # REST API
       - "6334:6334"   # gRPC
+    volumes:
+      - data-vector-data:/qdrant/storage
     restart: unless-stopped
     networks:
       - app-network
+
+volumes:
+  data-relational-data:
+  data-object-data:
+  data-vector-data:
+  data-non-relational-data:
 
 networks:
   app-network:

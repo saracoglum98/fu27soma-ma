@@ -50,11 +50,12 @@ def init_ollama():
         host='http://localhost:11434'  # Default Ollama API endpoint
     )
     ollama_client.pull('tinyllama')
+    ollama_client.pull('nomic-embed-text')
 
 if __name__ == "__main__":
     print("Starting initialization...")
-    #init_minio()
+    init_minio()
     init_postgres()
-    #init_qdrant()
-    #init_ollama()
+    init_qdrant()
+    init_ollama()
 

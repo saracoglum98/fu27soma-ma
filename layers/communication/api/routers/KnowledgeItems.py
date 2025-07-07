@@ -15,14 +15,6 @@ minio_client = Minio("data-object:9000",
                         secret_key="fu27soma",
                         secure=False)
 
-# Ensure bucket exists
-BUCKET_NAME = "data"
-try:
-    if not minio_client.bucket_exists(BUCKET_NAME):
-        minio_client.make_bucket(BUCKET_NAME)
-except Exception as e:
-    print(f"Error ensuring bucket exists: {e}")
-
 
 router = APIRouter(
     prefix="/knowledge_items",
