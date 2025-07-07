@@ -3,7 +3,8 @@
 - Implement Github Actions CI/CD Pipeline
 
 # Functions
-- CRUD - Knowledge Items -  Generate embeddings into Qdrant
+- CRUD - Knowledge Items - Generate embeddings into Qdrant
+- CRUD - Knowledge Items - Delete files on delete
 - CRUD - SolutionSpaces
 - UI - Knowledge Items
 - UI - Functions
