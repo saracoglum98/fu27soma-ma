@@ -6,6 +6,8 @@ services:
     container_name: communication-api
     ports:
       - "8000:8000"
+    env_file:
+      - .env
     restart: unless-stopped
     networks:
       - app-network
@@ -17,6 +19,8 @@ services:
     container_name: communication-webapp
     ports:
       - "3000:3000"
+    env_file:
+      - .env
     restart: unless-stopped
     networks:
       - app-network

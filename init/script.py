@@ -4,15 +4,19 @@ import os
 import ollama
 from qdrant_client import QdrantClient
 from qdrant_client.models import VectorParams, Distance
+from dotenv import load_dotenv
+
+load_dotenv()
+
 
 def init_minio():
     # Initialize MinIO buckets
     print("Initializating MinIO")
     minio_client = Minio("localhost:9000",
-                        access_key="root",
-                        secret_key="fu27soma",
+                        access_key=os.getenv("MINIO_ROOT_USER"),
+                        secret_key=os.getenv("MINIO_ROOT_PASSWORD"),
                         secure=False)
-    minio_client.make_bucket("data")
+    minio_client.make_bucket(os.getenv("MINIO_DEFAULT_BUCKET"))
 
 def init_postgres():
     # Initialize PostgreSQL
@@ -20,13 +24,13 @@ def init_postgres():
     postgres_conn = psycopg2.connect(
         host="localhost",
         port="5432",
-        database="postgres",
-        user="root",
-        password="fu27soma"
+        database=os.getenv("POSTGRES_DB"),
+        user=os.getenv("POSTGRES_USER"),
+        password=os.getenv("POSTGRES_PASSWORD")
     )
     postgres_cursor = postgres_conn.cursor()
 
-    with open('seed.sql', 'r') as file:
+    with open(os.getenv("INIT_SCHEMA_FILE"), 'r') as file:
         sql_commands = file.read()
         postgres_cursor.execute(sql_commands)
 
@@ -40,7 +44,7 @@ def init_qdrant():
     qdrant_client = QdrantClient(host='localhost',port=6333)
 
     qdrant_client.create_collection(
-        collection_name="data",
+        collection_name=os.getenv("QDRANT_DEFAULT_COLLECTION"),
         vectors_config=VectorParams(size=100, distance=Distance.COSINE))
 
 def init_ollama():

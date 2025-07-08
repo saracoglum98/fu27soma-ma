@@ -40,6 +40,7 @@ layer_build() {
     else
         docker compose up -d --build --force-recreate > /dev/null 2>&1
     fi
+    cd $SCRIPT_DIR
 }
 
 service_destroy() {
@@ -71,17 +72,37 @@ create_network() {
     echo -e "🌍 Creating network\n"
     docker network rm app-network > /dev/null 2>&1
     docker network create app-network > /dev/null 2>&1
+    cd $SCRIPT_DIR
 }
 
 init() {
-    echo -e "\n🧹 Initializing services"
+    echo -e "\n💨 Initializing services\n"
     cd init  > /dev/null 2>&1
     uv venv  > /dev/null 2>&1
     source .venv/bin/activate  > /dev/null 2>&1
     uv pip install -r requirements.txt  > /dev/null 2>&1
-    python script.py  > /dev/null 2>&1
+    python script.py  > /dev/null
     deactivate  > /dev/null 2>&1
     rm -rf .venv  > /dev/null 2>&1
+    cd $SCRIPT_DIR
+}
+
+env_create() {
+    echo -e "🛠️  Creating environment variables\n"
+    cp .env layers/communication/.env
+    cp .env layers/data/.env
+    cp .env layers/llm/.env
+    cp .env init/.env
+    cd $SCRIPT_DIR
+}
+
+clear() {
+    echo -e "🧹 Clearing build related files"
+    rm -rf layers/communication/.env
+    rm -rf layers/data/.env
+    rm -rf layers/llm/.env
+    rm -rf init/.env
+    cd $SCRIPT_DIR
 }
 
 # Check if help argument is provided
@@ -100,10 +121,12 @@ fi
 
 if [ "$1" = "build" ]; then
     create_network
+    env_create
     layer_build "communication"
     layer_build "data"
     layer_build "llm"
-
+    init
+    clear
     echo -e "\n🎉 All services are running\n"
     echo -e "🌐 Access the web app at http://localhost:3000\n"
 fi
@@ -112,7 +135,6 @@ if [ "$1" = "start" ]; then
     service_start "communication-api"
     service_start "llm-inference"
     service_start "data-relational"
-    service_start "data-non-relational"
     service_start "data-object"
     service_start "data-vector"
 
@@ -123,7 +145,6 @@ if [ "$1" = "stop" ]; then
     service_stop "communication-api"
     service_stop "llm-inference"
     service_stop "data-relational"
-    service_stop "data-non-relational"
     service_stop "data-object"
     service_stop "data-vector"
 
@@ -134,7 +155,6 @@ if [ "$1" = "restart" ]; then
     service_restart "communication-api"
     service_restart "llm-inference"
     service_restart "data-relational"
-    service_restart "data-non-relational"
     service_restart "data-object"
     service_restart "data-vector"
 
@@ -146,7 +166,6 @@ if [ "$1" = "destroy" ]; then
     service_destroy "communication-webapp"
     service_destroy "llm-inference"
     service_destroy "data-relational"
-    service_destroy "data-non-relational"
     service_destroy "data-object"
     service_destroy "data-vector"
 

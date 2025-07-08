@@ -7,14 +7,6 @@
 
 
 # TODO
-- Do I need redis?
-- Merge .env files - seed.sql
-- Merge .env files - minio bucket name
-- Merge .env files - qdrant collection name
-- Merge .env files - Pipeline - Copy them to layers
-- Merge .env files - Pipeline - Build
-- Merge .env files - Pipeline - Remove .env files from layers
-- API Layer - all connections in one file(qdrant and minio)
 - CRUD - Knowledge Items - Generate embeddings into Qdrant
 - CRUD - Knowledge Items - Delete files on delete
 - CRUD - SolutionSpaces

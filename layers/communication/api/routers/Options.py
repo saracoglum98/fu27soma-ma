@@ -2,7 +2,7 @@ from fastapi import APIRouter, HTTPException, status
 from datetime import datetime
 from typing import List
 from schemas.Options import OptionsR, OptionsCU
-from database import get_db_connection
+from connections import db
 import uuid
 
 router = APIRouter(
@@ -14,7 +14,7 @@ router = APIRouter(
 @router.get("/", name="Read all", response_model=List[OptionsR])
 async def options_read_all():
     try:
-        conn = get_db_connection()
+        conn = db()
         cur = conn.cursor()
         cur.execute("SELECT uuid, name, knowledge FROM options")
         options = cur.fetchall()
@@ -35,7 +35,7 @@ async def options_read_all():
 @router.get("/{uuid}", name="Read single", response_model=OptionsR)
 async def option_read_one(uuid: str):
     try:
-        conn = get_db_connection()
+        conn = db()
         cur = conn.cursor()
         cur.execute("SELECT uuid, name, knowledge FROM options WHERE uuid = %s", (uuid,))
         option = cur.fetchone()
@@ -56,7 +56,7 @@ async def option_read_one(uuid: str):
 @router.put("/{uuid}", name="Update", response_model=OptionsR)
 async def option_update(uuid: str, option: OptionsCU):
     try:
-        conn = get_db_connection()
+        conn = db()
         cur = conn.cursor()
         
         # First check if the option exists
@@ -93,7 +93,7 @@ async def option_update(uuid: str, option: OptionsCU):
 @router.delete("/{uuid}", name="Delete", status_code=status.HTTP_200_OK)
 async def option_delete(uuid: str):
     try:
-        conn = get_db_connection()
+        conn = db()
         cur = conn.cursor()
         
         # First check if the option exists
@@ -117,7 +117,7 @@ async def option_delete(uuid: str):
 @router.post("/", name="Create", response_model=OptionsR, status_code=status.HTTP_201_CREATED)
 async def option_create(option: OptionsCU):
     try:
-        conn = get_db_connection()
+        conn = db()
         cur = conn.cursor()
         
         new_uuid = str(uuid.uuid4())

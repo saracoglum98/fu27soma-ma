@@ -2,18 +2,15 @@ from fastapi import APIRouter, HTTPException, status, UploadFile
 from datetime import datetime
 from typing import List
 from schemas.KnowledgeItems import KnowledgeItemsR, KnowledgeItemsCreate, KnowledgeItemsUpdate, KnowledgeItemsUpload
-from database import get_db_connection
-from minio import Minio
+from connections import db, minio
+
 import os
 from io import BytesIO
 from docling.document_converter import DocumentConverter
 from markitdown import MarkItDown
 
 # Initialize MinIO client
-minio_client = Minio("data-object:9000",
-                        access_key="root",
-                        secret_key="fu27soma",
-                        secure=False)
+
 
 
 router = APIRouter(
@@ -25,7 +22,7 @@ router = APIRouter(
 @router.get("/", name="Read all", response_model=List[KnowledgeItemsR])
 async def knowledge_items_read_all():
     try:
-        conn = get_db_connection()
+        conn = db()
         cur = conn.cursor()
         cur.execute("SELECT uuid, name, url, length FROM knowledge_items")
         knowledge_items = cur.fetchall()
@@ -50,7 +47,7 @@ async def knowledge_items_read_all():
 @router.delete("/{uuid}", name="Delete", status_code=status.HTTP_200_OK)
 async def knowledge_item_delete(uuid: str):
     try:
-        conn = get_db_connection()
+        conn = db()
         cur = conn.cursor()
         
         # First check if the knowledge item exists
@@ -74,7 +71,7 @@ async def knowledge_item_delete(uuid: str):
 @router.post("/", name="Create", response_model=KnowledgeItemsR, status_code=status.HTTP_201_CREATED)
 async def knowledge_item_create(knowledge_item: KnowledgeItemsCreate):
     try:
-        conn = get_db_connection()
+        conn = db()
         cur = conn.cursor()
         
         cur.execute(
@@ -101,7 +98,7 @@ async def knowledge_item_create(knowledge_item: KnowledgeItemsCreate):
 @router.put("/upload/{uuid}", name="Upload", response_model=KnowledgeItemsR)
 async def knowledge_item_upload(uuid: str, file: UploadFile):
     try:
-        conn = get_db_connection()
+        conn = db()
         cur = conn.cursor()
         
         
@@ -113,8 +110,10 @@ async def knowledge_item_upload(uuid: str, file: UploadFile):
         object_name = f"{uuid}/{datetime.now().strftime('%Y%m%d_%H%M%S')}_{file.filename}"
         
         # Upload file to MinIO
+        
+        minio_client = minio()
         minio_client.put_object(
-            bucket_name=BUCKET_NAME,
+            bucket_name=os.getenv("MINIO_DEFAULT_BUCKET"),
             object_name=object_name,
             data=BytesIO(file_content),
             length=file_size,
@@ -123,7 +122,7 @@ async def knowledge_item_upload(uuid: str, file: UploadFile):
     
         
         # Generate presigned URL (valid for 7 days)
-        url = minio_client.presigned_get_object(BUCKET_NAME, object_name)
+        url = minio_client.presigned_get_object(os.getenv("MINIO_DEFAULT_BUCKET"), object_name)
         
         # Convert file to text
         md = MarkItDown(enable_plugins=False) # Set to True to enable plugins

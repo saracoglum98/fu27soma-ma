@@ -21,22 +21,14 @@ services:
     networks:
       - app-network
 
-  data-non-relational:
-    image: bitnami/redis:latest
-    container_name: data-non-relational
-    ports:
-      - "6379:6379"   # Redis port
-    env_file:
-      - .env  # You should set this in .env file
-    networks:
-      - app-network
-
   data-vector:
     container_name: data-vector
     image: qdrant/qdrant:latest
     ports:
       - "6333:6333"   # REST API
       - "6334:6334"   # gRPC
+    env_file:
+      - .env
     restart: unless-stopped
     networks:
       - app-network

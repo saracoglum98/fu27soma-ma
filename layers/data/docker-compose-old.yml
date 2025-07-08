@@ -25,18 +25,6 @@ services:
     networks:
       - app-network
 
-  data-non-relational:
-    image: bitnami/redis:latest
-    container_name: data-non-relational
-    ports:
-      - "6379:6379"   # Redis port
-    env_file:
-      - .env  # You should set this in .env file
-    volumes:
-      - data-non-relational-data:/bitnami/redis/data
-    networks:
-      - app-network
-
   data-vector:
     container_name: data-vector
     image: qdrant/qdrant:latest
@@ -53,7 +41,6 @@ volumes:
   data-relational-data:
   data-object-data:
   data-vector-data:
-  data-non-relational-data:
 
 networks:
   app-network:
