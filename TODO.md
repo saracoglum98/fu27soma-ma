@@ -7,6 +7,7 @@
 - Demo - Data for Cake use case - Options
 - Demo - Data for Cake use case - Functions
 - Demo - Data for Cake use case - Solution Space
+- init and sample - Move to scripts/ folder
 - Demo - Implement into manage script
 - UI - Knowledge Items
 - UI - Functions
