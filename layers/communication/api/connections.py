@@ -5,13 +5,6 @@ from psycopg2.extras import RealDictCursor
 from minio import Minio
 load_dotenv()
 
-print(os.getenv("POSTGRES_DB")) 
-print(os.getenv("POSTGRES_USER")) 
-print(os.getenv("POSTGRES_PASSWORD")) 
-print(os.getenv("MINIO_ROOT_USER")) 
-print(os.getenv("MINIO_ROOT_PASSWORD")) 
-print(os.getenv("POSTGRES_DB")) 
-
 def db():
     try:
         conn = psycopg2.connect(

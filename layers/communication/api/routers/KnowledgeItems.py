@@ -24,7 +24,7 @@ async def knowledge_items_read_all():
     try:
         conn = db()
         cur = conn.cursor()
-        cur.execute("SELECT uuid, name, url, length FROM knowledge_items")
+        cur.execute("SELECT uuid, name, size, type, url, content, length FROM knowledge_items")
         knowledge_items = cur.fetchall()
         cur.close()
         conn.close()
@@ -50,14 +50,31 @@ async def knowledge_item_delete(uuid: str):
         conn = db()
         cur = conn.cursor()
         
-        # First check if the knowledge item exists
-        cur.execute("SELECT uuid FROM knowledge_items WHERE uuid = %s", (uuid,))
-        if cur.fetchone() is None:
+        # First check if the knowledge item exists and get its URL
+        cur.execute("SELECT uuid, url FROM knowledge_items WHERE uuid = %s", (uuid,))
+        knowledge_item = cur.fetchone()
+        if knowledge_item is None:
             cur.close()
             conn.close()
             raise HTTPException(status_code=404, detail="Knowledge item not found")
         
-        # Delete the knowledge item
+        # If there's a URL, delete the file from MinIO
+        if knowledge_item["url"]:
+            try:
+                url = knowledge_item["url"]
+                object_name = url.replace(f'http://localhost:9000/{os.getenv("MINIO_DEFAULT_BUCKET")}/', '')
+                
+                # Delete object from MinIO
+                minio_client = minio()
+                minio_client.remove_object(
+                    bucket_name=os.getenv("MINIO_DEFAULT_BUCKET"),
+                    object_name=object_name
+                )
+            except Exception as e:
+                # Log the error but continue with database deletion
+                print(f"Error deleting file from MinIO: {str(e)}")
+        
+        # Delete the knowledge item from database
         cur.execute("DELETE FROM knowledge_items WHERE uuid = %s", (uuid,))
         
         conn.commit()
@@ -107,7 +124,7 @@ async def knowledge_item_upload(uuid: str, file: UploadFile):
         file_size = len(file_content)
         
         # Generate a unique object name using original filename
-        object_name = f"{uuid}/{datetime.now().strftime('%Y%m%d_%H%M%S')}_{file.filename}"
+        object_name = f"{uuid}/{datetime.now().strftime('%Y%m%d_%H%M%S')}/{file.filename}"
         
         # Upload file to MinIO
         
@@ -121,8 +138,8 @@ async def knowledge_item_upload(uuid: str, file: UploadFile):
         )
     
         
-        # Generate presigned URL (valid for 7 days)
-        url = minio_client.presigned_get_object(os.getenv("MINIO_DEFAULT_BUCKET"), object_name)
+        # Generate direct URL for public bucket
+        url = f"{'http://data-object:9000'}/{os.getenv('MINIO_DEFAULT_BUCKET')}/{object_name}"
         
         # Convert file to text
         md = MarkItDown(enable_plugins=False) # Set to True to enable plugins
@@ -135,9 +152,9 @@ async def knowledge_item_upload(uuid: str, file: UploadFile):
             UPDATE knowledge_items 
             SET url = %s, length = %s, content = %s, size = %s, type = %s
             WHERE uuid = %s
-            RETURNING uuid, name, url, length
+            RETURNING uuid, name, url, length, size, type, content
             """,
-            (url, len(content), content, file_size, file.content_type, str(uuid))
+            (url.replace('http://data-object', 'http://localhost'), len(content), content, file_size, file.content_type, str(uuid))
         )
         updated_item = cur.fetchone()
         
@@ -148,7 +165,10 @@ async def knowledge_item_upload(uuid: str, file: UploadFile):
         return {
             "uuid": str(updated_item["uuid"]),
             "name": updated_item["name"],
+            "size": updated_item["size"],
+            "type": updated_item["type"],
             "url": updated_item["url"],
+            "content": updated_item["content"],
             "length": updated_item["length"]
         }
     except Exception as e:

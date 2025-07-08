@@ -2,7 +2,6 @@
 
 ## Functions
 - CRUD - Knowledge Items - Generate embeddings into Qdrant
-- CRUD - Knowledge Items - Delete files on delete
 - Demo - Data for Cake use case
 - Demo - Seed script
 - UI - Knowledge Items

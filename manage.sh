@@ -32,7 +32,7 @@ tool_replace_inplace() {
 layer_build() {
     local folder=$1
     cd "$SCRIPT_DIR/layers/$folder"
-    echo -e "🚀 Building \t $folder"
+    echo -e "🚀 Building $folder"
     
     if [ "$folder" = "llm" ]; then
         deployment_type=$(cd "$SCRIPT_DIR" && tool_read_yaml "deployment.type")
@@ -45,26 +45,26 @@ layer_build() {
 
 service_destroy() {
     local service=$1
-    echo -e "💣 Destroying \t $service"
+    echo -e "💣 Destroying $service"
     service_stop $service > /dev/null 2>&1
     docker rm -f -v $service > /dev/null 2>&1
 }
 
 service_start() {
     local service=$1
-    echo -e "🏃 Starting \t $service"
+    echo -e "🏃 Starting $service"
     docker start $service > /dev/null 2>&1
 }
 
 service_stop() {
     local service=$1
-    echo -e "🤚 Stopping \t $service"
+    echo -e "🤚 Stopping $service"
     docker stop $service > /dev/null 2>&1
 }
 
 service_restart() {
     local service=$1
-    echo -e "🔄 Restarting \t $service"
+    echo -e "🔄 Restarting $service"
     docker restart $service > /dev/null 2>&1
 }
 
@@ -88,7 +88,7 @@ init() {
 }
 
 env_create() {
-    echo -e "🛠️  Creating environment variables\n"
+    echo -e "🛠️  Setting environment variables\n"
     cp .env layers/communication/.env
     cp .env layers/data/.env
     cp .env layers/llm/.env
