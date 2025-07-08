@@ -1,16 +1,16 @@
 from fastapi import APIRouter, HTTPException
 from datetime import datetime
-from schemas.file import FileResponse
 from ollama import Client
 
 
 router = APIRouter(
-    prefix="/llm",
+    prefix="/tests",
+    tags=["tests"],
     responses={404: {"description": "Not found"}},
 )
 
-@router.post("/test")
-async def test():
+@router.get("/models")
+async def models():
     try:
         client = Client(host='http://llm-inference:11434')
         models = client.list()

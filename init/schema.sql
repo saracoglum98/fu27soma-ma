@@ -25,8 +25,7 @@ CREATE TABLE IF NOT EXISTS knowledge_items (
 CREATE TABLE IF NOT EXISTS solution_spaces (
     uuid UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     name TEXT NOT NULL,
-    functions VARCHAR(32)[],
-    results VARCHAR(32)[]
+    functions VARCHAR(32)[]
 );
 
 CREATE TABLE IF NOT EXISTS solutions (

@@ -53,8 +53,13 @@ def init_ollama():
     ollama_client = ollama.Client(
         host='http://localhost:11434'  # Default Ollama API endpoint
     )
-    ollama_client.pull('tinyllama')
-    ollama_client.pull('nomic-embed-text')
+    
+    ollama_client.pull(os.getenv('MODEL_EMBEDDING'))
+    models = os.getenv("MODELS_THINKING").split(',')
+    for model in models:
+        model = model.strip()
+        if model:
+            ollama_client.pull(model)
 
 if __name__ == "__main__":
     print("Starting initialization...")
