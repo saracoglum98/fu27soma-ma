@@ -2,6 +2,7 @@
 
 ## Functions
 - Demo - Test embeddings with relatively larger PDF files
+- Demo - A smarter data type, for junctions?
 - Demo - Data for Cake use case - Knowledge Items
 - Demo - Data for Cake use case - Upload Items
 - Demo - Data for Cake use case - Options
