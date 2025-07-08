@@ -3,9 +3,11 @@ from dotenv import load_dotenv
 import psycopg2
 from psycopg2.extras import RealDictCursor
 from minio import Minio
+import ollama
+from qdrant_client import QdrantClient
 load_dotenv()
 
-def db():
+def my_db():
     try:
         conn = psycopg2.connect(
             host="data-relational",
@@ -20,7 +22,7 @@ def db():
         print(f"Error connecting to database: {e}")
         raise e 
     
-def minio():
+def my_minio():
     try:
         minio_client = Minio("data-object:9000",
                             access_key=os.getenv("MINIO_ROOT_USER"),
@@ -29,4 +31,20 @@ def minio():
         return minio_client
     except Exception as e:
         print(f"Error connecting to minio: {e}")
+        raise e 
+
+def my_ollama():
+    try:
+        ollama_client = ollama.Client(host='http://llm-inference:11434')
+        return ollama_client
+    except Exception as e:
+        print(f"Error connecting to ollama: {e}")
+        raise e 
+
+def my_qdrant():
+    try:
+        qdrant_client = QdrantClient(url='http://data-vector:6333')
+        return qdrant_client
+    except Exception as e:
+        print(f"Error connecting to qdrant: {e}")
         raise e 

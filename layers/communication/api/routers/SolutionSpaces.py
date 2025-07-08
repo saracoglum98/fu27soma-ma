@@ -2,7 +2,7 @@ from fastapi import APIRouter, HTTPException, status
 from datetime import datetime
 from typing import List
 from schemas.SolutionSpaces import SolutionSpacesR, SolutionSpacesCU
-from connections import db
+from connections import my_db
 import uuid
 
 router = APIRouter(
@@ -14,7 +14,7 @@ router = APIRouter(
 @router.get("/", name="Read all", response_model=List[SolutionSpacesR])
 async def solution_spaces_read_all():
     try:
-        conn = db()
+        conn = my_db()
         cur = conn.cursor()
         cur.execute("SELECT uuid, name, functions FROM solution_spaces")
         solution_spaces = cur.fetchall()
@@ -35,7 +35,7 @@ async def solution_spaces_read_all():
 @router.get("/{uuid}", name="Read single", response_model=SolutionSpacesR)
 async def solution_space_read_one(uuid: str):
     try:
-        conn = db()
+        conn = my_db()
         cur = conn.cursor()
         cur.execute("SELECT uuid, name, functions FROM solution_spaces WHERE uuid = %s", (uuid,))
         solution_space = cur.fetchone()
@@ -56,7 +56,7 @@ async def solution_space_read_one(uuid: str):
 @router.put("/{uuid}", name="Update", response_model=SolutionSpacesR)
 async def solution_space_update(uuid: str, solution_space: SolutionSpacesCU):
     try:
-        conn = db()
+        conn = my_db()
         cur = conn.cursor()
         
         # First check if the option exists
@@ -93,7 +93,7 @@ async def solution_space_update(uuid: str, solution_space: SolutionSpacesCU):
 @router.delete("/{uuid}", name="Delete", status_code=status.HTTP_200_OK)
 async def solution_space_delete(uuid: str):
     try:
-        conn = db()
+        conn = my_db()
         cur = conn.cursor()
         
         # First check if the option exists
@@ -117,7 +117,7 @@ async def solution_space_delete(uuid: str):
 @router.post("/", name="Create", response_model=SolutionSpacesR, status_code=status.HTTP_201_CREATED)
 async def solution_space_create(solution_space: SolutionSpacesCU):
     try:
-        conn = db()
+        conn = my_db()
         cur = conn.cursor()
         
         new_uuid = str(uuid.uuid4())

@@ -81,7 +81,7 @@ init() {
     uv venv  > /dev/null 2>&1
     source .venv/bin/activate  > /dev/null 2>&1
     uv pip install -r requirements.txt  > /dev/null 2>&1
-    python script.py  > /dev/null
+    python script.py  > /dev/null 2>&1
     deactivate  > /dev/null 2>&1
     rm -rf .venv  > /dev/null 2>&1
     cd $SCRIPT_DIR
@@ -97,11 +97,16 @@ env_create() {
 }
 
 clear() {
-    echo -e "🧹 Clearing build related files"
+    echo -e "🧹 Clearing build related files\n"
     rm -rf layers/communication/.env
     rm -rf layers/data/.env
     rm -rf layers/llm/.env
     rm -rf init/.env
+    cd $SCRIPT_DIR
+}
+
+sample_data() {
+    echo -e "🌱 Seeding sample data\n"
     cd $SCRIPT_DIR
 }
 
@@ -120,14 +125,23 @@ if [ "$1" = "help" ]; then
 fi 
 
 if [ "$1" = "build" ]; then
+    echo -e "🪜  Preparing to build\n"
+    service_destroy "communication-api"  > /dev/null 2>&1
+    service_destroy "communication-webapp"  > /dev/null 2>&1
+    service_destroy "llm-inference"  > /dev/null 2>&1
+    service_destroy "data-relational"  > /dev/null 2>&1
+    service_destroy "data-object"  > /dev/null 2>&1
+    service_destroy "data-vector"  > /dev/null 2>&1
+    
     create_network
     env_create
     layer_build "communication"
     layer_build "data"
     layer_build "llm"
     init
+    sample_data
     clear
-    echo -e "\n🎉 All services are running\n"
+    echo -e "🎉 All services are running\n"
     echo -e "🌐 Access the web app at http://localhost:3000\n"
 fi
 

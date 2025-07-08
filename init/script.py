@@ -64,7 +64,7 @@ def init_qdrant():
 
     qdrant_client.create_collection(
         collection_name=os.getenv("QDRANT_DEFAULT_COLLECTION"),
-        vectors_config=VectorParams(size=100, distance=Distance.COSINE),
+        vectors_config=VectorParams(size=os.getenv("EMBEDDING_DIMENSION"), distance=Distance.COSINE),
     )
 
 

@@ -2,12 +2,14 @@ from fastapi import APIRouter, HTTPException, status, UploadFile
 from datetime import datetime
 from typing import List
 from schemas.KnowledgeItems import KnowledgeItemsR, KnowledgeItemsCreate, KnowledgeItemsUpdate, KnowledgeItemsUpload
-from connections import db, minio
-
+from connections import my_db, my_minio, my_qdrant
+from tools import chunk_text, embed_text
 import os
 from io import BytesIO
 from docling.document_converter import DocumentConverter
 from markitdown import MarkItDown
+import uuid as uuid_pkg
+from qdrant_client.models import PointStruct
 
 # Initialize MinIO client
 
@@ -22,7 +24,7 @@ router = APIRouter(
 @router.get("/", name="Read all", response_model=List[KnowledgeItemsR])
 async def knowledge_items_read_all():
     try:
-        conn = db()
+        conn = my_db()
         cur = conn.cursor()
         cur.execute("SELECT uuid, name, size, type, url, content, length FROM knowledge_items")
         knowledge_items = cur.fetchall()
@@ -47,7 +49,7 @@ async def knowledge_items_read_all():
 @router.delete("/{uuid}", name="Delete", status_code=status.HTTP_200_OK)
 async def knowledge_item_delete(uuid: str):
     try:
-        conn = db()
+        conn = my_db()
         cur = conn.cursor()
         
         # First check if the knowledge item exists and get its URL
@@ -65,7 +67,7 @@ async def knowledge_item_delete(uuid: str):
                 object_name = url.replace(f'http://localhost:9000/{os.getenv("MINIO_DEFAULT_BUCKET")}/', '')
                 
                 # Delete object from MinIO
-                minio_client = minio()
+                minio_client = my_minio()
                 minio_client.remove_object(
                     bucket_name=os.getenv("MINIO_DEFAULT_BUCKET"),
                     object_name=object_name
@@ -88,7 +90,7 @@ async def knowledge_item_delete(uuid: str):
 @router.post("/", name="Create", response_model=KnowledgeItemsR, status_code=status.HTTP_201_CREATED)
 async def knowledge_item_create(knowledge_item: KnowledgeItemsCreate):
     try:
-        conn = db()
+        conn = my_db()
         cur = conn.cursor()
         
         cur.execute(
@@ -115,7 +117,7 @@ async def knowledge_item_create(knowledge_item: KnowledgeItemsCreate):
 @router.put("/upload/{uuid}", name="Upload", response_model=KnowledgeItemsR)
 async def knowledge_item_upload(uuid: str, file: UploadFile):
     try:
-        conn = db()
+        conn = my_db()
         cur = conn.cursor()
         
         
@@ -128,7 +130,7 @@ async def knowledge_item_upload(uuid: str, file: UploadFile):
         
         # Upload file to MinIO
         
-        minio_client = minio()
+        minio_client = my_minio()
         minio_client.put_object(
             bucket_name=os.getenv("MINIO_DEFAULT_BUCKET"),
             object_name=object_name,
@@ -145,6 +147,44 @@ async def knowledge_item_upload(uuid: str, file: UploadFile):
         md = MarkItDown(enable_plugins=False) # Set to True to enable plugins
         result = md.convert(url)
         content = result.text_content   
+        
+        # Generate embeddings for content
+        chunks = chunk_text(content)
+        
+        embeddings = []
+        for chunk in chunks:
+            embedding = embed_text(chunk)
+            embeddings.append(embedding)
+        
+        metadata = {
+            "filename": file.filename,
+            "content_type": file.content_type,
+            "total_characters": len(content)
+        }
+        
+        points = []
+        point_ids = []
+        for i, (chunk, embedding) in enumerate(zip(chunks, embeddings)):
+            point_id = str(uuid_pkg.uuid4())
+            point_ids.append(point_id)
+            
+            payload = {
+                "text": chunk,
+                "document_uuid": uuid,
+                "chunk_index": i,
+                "total_chunks": len(chunks),
+                "chunk_size": len(chunk),
+                **metadata
+            }
+            
+            points.append(PointStruct(
+                id=point_id,
+                vector=embedding,
+                payload=payload
+            ))
+            
+        qdrant_client = my_qdrant()
+        qdrant_client.upsert(collection_name=os.getenv("QDRANT_DEFAULT_COLLECTION"),points=points)
         
         # Update knowledge item with URL and length
         cur.execute(

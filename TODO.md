@@ -1,7 +1,6 @@
 # TODO
 
 ## Functions
-- CRUD - Knowledge Items - Generate embeddings into Qdrant
 - Demo - Data for Cake use case
 - Demo - Seed script
 - UI - Knowledge Items
@@ -17,3 +16,6 @@
 ## Infrastructre
 - Rent a server and/or Tailscale and/or DynamicDNS?
 - Implement Github Actions CI/CD Pipeline
+
+## Before Deployment
+- Persistent storage volumes for data layer
