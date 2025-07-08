@@ -10,6 +10,8 @@ from docling.document_converter import DocumentConverter
 from markitdown import MarkItDown
 import uuid as uuid_pkg
 from qdrant_client.models import PointStruct
+import traceback
+import sys
 
 # Initialize MinIO client
 
@@ -44,6 +46,8 @@ async def knowledge_items_read_all():
             for knowledge_item in knowledge_items
         ]
     except Exception as e:
+        print(f"Error in {__file__}:{traceback.extract_tb(sys.exc_info()[2])[-1].lineno}:")
+        print(traceback.format_exc())
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.delete("/{uuid}", name="Delete", status_code=status.HTTP_200_OK)
@@ -85,6 +89,8 @@ async def knowledge_item_delete(uuid: str):
         
         return None
     except Exception as e:
+        print(f"Error in {__file__}:{traceback.extract_tb(sys.exc_info()[2])[-1].lineno}:")
+        print(traceback.format_exc())
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.post("/", name="Create", response_model=KnowledgeItemsR, status_code=status.HTTP_201_CREATED)
@@ -112,6 +118,8 @@ async def knowledge_item_create(knowledge_item: KnowledgeItemsCreate):
             "name": created_knowledge_item["name"],
         }
     except Exception as e:
+        print(f"Error in {__file__}:{traceback.extract_tb(sys.exc_info()[2])[-1].lineno}:")
+        print(traceback.format_exc())
         raise HTTPException(status_code=500, detail=str(e))
     
 @router.put("/upload/{uuid}", name="Upload", response_model=KnowledgeItemsR)
@@ -182,7 +190,8 @@ async def knowledge_item_upload(uuid: str, file: UploadFile):
                 vector=embedding,
                 payload=payload
             ))
-            
+        
+        
         qdrant_client = my_qdrant()
         qdrant_client.upsert(collection_name=os.getenv("QDRANT_DEFAULT_COLLECTION"),points=points)
         
@@ -212,5 +221,7 @@ async def knowledge_item_upload(uuid: str, file: UploadFile):
             "length": updated_item["length"]
         }
     except Exception as e:
+        print(f"Error in {__file__}:{traceback.extract_tb(sys.exc_info()[2])[-1].lineno}:")
+        print(traceback.format_exc())
         raise HTTPException(status_code=500, detail=str(e))
     

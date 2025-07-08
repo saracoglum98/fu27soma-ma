@@ -1,8 +1,13 @@
 # TODO
 
 ## Functions
-- Demo - Data for Cake use case
-- Demo - Seed script
+- Demo - Test embeddings with relatively larger PDF files
+- Demo - Data for Cake use case - Knowledge Items
+- Demo - Data for Cake use case - Upload Items
+- Demo - Data for Cake use case - Options
+- Demo - Data for Cake use case - Functions
+- Demo - Data for Cake use case - Solution Space
+- Demo - Implement into manage script
 - UI - Knowledge Items
 - UI - Functions
 - UI - Options

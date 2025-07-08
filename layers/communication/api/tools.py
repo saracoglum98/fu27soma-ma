@@ -7,7 +7,7 @@ load_dotenv()
 def embed_text(text: str):
     model = os.getenv("MODEL_EMBEDDING")
     client = my_ollama()
-    
+
     response = client.embeddings(model=model, prompt=text)
     return response['embedding']
 
