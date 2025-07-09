@@ -77,7 +77,7 @@ create_network() {
 
 init() {
     echo -e "\n💨 Initializing services\n"
-    cd init  > /dev/null 2>&1
+    cd scripts/init  > /dev/null 2>&1
     uv venv  > /dev/null 2>&1
     source .venv/bin/activate  > /dev/null 2>&1
     uv pip install -r requirements.txt  > /dev/null 2>&1
@@ -92,7 +92,8 @@ env_create() {
     cp .env layers/communication/.env
     cp .env layers/data/.env
     cp .env layers/llm/.env
-    cp .env init/.env
+    cp .env scripts/init/.env
+    cp .env scripts/seed/.env
     cd $SCRIPT_DIR
 }
 
@@ -101,12 +102,20 @@ clear() {
     rm -rf layers/communication/.env
     rm -rf layers/data/.env
     rm -rf layers/llm/.env
-    rm -rf init/.env
+    rm -rf scripts/init/.env
+    rm -rf scripts/seed/.env
     cd $SCRIPT_DIR
 }
 
-sample_data() {
+seed() {
     echo -e "🌱 Seeding sample data\n"
+    cd scripts/seed  > /dev/null 2>&1
+    uv venv  > /dev/null 2>&1
+    source .venv/bin/activate  > /dev/null 2>&1
+    uv pip install -r requirements.txt  > /dev/null 2>&1
+    python script.py  > /dev/null 2>&1
+    deactivate  > /dev/null 2>&1
+    rm -rf .venv  > /dev/null 2>&1
     cd $SCRIPT_DIR
 }
 
@@ -139,9 +148,9 @@ if [ "$1" = "build" ]; then
     layer_build "data"
     layer_build "llm"
     init
-    sample_data
+    seed
     clear
-    echo -e "🎉 All services are running\n"
+    echo -e "🎉 All services are running"
     echo -e "🌐 Access the web app at http://localhost:3000\n"
 fi
 

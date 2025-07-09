@@ -6,7 +6,7 @@ import time
 
 load_dotenv()
 
-def seed_knowledge_items():
+def process_sql_file(filename):
     postgres_conn = psycopg2.connect(
         host="localhost",
         port="5432",
@@ -16,7 +16,7 @@ def seed_knowledge_items():
     )
     postgres_cursor = postgres_conn.cursor()
 
-    with open('sample_knowledge_items.sql', "r") as file:
+    with open(f'{os.getenv("SEED_DATA_FOLDER")}/{os.getenv("SEED_DATA_FOLDER_SQL")}/{filename}', "r") as file:
         sql_commands = file.read()
         postgres_cursor.execute(sql_commands)
 
@@ -24,7 +24,7 @@ def seed_knowledge_items():
     postgres_cursor.close()
     postgres_conn.close()
 
-def upload_knowledge_items(uuid: str, file_path: str):
+def upload_knowledge_items(uuid: str, filename: str):
     """
     Upload a file to the knowledge items API.
     
@@ -37,12 +37,12 @@ def upload_knowledge_items(uuid: str, file_path: str):
     """
     try:
         # Check if file exists
-        if not os.path.exists(file_path):
-            raise FileNotFoundError(f"File not found: {file_path}")
+        if not os.path.exists(f'{os.getenv("SEED_DATA_FOLDER")}/{os.getenv("SEED_DATA_FOLDER_RAW")}/{filename}'):
+            raise FileNotFoundError(f"File not found: {filename}")
         
         # Prepare the file for upload
-        with open(file_path, 'rb') as file:
-            files = {'file': (os.path.basename(file_path), file)}
+        with open(f'{os.getenv("SEED_DATA_FOLDER")}/{os.getenv("SEED_DATA_FOLDER_RAW")}/{filename}', "rb") as file:
+            files = {'file': (os.path.basename(filename), file)}
             
             # Make the request to the API
             response = requests.put(
@@ -65,25 +65,8 @@ def upload_knowledge_items(uuid: str, file_path: str):
         print(f"Unexpected error: {str(e)}")
         raise
 
-def seed_options():
-    pass
-
-def seed_functions():
-    pass
-
-def seed_solution_spaces():
-    pass
-
 if __name__ == "__main__":
-    seed_knowledge_items()
-    time_start = time.time()
-    upload_knowledge_items("fd6727fa-d7fa-4e6a-b4b3-52c7e2824887", "raw/test.pdf")
-    time_end = time.time()
-    print(f"Time taken: {time_end - time_start} seconds")
-    time_start = time.time()
-    upload_knowledge_items("b09f05c9-da52-46c6-a84d-3fcdde0a8d52", "raw/lecture.pdf")
-    time_end = time.time()
-    print(f"Time taken: {time_end - time_start} seconds")
-    #seed_options()
-    #seed_functions()
-    #seed_solution_spaces()
+    process_sql_file("knowledge_items.sql")
+    #upload_knowledge_items("fd6727fa-d7fa-4e6a-b4b3-52c7e2824887", "test.pdf")
+    upload_knowledge_items("ca7d738e-1c9f-415e-b600-de22b3aab619", "report.pdf")
+    upload_knowledge_items("b09f05c9-da52-46c6-a84d-3fcdde0a8d52", "lecture.pdf")

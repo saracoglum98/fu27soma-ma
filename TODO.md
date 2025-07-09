@@ -4,23 +4,39 @@
 - Max File Size for Knowledge Item - 20 MB
 
 ## Functions
-- Demo - Test embeddings with relatively larger PDF files
-- Demo - Data for Cake use case - Knowledge Items
-- Demo - Data for Cake use case - Upload Items
-- Demo - Data for Cake use case - Options
-- Demo - Data for Cake use case - Functions
-- Demo - Data for Cake use case - Solution Space
-- init and sample - Move to scripts/ folder
-- Demo - Implement into manage script
-- UI - Knowledge Items
-- UI - Functions
-- UI - Options
-- UI - Solution Spaces
+- Demo - Data for Intralogistics - Define Functions
+- Demo - Data for Intralogistics - Define Options for Each Function
+- Demo - Data for Intralogistics - Define Knowledge for Each Option
+- Demo - Data for Intralogistics - Define Solution Spaces
+- UI - Knowledge Items - Read
+- UI - Knowledge Items - Create
+- UI - Knowledge Items - Upload
+- UI - Knowledge Items - Delete
+- UI - Functions - Read
+- UI - Functions - Create
+- UI - Functions - Delete
+- UI - Functions - Update
+- UI - Functions - Attach Option
+- UI - Functions - Detach Option
+- UI - Functions - Attach Knowledge
+- UI - Functions - Detach Knowledge
+- UI - Options - Read
+- UI - Options - Create
+- UI - Options - Delete
+- UI - Options - Update
+- UI - Options - Attach Knowledge
+- UI - Options - Detach Knowledge
+- UI - Solution Spaces - Read
+- UI - Solution Spaces - Create
+- UI - Solution Spaces - Delete
+- UI - Solution Spaces - Update
+- UI - Solution Spaces - Attach Function
+- UI - Solution Spaces - Detach Function
+- Continue with Solution & Results
 - CRUD - Solutions
 - CRUD - Results
 - UI - Solutions
 - UI - Results
-- Create Sample Data - make it in init script
 
 ## Infrastructre
 - Rent a server and/or Tailscale and/or DynamicDNS?

@@ -48,7 +48,7 @@ def init_postgres():
     )
     postgres_cursor = postgres_conn.cursor()
 
-    with open(os.getenv("INIT_SCHEMA_FILE"), "r") as file:
+    with open(f'{os.getenv("INIT_DATA_FOLDER")}/{os.getenv("INIT_SCHEMA_FILE")}', "r") as file:
         sql_commands = file.read()
         postgres_cursor.execute(sql_commands)
 
