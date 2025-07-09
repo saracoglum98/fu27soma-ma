@@ -4,14 +4,13 @@
 - Max File Size for Knowledge Item - 20 MB
 
 ## Functions
+- Test 
 - Demo - Data for Intralogistics - Define Functions
 - Demo - Data for Intralogistics - Define Options for Each Function
 - Demo - Data for Intralogistics - Define Knowledge for Each Option
 - Demo - Data for Intralogistics - Define Solution Spaces
-- UI - Knowledge Items - Read
 - UI - Knowledge Items - Create
 - UI - Knowledge Items - Upload
-- UI - Knowledge Items - Delete
 - UI - Functions - Read
 - UI - Functions - Create
 - UI - Functions - Delete

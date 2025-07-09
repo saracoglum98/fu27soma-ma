@@ -10,6 +10,7 @@ const navigation = [
   { name: 'Functions', href: '/functions', icon: '⚙️' },
   { name: 'Solution Spaces', href: '/solution-spaces', icon: '🎯' },
   { name: 'Results', href: '/results', icon: '📈' },
+  { name: 'Tests', href: '/tests', icon: '🧪' },
 ];
 
 export default function Sidebar() {

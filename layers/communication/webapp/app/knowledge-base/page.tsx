@@ -21,46 +21,83 @@ import {
 } from "@/components/ui/table";
 import { IconPlus, IconEye, IconDownload, IconTrash, IconSearch } from "@tabler/icons-react";
 import { KnowledgeItems } from "@/app/types/KnowledgeItems";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { getAllKnowledgeItems, deleteKnowledgeItem } from "@/app/services/KnowledgeItems";
 
-const data: KnowledgeItems[] = [
-  {
-    uuid: "asdasdasd",
-    name: "Test Knowledge 1",
-    url: "https://ontheline.trincoll.edu/images/bookdown/sample-local-pdf.pdf",
-    length: 100,
-  },
-  {
-    uuid: "asdasdasd12",
-    name: "Test Knowledge 2",
-    url: "https://ontheline.trincoll.edu/images/bookdown/sample-local-pdf.pdf",
-    length: 100,
-  },
-];
-
-const handleDownload = async (url: string, filename: string) => {
-  try {
-    const response = await fetch(url);
-    const blob = await response.blob();
-    const downloadUrl = window.URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = downloadUrl;
-    link.download = filename;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    window.URL.revokeObjectURL(downloadUrl);
-  } catch (error) {
-    console.error('Download failed:', error);
-  }
+const formatSizeInMB = (bytes: number | null | undefined): string => {
+  if (!bytes) return '0 MB';
+  const mb = bytes / (1024 * 1024);
+  return mb < 1 ? `${mb.toFixed(2)} MB` : `${Math.round(mb * 10) / 10} MB`;
 };
 
 export default function KnowledgeBasePage() {
   const [searchTerm, setSearchTerm] = useState("");
+  const [knowledgeItems, setKnowledgeItems] = useState<KnowledgeItems[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const filteredData = data.filter((item) =>
+  useEffect(() => {
+    fetchKnowledgeItems();
+  }, []);
+
+  const fetchKnowledgeItems = async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      const data = await getAllKnowledgeItems();
+      setKnowledgeItems(data);
+      console.log(data);
+    } catch (err) {
+      setError('Failed to fetch knowledge items');
+      console.error(err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleDelete = async (uuid: string) => {
+    try {
+      await deleteKnowledgeItem(uuid);
+      // Refresh the list after deletion
+      await fetchKnowledgeItems();
+    } catch (err) {
+      console.error('Failed to delete item:', err);
+      // You might want to show an error message to the user here
+    }
+  };
+
+  const filteredData = knowledgeItems.filter((item) =>
     item.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  const handleDownload = async (url: string, filename: string) => {
+    try {
+      const response = await fetch(url);
+      const blob = await response.blob();
+      const downloadUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = downloadUrl;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(downloadUrl);
+    } catch (error) {
+      console.error('Download failed:', error);
+    }
+  };
+
+  if (isLoading) {
+    return <div className="flex justify-center items-center h-64">Loading...</div>;
+  }
+
+  if (error) {
+    return (
+      <div className="flex justify-center items-center h-64 text-red-600">
+        {error}
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4">
@@ -116,7 +153,9 @@ export default function KnowledgeBasePage() {
           <TableHeader>
             <TableRow>
               <TableHead>Name</TableHead>
-              <TableHead>Length</TableHead>
+              <TableHead>File Type</TableHead>
+              <TableHead>File Size</TableHead>
+              <TableHead>Content Length</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -124,19 +163,24 @@ export default function KnowledgeBasePage() {
             {filteredData.map((item) => (
               <TableRow key={item.uuid}>
                 <TableCell>{item.name}</TableCell>
+                <TableCell>{item.type}</TableCell>
+                <TableCell>{formatSizeInMB(item.size)}</TableCell>
                 <TableCell>{item.length}</TableCell>
                 <TableCell className="text-right space-x-2">
-                  <Button variant="outline" size="sm"
-                    onClick={() => window.open(item.url, '_blank')}
-                  >
-                    <IconEye className="w-4 h-4" />
-                  </Button>
-                  <Button variant="outline" size="sm"
-                    onClick={() => handleDownload(item.url, `${item.name}.pdf`)}
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    disabled={!item.url}
+                    onClick={() => item.url && handleDownload(item.url, `${item.name}.pdf`)}
                   >
                     <IconDownload className="w-4 h-4" />
                   </Button>
-                  <Button variant="outline" size="sm" className="text-red-600 hover:text-red-700">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="text-red-600 hover:text-red-700"
+                    onClick={() => handleDelete(item.uuid)}
+                  >
                     <IconTrash className="w-4 h-4" />
                   </Button>
                 </TableCell>

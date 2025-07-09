@@ -1,6 +1,9 @@
 export type KnowledgeItems = {
   uuid: string;
   name: string;
-  url: string;
-  length: number;
+  size?: number | null;
+  type?: string | null;
+  url?: string | null;
+  content?: string | null;
+  length?: number | null;
 };

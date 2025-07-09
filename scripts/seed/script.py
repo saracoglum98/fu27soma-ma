@@ -67,6 +67,6 @@ def upload_knowledge_items(uuid: str, filename: str):
 
 if __name__ == "__main__":
     process_sql_file("knowledge_items.sql")
-    #upload_knowledge_items("fd6727fa-d7fa-4e6a-b4b3-52c7e2824887", "test.pdf")
+    upload_knowledge_items("fd6727fa-d7fa-4e6a-b4b3-52c7e2824887", "test.pdf")
     upload_knowledge_items("ca7d738e-1c9f-415e-b600-de22b3aab619", "report.pdf")
     upload_knowledge_items("b09f05c9-da52-46c6-a84d-3fcdde0a8d52", "lecture.pdf")
