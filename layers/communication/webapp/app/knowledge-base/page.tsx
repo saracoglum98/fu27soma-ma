@@ -22,7 +22,9 @@ import {
 import { IconPlus, IconEye, IconDownload, IconTrash, IconSearch } from "@tabler/icons-react";
 import { KnowledgeItems } from "@/app/types/KnowledgeItems";
 import { useState, useEffect } from "react";
-import { getAllKnowledgeItems, deleteKnowledgeItem } from "@/app/services/KnowledgeItems";
+import { getAllKnowledgeItems, deleteKnowledgeItem, createKnowledgeItem, uploadKnowledgeItem } from "@/app/services/KnowledgeItems";
+
+const MAX_FILE_SIZE = 20 * 1024 * 1024; // 10MB in bytes
 
 const formatSizeInMB = (bytes: number | null | undefined): string => {
   if (!bytes) return '0 MB';
@@ -35,6 +37,11 @@ export default function KnowledgeBasePage() {
   const [knowledgeItems, setKnowledgeItems] = useState<KnowledgeItems[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [itemName, setItemName] = useState("");
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [fileError, setFileError] = useState<string | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     fetchKnowledgeItems();
@@ -46,7 +53,6 @@ export default function KnowledgeBasePage() {
       setError(null);
       const data = await getAllKnowledgeItems();
       setKnowledgeItems(data);
-      console.log(data);
     } catch (err) {
       setError('Failed to fetch knowledge items');
       console.error(err);
@@ -63,6 +69,35 @@ export default function KnowledgeBasePage() {
     } catch (err) {
       console.error('Failed to delete item:', err);
       // You might want to show an error message to the user here
+    }
+  };
+
+  const handleSave = async () => {
+    if (!itemName || !selectedFile) {
+      alert("Please fill in all fields");
+      return;
+    }
+
+    try {
+      setIsSaving(true);
+      // First create the knowledge item
+      const createdItem = await createKnowledgeItem(itemName);
+      
+      // Then upload the file
+      await uploadKnowledgeItem(createdItem.uuid, selectedFile);
+      
+      // Reset form and close dialog
+      setItemName("");
+      setSelectedFile(null);
+      setIsDialogOpen(false);
+      
+      // Refresh the list
+      await fetchKnowledgeItems();
+    } catch (error) {
+      console.error('Failed to save knowledge item:', error);
+      alert('Failed to save knowledge item. Please try again.');
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -103,7 +138,7 @@ export default function KnowledgeBasePage() {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-black">Knowledge Base</h1>
-        <Dialog>
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
             <Button>
               <IconPlus className="w-4 h-4" />
@@ -112,6 +147,9 @@ export default function KnowledgeBasePage() {
           <DialogContent className="sm:max-w-[425px]">
             <DialogHeader>
               <DialogTitle>New Knowledge Item</DialogTitle>
+              <DialogDescription>
+                Max file size is 20MB. Allowed file types are .doc, .docx, .xlsx, .xls, .ppt, .pptx, .pdf, .csv, .txt, .xml, .json, .md, .zip.
+              </DialogDescription>
             </DialogHeader>
             <div className="space-y-4">
               <div className="space-y-2">
@@ -120,18 +158,44 @@ export default function KnowledgeBasePage() {
                   id="name-input"
                   type="text"
                   placeholder="Enter a name for this knowledge item"
+                  value={itemName}
+                  onChange={(e) => setItemName(e.target.value)}
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="file-input">Select File</Label>
+                <Label htmlFor="file-input">Select File (Max 10MB)</Label>
                 <Input
                   id="file-input"
                   type="file"
                   className="cursor-pointer"
-                  accept=".txt,.pdf,.doc,.docx,.xlsx,.xls,.csv,.ppt,.pptx,.md"
+                  accept=".doc,.docx,.xlsx,.xls,.ppt,.pptx,.pdf,.csv,.txt,.xml,.json,.md,.zip"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      if (file.size > MAX_FILE_SIZE) {
+                        setFileError("File size exceeds 10MB limit");
+                        setSelectedFile(null);
+                      } else {
+                        setFileError(null);
+                        setSelectedFile(file);
+                      }
+                    } else {
+                      setFileError(null);
+                      setSelectedFile(null);
+                    }
+                  }}
                 />
+                {fileError && (
+                  <p className="text-sm text-red-500 mt-1">{fileError}</p>
+                )}
               </div>
-              <Button className="w-full">Save</Button>
+              <Button 
+                className="w-full" 
+                onClick={handleSave}
+                disabled={isSaving || !itemName || !selectedFile}
+              >
+                {isSaving ? 'Saving...' : 'Save'}
+              </Button>
             </div>
           </DialogContent>
         </Dialog>

@@ -4,7 +4,6 @@ const API_BASE_URL = "http://localhost:8000/knowledge_items";
 
 export async function getAllKnowledgeItems(): Promise<KnowledgeItems[]> {
   try {
-    console.log('Fetching from:', API_BASE_URL);
     const response = await fetch(API_BASE_URL, {
       method: 'GET',
       headers: {
@@ -23,7 +22,6 @@ export async function getAllKnowledgeItems(): Promise<KnowledgeItems[]> {
     }
     
     const data = await response.json();
-    console.log('API Response:', data);
     return data;
   } catch (error) {
     console.error('Failed to fetch knowledge items:', error);

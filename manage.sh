@@ -148,7 +148,11 @@ if [ "$1" = "build" ]; then
     layer_build "data"
     layer_build "llm"
     init
-    seed
+    
+    if [ "$2" = "--seed" ]; then
+        seed
+    fi
+    
     clear
     echo -e "🎉 All services are running"
     echo -e "🌐 Access the web app at http://localhost:3000\n"
