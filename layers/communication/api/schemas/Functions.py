@@ -11,5 +11,3 @@ class FunctionsR(BaseModel):
  
 class FunctionsCU(BaseModel):
     name: str
-    knowledge: Optional[List[str]] = []
-    options: Optional[List[str]] = []

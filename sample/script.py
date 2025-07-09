@@ -2,6 +2,7 @@ import psycopg2
 from dotenv import load_dotenv
 import os
 import requests
+import time
 
 load_dotenv()
 
@@ -75,7 +76,14 @@ def seed_solution_spaces():
 
 if __name__ == "__main__":
     seed_knowledge_items()
+    time_start = time.time()
     upload_knowledge_items("fd6727fa-d7fa-4e6a-b4b3-52c7e2824887", "raw/test.pdf")
+    time_end = time.time()
+    print(f"Time taken: {time_end - time_start} seconds")
+    time_start = time.time()
+    upload_knowledge_items("b09f05c9-da52-46c6-a84d-3fcdde0a8d52", "raw/lecture.pdf")
+    time_end = time.time()
+    print(f"Time taken: {time_end - time_start} seconds")
     #seed_options()
     #seed_functions()
     #seed_solution_spaces()

@@ -70,11 +70,11 @@ async def solution_space_update(uuid: str, solution_space: SolutionSpacesCU):
         cur.execute(
             """
             UPDATE solution_spaces 
-            SET name = %s, functions = %s
+            SET name = %s
             WHERE uuid = %s
             RETURNING uuid, name, functions
             """,
-            (solution_space.name, solution_space.functions, uuid)
+            (solution_space.name, uuid)
         )
         updated_solution_space = cur.fetchone()
         
@@ -124,11 +124,11 @@ async def solution_space_create(solution_space: SolutionSpacesCU):
         
         cur.execute(
             """
-            INSERT INTO solution_spaces (uuid, name, functions)
-            VALUES (%s, %s, %s)
+            INSERT INTO solution_spaces (uuid, name)
+            VALUES (%s, %s)
             RETURNING uuid, name, functions
             """,
-            (new_uuid, solution_space.name, solution_space.functions)
+            (new_uuid, solution_space.name)
         )
         created_solution_space = cur.fetchone()
         
@@ -141,5 +141,119 @@ async def solution_space_create(solution_space: SolutionSpacesCU):
             "name": created_solution_space["name"],
             "functions": created_solution_space["functions"] if created_solution_space["functions"] else []
         }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.put("/attach/function/{solution_space_uuid}/{function_uuid}", name="Attach Function", response_model=SolutionSpacesR)
+async def solution_space_attach_function(solution_space_uuid: str, function_uuid: str):
+    try:
+        conn = my_db()
+        cur = conn.cursor()
+        
+        # First check if the solution space exists
+        cur.execute("SELECT uuid, name, functions FROM solution_spaces WHERE uuid = %s", (solution_space_uuid,))
+        solution_space = cur.fetchone()
+        
+        if solution_space is None:
+            cur.close()
+            conn.close()
+            raise HTTPException(status_code=404, detail="Solution space not found")
+        
+        # Get current functions array or initialize empty array if None
+        current_functions = solution_space["functions"] if solution_space["functions"] else []
+        
+        # Check if function_uuid already exists in the array
+        if function_uuid not in current_functions:
+            # Add the new function_uuid to the array
+            current_functions.append(function_uuid)
+            
+            # Update the solution space with new functions array
+            cur.execute(
+                """
+                UPDATE solution_spaces 
+                SET functions = %s
+                WHERE uuid = %s
+                RETURNING uuid, name, functions
+                """,
+                (current_functions, solution_space_uuid)
+            )
+            updated_solution_space = cur.fetchone()
+            
+            conn.commit()
+            cur.close()
+            conn.close()
+            
+            return {
+                "uuid": str(updated_solution_space["uuid"]),
+                "name": updated_solution_space["name"],
+                "functions": updated_solution_space["functions"] if updated_solution_space["functions"] else []
+            }
+        else:
+            # Function already exists, return current state
+            cur.close()
+            conn.close()
+            return {
+                "uuid": str(solution_space["uuid"]),
+                "name": solution_space["name"],
+                "functions": current_functions
+            }
+            
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.put("/detach/function/{solution_space_uuid}/{function_uuid}", name="Detach Function", response_model=SolutionSpacesR)
+async def solution_space_detach_function(solution_space_uuid: str, function_uuid: str):
+    try:
+        conn = my_db()
+        cur = conn.cursor()
+        
+        # First check if the solution space exists
+        cur.execute("SELECT uuid, name, functions FROM solution_spaces WHERE uuid = %s", (solution_space_uuid,))
+        solution_space = cur.fetchone()
+        
+        if solution_space is None:
+            cur.close()
+            conn.close()
+            raise HTTPException(status_code=404, detail="Solution space not found")
+        
+        # Get current functions array or initialize empty array if None
+        current_functions = solution_space["functions"] if solution_space["functions"] else []
+        
+        # Check if function_uuid exists in the array
+        if function_uuid in current_functions:
+            # Remove the function_uuid from the array
+            current_functions.remove(function_uuid)
+            
+            # Update the solution space with new functions array
+            cur.execute(
+                """
+                UPDATE solution_spaces 
+                SET functions = %s
+                WHERE uuid = %s
+                RETURNING uuid, name, functions
+                """,
+                (current_functions, solution_space_uuid)
+            )
+            updated_solution_space = cur.fetchone()
+            
+            conn.commit()
+            cur.close()
+            conn.close()
+            
+            return {
+                "uuid": str(updated_solution_space["uuid"]),
+                "name": updated_solution_space["name"],
+                "functions": updated_solution_space["functions"] if updated_solution_space["functions"] else []
+            }
+        else:
+            # Function doesn't exist in array, return current state
+            cur.close()
+            conn.close()
+            return {
+                "uuid": str(solution_space["uuid"]),
+                "name": solution_space["name"],
+                "functions": current_functions
+            }
+            
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

@@ -2,14 +2,14 @@
 CREATE TABLE IF NOT EXISTS functions (
     uuid UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     name TEXT NOT NULL,
-    knowledge VARCHAR(32)[],
-    options VARCHAR(32)[]
+    knowledge VARCHAR(36)[],
+    options VARCHAR(36)[]
 );
 
 CREATE TABLE IF NOT EXISTS options (
     uuid UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     name TEXT NOT NULL,
-    knowledge VARCHAR(32)[]
+    knowledge VARCHAR(36)[]
 );
 
 CREATE TABLE IF NOT EXISTS knowledge_items (
@@ -25,7 +25,7 @@ CREATE TABLE IF NOT EXISTS knowledge_items (
 CREATE TABLE IF NOT EXISTS solution_spaces (
     uuid UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     name TEXT NOT NULL,
-    functions VARCHAR(32)[]
+    functions VARCHAR(36)[]
 );
 
 CREATE TABLE IF NOT EXISTS solutions (
@@ -33,7 +33,7 @@ CREATE TABLE IF NOT EXISTS solutions (
     name TEXT NOT NULL,
     input_customer TEXT,
     input_business TEXT,
-    results VARCHAR(32)[] NOT NULL
+    results VARCHAR(36)[] NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS results (

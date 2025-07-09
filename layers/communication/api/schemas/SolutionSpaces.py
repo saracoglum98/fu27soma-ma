@@ -10,4 +10,3 @@ class SolutionSpacesR(BaseModel):
 
 class SolutionSpacesCU(BaseModel):
     name: str
-    functions: Optional[List[str]] = []    

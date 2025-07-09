@@ -50,7 +50,7 @@ async def knowledge_items_read_all():
         print(traceback.format_exc())
         raise HTTPException(status_code=500, detail=str(e))
 
-@router.delete("/{uuid}", name="Delete", status_code=status.HTTP_200_OK)
+@router.delete("/{uuid}", name="Delete")
 async def knowledge_item_delete(uuid: str):
     try:
         conn = my_db()
@@ -93,7 +93,7 @@ async def knowledge_item_delete(uuid: str):
         print(traceback.format_exc())
         raise HTTPException(status_code=500, detail=str(e))
 
-@router.post("/", name="Create", response_model=KnowledgeItemsR, status_code=status.HTTP_201_CREATED)
+@router.post("/", name="Create", response_model=KnowledgeItemsR)
 async def knowledge_item_create(knowledge_item: KnowledgeItemsCreate):
     try:
         conn = my_db()

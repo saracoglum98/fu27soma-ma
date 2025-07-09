@@ -9,4 +9,3 @@ class OptionsR(BaseModel):
 
 class OptionsCU(BaseModel):
     name: str
-    knowledge: Optional[List[str]] = []
