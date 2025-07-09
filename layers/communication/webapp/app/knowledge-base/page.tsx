@@ -148,7 +148,8 @@ export default function KnowledgeBasePage() {
             <DialogHeader>
               <DialogTitle>New Knowledge Item</DialogTitle>
               <DialogDescription>
-                Max file size is 20MB. Allowed file types are .doc, .docx, .xlsx, .xls, .ppt, .pptx, .pdf, .csv, .txt, .xml, .json, .md, .zip.
+                Max file size is 20 MB.<br/>
+                Allowed file types are .doc, .docx, .xlsx, .xls, .ppt, .pptx, .pdf, .csv, .txt, .xml, .json, .md, .zip.
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4">
@@ -163,7 +164,7 @@ export default function KnowledgeBasePage() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="file-input">Select File (Max 10MB)</Label>
+                <Label htmlFor="file-input">Select File</Label>
                 <Input
                   id="file-input"
                   type="file"
@@ -173,7 +174,7 @@ export default function KnowledgeBasePage() {
                     const file = e.target.files?.[0];
                     if (file) {
                       if (file.size > MAX_FILE_SIZE) {
-                        setFileError("File size exceeds 10MB limit");
+                        setFileError("File size exceeds 20 MB limit");
                         setSelectedFile(null);
                       } else {
                         setFileError(null);

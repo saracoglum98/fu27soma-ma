@@ -4,8 +4,6 @@
 - Max File Size for Knowledge Item - 20 MB
 
 ## Functions
-- Implement APP name as .env variable
-- Test host.docker.internal instead of container names
 - Demo - Data for Intralogistics - Define Functions
 - Demo - Data for Intralogistics - Define Options for Each Function
 - Demo - Data for Intralogistics - Define Knowledge for Each Option

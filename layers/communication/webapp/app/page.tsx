@@ -6,7 +6,7 @@ export default function DashboardPage() {
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-black">Dashboard</h1>
       </div>
-      <p className="text-gray-600">Welcome to your SOMA dashboard.</p>
+      <p className="text-gray-600">Welcome to dashboard.</p>
     </div>
   );
 }

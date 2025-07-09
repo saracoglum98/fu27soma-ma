@@ -19,7 +19,7 @@ export default function Sidebar() {
   return (
     <div className="flex h-full w-64 flex-col bg-gray-900 text-white">
       <div className="flex h-16 items-center px-4">
-        <h1 className="text-xl font-bold">SOMA</h1>
+        <h1 className="text-xl font-bold">{process.env.NEXT_PUBLIC_APP_NAME}</h1>
       </div>
       <nav className="flex-1 space-y-1 px-2 py-4">
         {navigation.map((item) => {

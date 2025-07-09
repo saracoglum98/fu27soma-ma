@@ -14,8 +14,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "SOMA Web App",
-  description: "SOMA Web Application Interface",
+  title: `${process.env.NEXT_PUBLIC_APP_NAME} Web App`,
+  description: "Web Application Interface",
 };
 
 export default function RootLayout({

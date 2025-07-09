@@ -2,8 +2,13 @@ from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
 from routers import tests, Options, Functions, KnowledgeItems, SolutionSpaces
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
+
 app = FastAPI(
-    title="fu27soma-ma API",
+    title=f"{os.getenv('NEXT_PUBLIC_APP_NAME')} API",
     version="1.0.0",
     docs_url=None,
     redoc_url=None
@@ -47,7 +52,7 @@ async def api_documentation(request: Request):
     <elements-api
       apiDescriptionUrl="openapi.json"
       router="hash"
-      hideSchemaSidebar="true"
+      hideSchemas="true"
     />
 
   </body>

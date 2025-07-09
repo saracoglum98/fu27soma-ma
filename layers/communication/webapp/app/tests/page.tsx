@@ -17,7 +17,7 @@ export default function TestPage() {
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-bold text-black">API Test Calls</h1>
         </div>
-        <p className="text-gray-600">Welcome to your SOMA test page.</p>
+        <p className="text-gray-600">Welcome to your test page.</p>
         <div className="flex items-center justify-between">
           <Button onClick={() => getAllKnowledgeItems()}>Get All Knowledge Items</Button>
         </div>
