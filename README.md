@@ -31,9 +31,14 @@ Commands:
   destroy    Destroy all services
 ```
 
-Finally, run the following command to build all services. This can take 5 to 30 minutes, depending on your host machine and internet connection.
+Finally, run one of the following commands to build all services. This can take 5 to 30 minutes, depending on your host machine and internet connection.
+If you want a clean build, run:
 ```
 ./manage.sh build
+```
+If you want to import sample data after the build, run:
+```
+./manage.sh build --seed
 ```
 
 The output of build command should look like this.
