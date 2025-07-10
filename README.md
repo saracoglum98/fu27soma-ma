@@ -29,6 +29,7 @@ Commands:
   start           Start all services
   stop            Stop all services
   restart         Restart all services
+  status          Show the status of all services
   destroy         Destroy all services
 ```
 

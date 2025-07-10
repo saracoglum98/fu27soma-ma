@@ -29,6 +29,16 @@ tool_replace_inplace() {
     sed -i '' "s|${search_string}|${replace_string}|g" "$file_path" 2>/dev/null
 }
 
+tool_container_status() {
+    local container_name=$1
+    local container_status=$(docker ps -q --filter "name=$container_name")
+    if [ -n "$container_status" ]; then
+        echo -e "\033[32m🏃 RUNNING\033[0m"  # Green color
+    else
+        echo -e "\033[31m🤚 STOPPED\033[0m"  # Red color
+    fi
+}
+
 layer_build() {
     local folder=$1
     cd "$SCRIPT_DIR/layers/$folder"
@@ -130,7 +140,18 @@ if [ "$1" = "help" ]; then
     echo "  start           Start all services"
     echo "  stop            Stop all services"
     echo "  restart         Restart all services"
+    echo "  status          Show the status of all services"
     echo "  destroy         Destroy all services"
+    exit 0
+fi 
+
+if [ "$1" = "status" ]; then
+    echo -e "API \t\t\t\t$(tool_container_status "communication-api")"
+    echo -e "Web App \t\t\t$(tool_container_status "communication-webapp")"
+    echo -e "LLM Inference Engine \t\t$(tool_container_status "llm-inference")"
+    echo -e "Relational Data Storage \t$(tool_container_status "data-relational")"
+    echo -e "Object Data Storage \t\t$(tool_container_status "data-object")"
+    echo -e "Vector Data Storage \t\t$(tool_container_status "data-vector")"
     exit 0
 fi 
 
@@ -161,6 +182,7 @@ fi
 
 if [ "$1" = "start" ]; then
     service_start "communication-api"
+    service_start "communication-webapp"
     service_start "llm-inference"
     service_start "data-relational"
     service_start "data-object"
@@ -171,6 +193,7 @@ fi
 
 if [ "$1" = "stop" ]; then
     service_stop "communication-api"
+    service_stop "communication-webapp"
     service_stop "llm-inference"
     service_stop "data-relational"
     service_stop "data-object"
@@ -181,6 +204,7 @@ fi
 
 if [ "$1" = "restart" ]; then
     service_restart "communication-api"
+    service_restart "communication-webapp"
     service_restart "llm-inference"
     service_restart "data-relational"
     service_restart "data-object"
