@@ -1,10 +1,10 @@
 import { KnowledgeItems } from "../types/KnowledgeItems";
 
-const API_BASE_URL = "http://localhost:8000/knowledge_items";
+const API_URL = "http://localhost:8000/knowledge_items";
 
 export async function getAllKnowledgeItems(): Promise<KnowledgeItems[]> {
   try {
-    const response = await fetch(API_BASE_URL, {
+    const response = await fetch(API_URL, {
       method: 'GET',
       headers: {
         'Accept': 'application/json',
@@ -30,7 +30,7 @@ export async function getAllKnowledgeItems(): Promise<KnowledgeItems[]> {
 }
 
 export async function createKnowledgeItem(name: string): Promise<KnowledgeItems> {
-  const response = await fetch(API_BASE_URL, {
+  const response = await fetch(API_URL, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -47,7 +47,7 @@ export async function uploadKnowledgeItem(uuid: string, file: File): Promise<Kno
   const formData = new FormData();
   formData.append("file", file);
 
-  const response = await fetch(`${API_BASE_URL}/upload/${uuid}`, {
+  const response = await fetch(`${API_URL}/upload/${uuid}`, {
     method: "PUT",
     body: formData,
   });
@@ -58,7 +58,7 @@ export async function uploadKnowledgeItem(uuid: string, file: File): Promise<Kno
 }
 
 export async function deleteKnowledgeItem(uuid: string): Promise<void> {
-  const response = await fetch(`${API_BASE_URL}/${uuid}`, {
+  const response = await fetch(`${API_URL}/${uuid}`, {
     method: "DELETE",
   });
   if (!response.ok) {

@@ -5,14 +5,7 @@
 
 ## Functions
 - Demo - Define Knowledge for each Option
-- UI - Functions - Read
-- UI - Functions - Create
-- UI - Functions - Delete
-- UI - Functions - Update
-- UI - Functions - Attach Option
-- UI - Functions - Detach Option
-- UI - Functions - Attach Knowledge
-- UI - Functions - Detach Knowledge
+- UI - Build - Solve Cold Start
 - UI - Options - Read
 - UI - Options - Create
 - UI - Options - Delete

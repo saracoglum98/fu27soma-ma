@@ -20,40 +20,74 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { IconPlus, IconEdit, IconTrash, IconSearch } from "@tabler/icons-react"
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Function } from "@/app/types/Functions";
-
-const data: Function[] = [
-  {
-    uuid: "asdasdasd",
-    name: "Test Function 1",
-    knowledge: ["test1", "test2"],
-    options: ["test3", "test4"],
-  },
-  {
-    uuid: "asdasdasd123",
-    name: "Test Function 2",
-    knowledge: ["test1", "test2", "test4"],
-    options: ["test3", "test4"],
-  },
-];
+import { getAllFunctions, createFunction } from "@/app/services/Functions";
+import { useRouter } from "next/navigation";
 
 export default function FunctionsPage() {
+  const router = useRouter();
   const [open, setOpen] = useState(false);
   const [functionName, setFunctionName] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
+  const [functions, setFunctions] = useState<Function[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const filteredData = data.filter((item) =>
+  useEffect(() => {
+    fetchFunctions();
+  }, []);
+
+  const fetchFunctions = async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      const data = await getAllFunctions();
+      setFunctions(data);
+    } catch (err) {
+      setError("Failed to fetch functions");
+      console.error("Error fetching functions:", err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const filteredData = functions.filter((item) =>
     item.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle form submission here
-    console.log("Creating function:", functionName);
-    setFunctionName("");
-    setOpen(false);
+    try {
+      setError(null);
+      const newFunction = await createFunction(functionName);
+      setFunctions([...functions, newFunction]);
+      setFunctionName("");
+      setOpen(false);
+    } catch (err) {
+      setError("Failed to create function");
+      console.error("Error creating function:", err);
+    }
   };
+
+  const handleEdit = (uuid: string) => {
+    router.push(`/function?uuid=${uuid}`);
+  };
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
+  if (error) {
+    return (
+      <div className="text-red-600">
+        {error}
+        <Button onClick={fetchFunctions} className="ml-2">
+          Retry
+        </Button>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4">
@@ -118,10 +152,18 @@ export default function FunctionsPage() {
                 <TableCell>{(item.knowledge ?? []).length}</TableCell>
                 <TableCell>{(item.options ?? []).length}</TableCell>
                 <TableCell className="text-right space-x-2">
-                  <Button variant="outline" size="sm">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleEdit(item.uuid)}
+                  >
                     <IconEdit className="w-4 h-4" />
                   </Button>
-                  <Button variant="outline" size="sm" className="text-red-600 hover:text-red-700">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="text-red-600 hover:text-red-700"
+                  >
                     <IconTrash className="w-4 h-4" />
                   </Button>
                 </TableCell>
