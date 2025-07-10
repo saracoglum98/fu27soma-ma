@@ -23,31 +23,33 @@ You can use `manage.sh` script to manage the codebase. run `./manage.sh help` an
 Usage: ./manage.sh [command]
 
 Commands:
-  help       Show this help message
-  build      Build all services
-  start      Start all services
-  stop       Stop all services
-  restart    Restart all services
-  destroy    Destroy all services
+  help            Show this help message
+  build           Build all services
+  build --seed    Build all services and seed sample data
+  start           Start all services
+  stop            Stop all services
+  restart         Restart all services
+  destroy         Destroy all services
 ```
 
 Finally, run one of the following commands to build all services. This can take 5 to 30 minutes, depending on your host machine and internet connection.
+
 If you want a clean build, run:
 ```
 ./manage.sh build
 ```
-If you want to import sample data after the build, run:
+Alternatively, if you want to seed sample data after the build, run:
 ```
 ./manage.sh build --seed
 ```
 
 The output of build command should look like this.
 ```
-🪜  Preparing to build
+🪜 Preparing to build
 
 🌍 Creating network
 
-🛠️  Setting environment variables
+🛠️ Setting environment variables
 
 🚀 Building communication
 🚀 Building data
@@ -60,6 +62,5 @@ The output of build command should look like this.
 🧹 Clearing build related files
 
 🎉 All services are running
-
 🌐 Access the web app at http://localhost:3000
 ```

@@ -124,12 +124,13 @@ if [ "$1" = "help" ]; then
     echo "Usage: ./manage.sh [command]"
     echo ""
     echo "Commands:"
-    echo "  help       Show this help message"
-    echo "  build      Build all services"
-    echo "  start      Start all services"
-    echo "  stop       Stop all services"
-    echo "  restart    Restart all services"
-    echo "  destroy    Destroy all services"
+    echo "  help            Show this help message"
+    echo "  build           Build all services"
+    echo "  build --seed    Build all services and seed sample data"
+    echo "  start           Start all services"
+    echo "  stop            Stop all services"
+    echo "  restart         Restart all services"
+    echo "  destroy         Destroy all services"
     exit 0
 fi 
 
