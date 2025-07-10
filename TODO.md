@@ -5,7 +5,6 @@
 
 ## Functions
 - Demo - Define Knowledge for each Option
-- UI - Build - Solve Cold Start
 - UI - Options - Read
 - UI - Options - Create
 - UI - Options - Delete
