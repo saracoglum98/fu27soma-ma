@@ -20,45 +20,66 @@ import {
 } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useState } from "react";
-import { SolutionSpace } from "@/app/types/SolutionSpace";
-
-const data: SolutionSpace[] = [
-  {
-    uuid: "asdasdasd",
-    name: "Test Solution Space 1",
-    functions: ["test1", "test2"],
-    results: null,
-  },
-  {
-    uuid: "asdasdasd123",
-    name: "Test Solution Space 2",
-    functions: [],
-    results: null,
-  },
-  {
-    uuid: "asdasdasd1234",
-    name: "Test Solution Space 3",
-    functions: ['test1', 'test2', 'test3'],
-    results: ['test1', 'test2', 'test3'],
-  },
-];
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { SolutionSpace } from "../types/SolutionSpaces";
+import * as SolutionSpacesService from "../services/SolutionSpaces";
 
 export default function SolutionSpacesPage() {
+  const router = useRouter();
   const [searchTerm, setSearchTerm] = useState("");
   const [newSpaceName, setNewSpaceName] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [solutionSpaces, setSolutionSpaces] = useState<SolutionSpace[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleCreateSpace = () => {
-    // TODO: Implement creation logic
-    console.log("Creating new space:", newSpaceName);
-    setNewSpaceName("");
-    setIsDialogOpen(false);
+  useEffect(() => {
+    fetchSolutionSpaces();
+  }, []);
+
+  const fetchSolutionSpaces = async () => {
+    try {
+      setIsLoading(true);
+      const spaces = await SolutionSpacesService.getAllSolutionSpaces();
+      setSolutionSpaces(spaces);
+      setError(null);
+    } catch (err) {
+      setError("Failed to fetch solution spaces");
+      console.error(err);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const filteredData = data.filter((item) =>
+  const handleCreateSpace = async () => {
+    try {
+      await SolutionSpacesService.createSolutionSpace(newSpaceName);
+      setNewSpaceName("");
+      setIsDialogOpen(false);
+      // Refresh the list after creating
+      await fetchSolutionSpaces();
+    } catch (err) {
+      console.error("Failed to create solution space:", err);
+      setError("Failed to create solution space");
+    }
+  };
+
+  const filteredData = solutionSpaces.filter((item) =>
     item.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  if (isLoading) {
+    return <div className="flex justify-center items-center h-64">Loading...</div>;
+  }
+
+  if (error) {
+    return (
+      <div className="flex justify-center items-center h-64 text-red-600">
+        {error}
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4">
@@ -66,7 +87,7 @@ export default function SolutionSpacesPage() {
         <h1 className="text-2xl font-bold text-black">Solution Spaces</h1>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
-          <Button>
+            <Button>
               <IconPlus className="w-4 h-4" />
             </Button>
           </DialogTrigger>
@@ -134,7 +155,7 @@ export default function SolutionSpacesPage() {
                         <IconPlayerPlay className="w-4 h-4" />
                       </Button>
                     )}
-                    <Button variant="outline" size="sm">
+                    <Button variant="outline" size="sm" onClick={() => router.push(`/solution-space?uuid=${space.uuid}`)}>
                       <IconEdit className="w-4 h-4" />
                     </Button>
                     <Button variant="outline" size="sm" className="text-red-600 hover:text-red-700">
