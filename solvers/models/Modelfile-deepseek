@@ -1,0 +1,5 @@
+FROM deepseek-r1:14b
+
+SYSTEM """
+%%%
+"""

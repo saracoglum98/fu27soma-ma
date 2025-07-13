@@ -30,10 +30,11 @@ CREATE TABLE IF NOT EXISTS solution_spaces (
 
 CREATE TABLE IF NOT EXISTS solutions (
     uuid UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    solution_space UUID REFERENCES solution_spaces(uuid),
     name TEXT NOT NULL,
-    input_customer TEXT,
-    input_business TEXT,
-    results VARCHAR(36)[] NOT NULL
+    req_customer TEXT,
+    req_business TEXT,
+    results VARCHAR(36)[]
 );
 
 CREATE TABLE IF NOT EXISTS results (

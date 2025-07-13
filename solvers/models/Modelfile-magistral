@@ -1,0 +1,8 @@
+FROM magistral:24b
+
+PARAMETER temperature 0.7
+PARAMETER top_p 0.95
+
+SYSTEM """
+%%%
+"""
