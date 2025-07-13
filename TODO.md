@@ -17,6 +17,7 @@
 - Continue with Solution & Results
 - CRUD - Solutions
 - CRUD - Results
+- Chat UI - Flowise?
 - UI - Solutions
 - UI - Results
 
