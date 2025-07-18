@@ -33,6 +33,19 @@ services:
     networks:
       - app-network
 
+  data-api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    container_name: data-api
+    ports:
+      - "8002:8002"
+    env_file:
+      - .env
+    restart: unless-stopped
+    networks:
+      - app-network
+
 networks:
   app-network:
     name: app-network

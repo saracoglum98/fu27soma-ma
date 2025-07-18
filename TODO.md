@@ -5,12 +5,10 @@
 
 ## Functions
 - Demo - Define Knowledge for each Option
+- Demo - Define layers and services, an API for each layer. (?)
 
-- Define layers and services, an API for each layer. (?)
+- LLM Layer - API - Tools - Convert Document
 
-- API - Tools - Convert Document
-
-- API - Solution - Update from UUID (Set customer requirements, internal requirements)
 - API - Solution - Solve from UUID ( # of solutions, solver, KPIs) (CRITICAL)
 
 - Remove Knowledge Attachment from Functions?

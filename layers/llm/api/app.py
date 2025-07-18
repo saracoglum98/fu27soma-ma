@@ -1,14 +1,14 @@
 from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
-from routers import tests, Options, Functions, KnowledgeItems, SolutionSpaces, Solutions
+from routers import root
 from dotenv import load_dotenv
 import os
 
 load_dotenv()
 
 app = FastAPI(
-    title=f"{os.getenv('NEXT_PUBLIC_APP_NAME')} Communication Layer API",
+    title=f"{os.getenv('NEXT_PUBLIC_APP_NAME')} LLM Layer API",
     version="1.0.0",
     docs_url=None,
     redoc_url=None
@@ -24,12 +24,7 @@ app.add_middleware(
 )
 
 # Include routers
-app.include_router(tests.router)
-app.include_router(KnowledgeItems.router)
-app.include_router(Options.router)
-app.include_router(Functions.router)
-app.include_router(SolutionSpaces.router)
-app.include_router(Solutions.router)
+app.include_router(root.router)
 
 @app.get("/")
 async def root():
