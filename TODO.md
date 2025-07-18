@@ -10,6 +10,7 @@
 - Rename Layers - Communication, Knowledge, LLM
 
 - Knowledge Layer - API - Tools - Convert Document - /convert
+- Knowledge Layer - API - chunk using LangChain
 - Knowledge Layer - API - Insert Knowledge - Move from Communication Layer API
 - Knowledge Layer - API - Delete Knowledge - Move from Communication Layer API
 - Communication Layer - API - Implement Docling conversion using LLM
