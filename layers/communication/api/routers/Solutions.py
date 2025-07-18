@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, status
 from datetime import datetime
 from typing import List
-from schemas.Solutions import SolutionsR, SolutionsCU
+from schemas.Solutions import SolutionsR, SolutionsC, SolutionsU
 from connections import my_db
 import uuid
 
@@ -58,7 +58,7 @@ async def solution_read_one(uuid: str):
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.post("/{solution_space_uuid}", name="Create", response_model=SolutionsR, status_code=status.HTTP_201_CREATED)
-async def solution_create(solution_space_uuid: str, solution: SolutionsCU):
+async def solution_create(solution_space_uuid: str, solution: SolutionsC):
     try:
         conn = my_db()
         cur = conn.cursor()
@@ -117,5 +117,44 @@ async def solution_delete(uuid: str):
         conn.close()
         
         return None
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.put("/{uuid}", name="Update", response_model=SolutionsR)
+async def solution_update(uuid: str, solution: SolutionsU):
+    try:
+        conn = my_db()
+        cur = conn.cursor()
+        
+        # First check if the solution exists
+        cur.execute("SELECT uuid FROM solutions WHERE uuid = %s", (uuid,))
+        if cur.fetchone() is None:
+            cur.close()
+            conn.close()
+            raise HTTPException(status_code=404, detail="Solution not found")
+        
+        # Update the solution
+        cur.execute(
+            """
+            UPDATE solutions 
+            SET name = %s, req_customer = %s, req_business = %s
+            WHERE uuid = %s
+            RETURNING uuid, name, req_customer, req_business, results
+            """,
+            (solution.name, solution.req_customer, solution.req_business, uuid)
+        )
+        updated_solution = cur.fetchone()
+        
+        conn.commit()
+        cur.close()
+        conn.close()
+        
+        return {
+            "uuid": str(updated_solution["uuid"]),
+            "name": updated_solution["name"],
+            "req_customer": updated_solution["req_customer"],
+            "req_business": updated_solution["req_business"],
+            "results": updated_solution["results"] if updated_solution["results"] else []
+        }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

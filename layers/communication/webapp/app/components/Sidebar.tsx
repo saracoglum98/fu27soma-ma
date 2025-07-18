@@ -9,7 +9,7 @@ const navigation = [
   { name: 'Knowledge Base', href: '/knowledge-base', icon: '📚' },
   { name: 'Functions', href: '/functions', icon: '⚙️' },
   { name: 'Solution Spaces', href: '/solution-spaces', icon: '🎯' },
-  { name: 'Results', href: '/results', icon: '📈' },
+  { name: 'Solutions', href: '/solutions', icon: '📈' },
   { name: 'Tests', href: '/tests', icon: '🧪' },
 ];
 

@@ -9,5 +9,10 @@ class SolutionsR(BaseModel):
     req_business: str
     results: Optional[List[str]] = []
 
-class SolutionsCU(BaseModel):
+class SolutionsC(BaseModel):
     name: str
+
+class SolutionsU(BaseModel):
+    name: str
+    req_customer: str
+    req_business: str

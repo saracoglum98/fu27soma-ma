@@ -6,6 +6,8 @@
 ## Functions
 - Demo - Define Knowledge for each Option
 
+- Define layers and services, an API for each layer. (?)
+
 - API - Tools - Convert Document
 
 - API - Solution - Update from UUID (Set customer requirements, internal requirements)

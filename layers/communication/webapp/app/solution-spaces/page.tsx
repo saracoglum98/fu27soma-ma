@@ -24,12 +24,16 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { SolutionSpace } from "../types/SolutionSpaces";
 import * as SolutionSpacesService from "../services/SolutionSpaces";
+import * as SolutionsService from "../services/Solutions";
 
 export default function SolutionSpacesPage() {
   const router = useRouter();
   const [searchTerm, setSearchTerm] = useState("");
   const [newSpaceName, setNewSpaceName] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isPlayDialogOpen, setIsPlayDialogOpen] = useState(false);
+  const [newSolutionName, setNewSolutionName] = useState("");
+  const [selectedSpaceUuid, setSelectedSpaceUuid] = useState<string>("");
   const [solutionSpaces, setSolutionSpaces] = useState<SolutionSpace[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -62,6 +66,18 @@ export default function SolutionSpacesPage() {
     } catch (err) {
       console.error("Failed to create solution space:", err);
       setError("Failed to create solution space");
+    }
+  };
+
+  const handleCreateSolution = async () => {
+    try {
+      await SolutionsService.createSolution(selectedSpaceUuid, { name: newSolutionName });
+      setNewSolutionName("");
+      setIsPlayDialogOpen(false);
+      // Optionally refresh the list or show a success message
+    } catch (err) {
+      console.error("Failed to create solution:", err);
+      setError("Failed to create solution");
     }
   };
 
@@ -151,9 +167,41 @@ export default function SolutionSpacesPage() {
                       </Button>
                     )}
                     {(space.functions?.length ?? 0) > 0 && (
-                      <Button variant="outline" size="sm">
-                        <IconPlayerPlay className="w-4 h-4" />
-                      </Button>
+                      <Dialog open={isPlayDialogOpen} onOpenChange={setIsPlayDialogOpen}>
+                        <DialogTrigger asChild>
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => setSelectedSpaceUuid(space.uuid)}
+                          >
+                            <IconPlayerPlay className="w-4 h-4" />
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent>
+                          <DialogHeader>
+                            <DialogTitle>Create New Solution</DialogTitle>
+                            <DialogDescription>
+                              Create a new solution in this solution space.
+                            </DialogDescription>
+                          </DialogHeader>
+                          <div className="space-y-4 py-4">
+                            <div className="space-y-2">
+                              <Label htmlFor="solutionName">Solution Name</Label>
+                              <Input
+                                id="solutionName"
+                                placeholder="Enter solution name"
+                                value={newSolutionName}
+                                onChange={(e) => setNewSolutionName(e.target.value)}
+                              />
+                            </div>
+                            <div className="flex justify-end">
+                              <Button onClick={handleCreateSolution} disabled={!newSolutionName.trim()}>
+                                Create Solution
+                              </Button>
+                            </div>
+                          </div>
+                        </DialogContent>
+                      </Dialog>
                     )}
                     <Button variant="outline" size="sm" onClick={() => router.push(`/solution-space?uuid=${space.uuid}`)}>
                       <IconEdit className="w-4 h-4" />

@@ -11,13 +11,22 @@ tool_read_yaml() {
     # Add leading dot for yq syntax
     local yq_path=".$keys"
 
-    # Try to read the YAML file with the path
-    if ! value=$(yq eval "$yq_path" "$CONFIG_FILE" 2>/dev/null); then
+    # Try to read the YAML file with the path, using absolute path
+    if ! value=$(yq eval "$yq_path" "$SCRIPT_DIR/$CONFIG_FILE" 2>/dev/null); then
         echo "Error: Failed to read YAML path: $yq_path" >&2
         return 1
     fi
 
     echo "$value"
+}
+
+get_output_redirect() {
+    local debug_mode=$(tool_read_yaml "debug")
+    if [ "$debug_mode" = "true" ]; then
+        echo ""
+    else
+        echo "> /dev/null 2>&1"
+    fi
 }
 
 tool_replace_inplace() {
@@ -44,56 +53,64 @@ layer_build() {
     cd "$SCRIPT_DIR/layers/$folder"
     echo -e "🚀 Building $folder"
     
+    local redirect=$(get_output_redirect)
+    
     if [ "$folder" = "llm" ]; then
         deployment_type=$(cd "$SCRIPT_DIR" && tool_read_yaml "deployment.type")
-        docker compose -f "docker-compose-${deployment_type}.yml" up -d --build --force-recreate > /dev/null 2>&1
+        eval "docker compose -f \"docker-compose-${deployment_type}.yml\" up -d --build --force-recreate $redirect"
     else
-        docker compose up -d --build --force-recreate > /dev/null 2>&1
+        eval "docker compose up -d --build --force-recreate $redirect"
     fi
     cd $SCRIPT_DIR
 }
 
 service_destroy() {
     local service=$1
+    local redirect=$(get_output_redirect)
     echo -e "💣 Destroying $service"
-    service_stop $service > /dev/null 2>&1
-    docker rm -f -v $service > /dev/null 2>&1
+    eval "service_stop $service $redirect"
+    eval "docker rm -f -v $service $redirect"
 }
 
 service_start() {
     local service=$1
+    local redirect=$(get_output_redirect)
     echo -e "🏃 Starting $service"
-    docker start $service > /dev/null 2>&1
+    eval "docker start $service $redirect"
 }
 
 service_stop() {
     local service=$1
+    local redirect=$(get_output_redirect)
     echo -e "🤚 Stopping $service"
-    docker stop $service > /dev/null 2>&1
+    eval "docker stop $service $redirect"
 }
 
 service_restart() {
     local service=$1
+    local redirect=$(get_output_redirect)
     echo -e "🔄 Restarting $service"
-    docker restart $service > /dev/null 2>&1
+    eval "docker restart $service $redirect"
 }
 
 create_network() {
+    local redirect=$(get_output_redirect)
     echo -e "🌍 Creating network\n"
-    docker network rm app-network > /dev/null 2>&1
-    docker network create app-network > /dev/null 2>&1
+    eval "docker network rm app-network $redirect"
+    eval "docker network create app-network $redirect"
     cd $SCRIPT_DIR
 }
 
 init() {
+    local redirect=$(get_output_redirect)
     echo -e "\n💨 Initializing services\n"
-    cd scripts/init  > /dev/null 2>&1
-    uv venv  > /dev/null 2>&1
-    source .venv/bin/activate  > /dev/null 2>&1
-    uv pip install -r requirements.txt  > /dev/null 2>&1
-    python script.py  > /dev/null 2>&1
-    deactivate  > /dev/null 2>&1
-    rm -rf .venv  > /dev/null 2>&1
+    cd scripts/init
+    eval "uv venv $redirect"
+    source .venv/bin/activate
+    eval "uv pip install -r requirements.txt $redirect"
+    eval "python script.py $redirect"
+    deactivate
+    rm -rf .venv
     cd $SCRIPT_DIR
 }
 
@@ -156,13 +173,14 @@ if [ "$1" = "status" ]; then
 fi 
 
 if [ "$1" = "build" ]; then
+    redirect=$(get_output_redirect)
     echo -e "🪜  Preparing to build\n"
-    service_destroy "communication-api"  > /dev/null 2>&1
-    service_destroy "communication-webapp"  > /dev/null 2>&1
-    service_destroy "llm-inference"  > /dev/null 2>&1
-    service_destroy "data-relational"  > /dev/null 2>&1
-    service_destroy "data-object"  > /dev/null 2>&1
-    service_destroy "data-vector"  > /dev/null 2>&1
+    eval "service_destroy \"communication-api\" $redirect"
+    eval "service_destroy \"communication-webapp\" $redirect"
+    eval "service_destroy \"llm-inference\" $redirect"
+    eval "service_destroy \"data-relational\" $redirect"
+    eval "service_destroy \"data-object\" $redirect"
+    eval "service_destroy \"data-vector\" $redirect"
     
     create_network
     env_create

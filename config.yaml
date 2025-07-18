@@ -1,2 +1,4 @@
+debug: false
+
 deployment:
   type: cpu
