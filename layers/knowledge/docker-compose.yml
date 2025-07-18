@@ -1,6 +1,6 @@
 services:
-  data-relational:
-    container_name: data-relational
+  knowledge-relational:
+    container_name: knowledge-relational
     image: bitnami/postgresql:latest
     env_file:
       - .env
@@ -9,8 +9,8 @@ services:
     networks:
       - app-network
 
-  data-object:
-    container_name: data-object
+  knowledge-object:
+    container_name: knowledge-object
     image: bitnami/minio:latest
     ports:
       - "9000:9000"
@@ -21,8 +21,8 @@ services:
     networks:
       - app-network
 
-  data-vector:
-    container_name: data-vector
+  knowledge-vector:
+    container_name: knowledge-vector
     image: qdrant/qdrant:latest
     ports:
       - "6333:6333"   # REST API
@@ -33,11 +33,11 @@ services:
     networks:
       - app-network
 
-  data-api:
+  knowledge-api:
     build:
       context: ./api
       dockerfile: Dockerfile
-    container_name: data-api
+    container_name: knowledge-api
     ports:
       - "8002:8002"
     env_file:

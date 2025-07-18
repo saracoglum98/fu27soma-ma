@@ -149,7 +149,7 @@ async def knowledge_item_upload(uuid: str, file: UploadFile):
     
         
         # Generate direct URL for public bucket
-        url = f"{'http://data-object:9000'}/{os.getenv('MINIO_DEFAULT_BUCKET')}/{object_name}"
+        url = f"{'http://knowledge-object:9000'}/{os.getenv('MINIO_DEFAULT_BUCKET')}/{object_name}"
         
         # Convert file to text
         md = MarkItDown(enable_plugins=False) # Set to True to enable plugins
@@ -203,7 +203,7 @@ async def knowledge_item_upload(uuid: str, file: UploadFile):
             WHERE uuid = %s
             RETURNING uuid, name, url, length, size, type, content
             """,
-            (url.replace('http://data-object', 'http://localhost'), len(content), content, file_size, file.content_type, str(uuid))
+            (url.replace('http://knowledge-object', 'http://localhost'), len(content), content, file_size, file.content_type, str(uuid))
         )
         updated_item = cur.fetchone()
         

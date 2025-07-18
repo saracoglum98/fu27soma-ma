@@ -117,7 +117,7 @@ init() {
 env_create() {
     echo -e "🛠️  Setting environment variables\n"
     cp .env layers/communication/.env
-    cp .env layers/data/.env
+    cp .env layers/knowledge/.env
     cp .env layers/llm/.env
     cp .env scripts/init/.env
     cp .env scripts/seed/.env
@@ -127,7 +127,7 @@ env_create() {
 clear() {
     echo -e "🧹 Clearing build related files\n"
     rm -rf layers/communication/.env
-    rm -rf layers/data/.env
+    rm -rf layers/knowledge/.env
     rm -rf layers/llm/.env
     rm -rf scripts/init/.env
     rm -rf scripts/seed/.env
@@ -135,7 +135,7 @@ clear() {
 }
 
 seed() {
-    echo -e "🌱 Seeding sample data\n"
+    echo -e "🌱 Seeding sample knowledge\n"
     cd scripts/seed  > /dev/null 2>&1
     uv venv  > /dev/null 2>&1
     source .venv/bin/activate  > /dev/null 2>&1
@@ -153,7 +153,7 @@ if [ "$1" = "help" ]; then
     echo "Commands:"
     echo "  help            Show this help message"
     echo "  build           Build all services"
-    echo "  build --seed    Build all services and seed sample data"
+    echo "  build --seed    Build all services and seed sample knowledge"
     echo "  start           Start all services"
     echo "  stop            Stop all services"
     echo "  restart         Restart all services"
@@ -166,9 +166,9 @@ if [ "$1" = "status" ]; then
     echo -e "API \t\t\t\t$(tool_container_status "communication-api")"
     echo -e "Web App \t\t\t$(tool_container_status "communication-webapp")"
     echo -e "LLM Inference Engine \t\t$(tool_container_status "llm-inference")"
-    echo -e "Relational Data Storage \t$(tool_container_status "data-relational")"
-    echo -e "Object Data Storage \t\t$(tool_container_status "data-object")"
-    echo -e "Vector Data Storage \t\t$(tool_container_status "data-vector")"
+    echo -e "Relational knowledge Storage \t$(tool_container_status "knowledge-relational")"
+    echo -e "Object knowledge Storage \t\t$(tool_container_status "knowledge-object")"
+    echo -e "Vector knowledge Storage \t\t$(tool_container_status "knowledge-vector")"
     exit 0
 fi 
 
@@ -178,14 +178,14 @@ if [ "$1" = "build" ]; then
     eval "service_destroy \"communication-api\" $redirect"
     eval "service_destroy \"communication-webapp\" $redirect"
     eval "service_destroy \"llm-inference\" $redirect"
-    eval "service_destroy \"data-relational\" $redirect"
-    eval "service_destroy \"data-object\" $redirect"
-    eval "service_destroy \"data-vector\" $redirect"
+    eval "service_destroy \"knowledge-relational\" $redirect"
+    eval "service_destroy \"knowledge-object\" $redirect"
+    eval "service_destroy \"knowledge-vector\" $redirect"
     
     create_network
     env_create
     layer_build "communication"
-    layer_build "data"
+    layer_build "knowledge"
     layer_build "llm"
     init
     
@@ -202,9 +202,9 @@ if [ "$1" = "start" ]; then
     service_start "communication-api"
     service_start "communication-webapp"
     service_start "llm-inference"
-    service_start "data-relational"
-    service_start "data-object"
-    service_start "data-vector"
+    service_start "knowledge-relational"
+    service_start "knowledge-object"
+    service_start "knowledge-vector"
 
     echo -e "\n🎉 All services started\n"
 fi
@@ -213,9 +213,9 @@ if [ "$1" = "stop" ]; then
     service_stop "communication-api"
     service_stop "communication-webapp"
     service_stop "llm-inference"
-    service_stop "data-relational"
-    service_stop "data-object"
-    service_stop "data-vector"
+    service_stop "knowledge-relational"
+    service_stop "knowledge-object"
+    service_stop "knowledge-vector"
 
     echo -e "\n🎉 All services stopped\n"
 fi
@@ -224,9 +224,9 @@ if [ "$1" = "restart" ]; then
     service_restart "communication-api"
     service_restart "communication-webapp"
     service_restart "llm-inference"
-    service_restart "data-relational"
-    service_restart "data-object"
-    service_restart "data-vector"
+    service_restart "knowledge-relational"
+    service_restart "knowledge-object"
+    service_restart "knowledge-vector"
 
     echo -e "\n🎉 All services restarted\n"
 fi
@@ -235,9 +235,9 @@ if [ "$1" = "destroy" ]; then
     service_destroy "communication-api"
     service_destroy "communication-webapp"
     service_destroy "llm-inference"
-    service_destroy "data-relational"
-    service_destroy "data-object"
-    service_destroy "data-vector"
+    service_destroy "knowledge-relational"
+    service_destroy "knowledge-object"
+    service_destroy "knowledge-vector"
 
     echo -e "\n🎉 All services destroyed\n"
 fi
