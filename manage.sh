@@ -119,6 +119,7 @@ env_create() {
     cp .env layers/communication/.env
     cp .env layers/knowledge/.env
     cp .env layers/llm/.env
+    cp .env layers/management/.env
     cp .env scripts/init/.env
     cp .env scripts/seed/.env
     cd $SCRIPT_DIR
@@ -129,6 +130,7 @@ clear() {
     rm -rf layers/communication/.env
     rm -rf layers/knowledge/.env
     rm -rf layers/llm/.env
+    rm -rf layers/management/.env
     rm -rf scripts/init/.env
     rm -rf scripts/seed/.env
     cd $SCRIPT_DIR
@@ -169,6 +171,7 @@ if [ "$1" = "status" ]; then
     echo -e "Relational knowledge Storage \t$(tool_container_status "knowledge-relational")"
     echo -e "Object knowledge Storage \t\t$(tool_container_status "knowledge-object")"
     echo -e "Vector knowledge Storage \t\t$(tool_container_status "knowledge-vector")"
+    echo -e "Management API \t\t\t$(tool_container_status "management-api")"
     exit 0
 fi 
 
@@ -181,12 +184,14 @@ if [ "$1" = "build" ]; then
     eval "service_destroy \"knowledge-relational\" $redirect"
     eval "service_destroy \"knowledge-object\" $redirect"
     eval "service_destroy \"knowledge-vector\" $redirect"
+    eval "service_destroy \"management-api\" $redirect"
     
     create_network
     env_create
-    layer_build "communication"
     layer_build "knowledge"
     layer_build "llm"
+    layer_build "communication"
+    layer_build "management"
     init
     
     if [ "$2" = "--seed" ]; then
@@ -205,7 +210,7 @@ if [ "$1" = "start" ]; then
     service_start "knowledge-relational"
     service_start "knowledge-object"
     service_start "knowledge-vector"
-
+    service_start "management-api"
     echo -e "\n🎉 All services started\n"
 fi
 
@@ -216,7 +221,7 @@ if [ "$1" = "stop" ]; then
     service_stop "knowledge-relational"
     service_stop "knowledge-object"
     service_stop "knowledge-vector"
-
+    service_stop "management-api"
     echo -e "\n🎉 All services stopped\n"
 fi
 
@@ -227,7 +232,7 @@ if [ "$1" = "restart" ]; then
     service_restart "knowledge-relational"
     service_restart "knowledge-object"
     service_restart "knowledge-vector"
-
+    service_restart "management-api"
     echo -e "\n🎉 All services restarted\n"
 fi
 
@@ -238,7 +243,7 @@ if [ "$1" = "destroy" ]; then
     service_destroy "knowledge-relational"
     service_destroy "knowledge-object"
     service_destroy "knowledge-vector"
-
+    service_destroy "management-api"
     echo -e "\n🎉 All services destroyed\n"
 fi
 

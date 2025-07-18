@@ -1,0 +1,47 @@
+services:
+  management-api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    container_name: management-api
+    ports:
+      - "8003:8003"
+    env_file:
+      - .env
+    restart: unless-stopped
+    networks:
+      - app-network
+  management-data:
+    image: adminer:latest
+    container_name: management-data
+    env_file:
+      - .env
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
+    networks:
+      - app-network
+    configs:
+      - source: adminer-index.php
+        target: /var/www/html/index.php
+
+configs:
+  adminer-index.php:
+    content: |
+      <?php
+        if(!count($$_GET)) {
+          $$_POST['auth'] = [
+            'server' => $$_ENV['ADMINER_DEFAULT_SERVER'],
+            'username' => $$_ENV['ADMINER_DEFAULT_USERNAME'],
+            'password' => $$_ENV['ADMINER_DEFAULT_PASSWORD'],
+            'driver' => $$_ENV['ADMINER_DEFAULT_DRIVER'],
+            'db'    => $$_ENV['ADMINER_DEFAULT_DB'],
+          ];
+        }
+        include './adminer.php';
+      ?>
+
+networks:
+  app-network:
+    name: app-network
+    external: true 

@@ -7,8 +7,6 @@
 - Demo - Define Knowledge for each Option
 - Demo - Define layers and services, an API for each layer. (?)
 
-- Implement adminer as a new service inside communication
-
 - Knowledge Layer - API - Tools - Convert Document - /convert
 - Knowledge Layer - API - chunk using LangChain
 - Knowledge Layer - API - Insert Knowledge - Move from Communication Layer API
