@@ -1,7 +1,7 @@
 from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
-from routers import root
+from routers import tests, Options, Functions, KnowledgeItems, SolutionSpaces, Solutions
 from dotenv import load_dotenv
 import os
 
@@ -24,7 +24,12 @@ app.add_middleware(
 )
 
 # Include routers
-app.include_router(root.router)
+app.include_router(tests.router)
+app.include_router(KnowledgeItems.router)
+app.include_router(Options.router)
+app.include_router(Functions.router)
+app.include_router(SolutionSpaces.router)
+app.include_router(Solutions.router)
 
 @app.get("/")
 async def root():

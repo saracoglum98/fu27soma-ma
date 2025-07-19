@@ -18,6 +18,18 @@ services:
     restart: unless-stopped
     networks:
       - app-network
+  llm-api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    container_name: llm-api
+    ports:
+      - "8010:8010"
+    env_file:
+      - .env
+    restart: unless-stopped
+    networks:
+      - app-network
 
 volumes:
   llm-inference-data:
