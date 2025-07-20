@@ -96,6 +96,7 @@ service_restart() {
 create_network() {
     local redirect=$(get_output_redirect)
     echo -e "🌍 Creating network\n"
+    eval "docker network inspect app-network --format='{{range .Containers}}{{.Name}} {{end}}' 2>/dev/null | xargs -r -n1 docker network disconnect -f app-network $redirect"
     eval "docker network rm app-network $redirect"
     eval "docker network create app-network $redirect"
     cd $SCRIPT_DIR
@@ -166,7 +167,7 @@ fi
 
 if [ "$1" = "status" ]; then
     echo -e "API \t\t\t\t$(tool_container_status "communication-api")"
-    echo -e "Web App \t\t\t$(tool_container_status "communication-webapp")"
+    echo -e "Web App \t\t\t$(tool_container_status "communication-app")"
     echo -e "LLM Inference Engine \t\t$(tool_container_status "llm-inference")"
     echo -e "Relational knowledge Storage \t$(tool_container_status "knowledge-relational")"
     echo -e "Object knowledge Storage \t\t$(tool_container_status "knowledge-object")"
@@ -179,7 +180,7 @@ if [ "$1" = "build" ]; then
     redirect=$(get_output_redirect)
     echo -e "🪜  Preparing to build\n"
     eval "service_destroy \"communication-api\" $redirect"
-    eval "service_destroy \"communication-webapp\" $redirect"
+    eval "service_destroy \"communication-app\" $redirect"
     eval "service_destroy \"llm-inference\" $redirect"
     eval "service_destroy \"knowledge-relational\" $redirect"
     eval "service_destroy \"knowledge-object\" $redirect"
@@ -191,7 +192,7 @@ if [ "$1" = "build" ]; then
     layer_build "knowledge"
     layer_build "llm"
     layer_build "communication"
-    layer_build "management"
+    #layer_build "management"
     init
     
     if [ "$2" = "--seed" ]; then
@@ -205,7 +206,7 @@ fi
 
 if [ "$1" = "start" ]; then
     service_start "communication-api"
-    service_start "communication-webapp"
+    service_start "communication-app"
     service_start "llm-inference"
     service_start "knowledge-relational"
     service_start "knowledge-object"
@@ -216,7 +217,7 @@ fi
 
 if [ "$1" = "stop" ]; then
     service_stop "communication-api"
-    service_stop "communication-webapp"
+    service_stop "communication-app"
     service_stop "llm-inference"
     service_stop "knowledge-relational"
     service_stop "knowledge-object"
@@ -227,7 +228,7 @@ fi
 
 if [ "$1" = "restart" ]; then
     service_restart "communication-api"
-    service_restart "communication-webapp"
+    service_restart "communication-app"
     service_restart "llm-inference"
     service_restart "knowledge-relational"
     service_restart "knowledge-object"
@@ -238,7 +239,7 @@ fi
 
 if [ "$1" = "destroy" ]; then
     service_destroy "communication-api"
-    service_destroy "communication-webapp"
+    service_destroy "communication-app"
     service_destroy "llm-inference"
     service_destroy "knowledge-relational"
     service_destroy "knowledge-object"

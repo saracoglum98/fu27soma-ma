@@ -1,6 +1,6 @@
 FROM node:18
 
-WORKDIR /app
+WORKDIR /application
 COPY package*.json ./
 RUN npm install -D @swc/core
 RUN npm install

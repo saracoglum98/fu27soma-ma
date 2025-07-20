@@ -23,10 +23,10 @@ dev-*.sh
 # next.js
 **/.next/
 **/.out/
-layers/communication/webapp/node_modules
-layers/communication/webapp/.next
-layers/communication/webapp/.out
-layers/communication/webapp/.build
+layers/communication/app/node_modules
+layers/communication/app/.next
+layers/communication/app/.out
+layers/communication/app/.build
 
 # production
 **/.build

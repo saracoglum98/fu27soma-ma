@@ -1,22 +1,9 @@
 services:
-  communication-api:
+  communication-app:
     build:
-      context: ./api
+      context: ./app
       dockerfile: Dockerfile
-    container_name: communication-api
-    ports:
-      - "8000:8000"
-    env_file:
-      - .env
-    restart: unless-stopped
-    networks:
-      - app-network
-
-  communication-webapp:
-    build:
-      context: ./webapp
-      dockerfile: Dockerfile
-    container_name: communication-webapp
+    container_name: communication-app
     ports:
       - "3000:3000"
     env_file:

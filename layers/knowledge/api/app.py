@@ -31,9 +31,9 @@ app.include_router(Functions.router)
 app.include_router(SolutionSpaces.router)
 app.include_router(Solutions.router)
 
-@app.get("/")
+@app.get("/", include_in_schema=False)
 async def root():
-    return {"status": "OK", "message": "Root endpoint"}
+    return 'OK'
 
 @app.get("/docs", include_in_schema=False)
 async def api_documentation(request: Request):
