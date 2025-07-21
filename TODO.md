@@ -7,7 +7,6 @@
 - Demo - Define Knowledge for each Option
 - Demo - Define layers and services, an API for each layer. (?)
 
-- Knowledge Layer - API - chunk using LangChain
 - LLM Layer - API - Model for SysML v2 Conversion
 - LLM Layer - API - Model for Solution
 - Communication Layer - API - Solution - Solve from UUID ( # of solutions, solver, KPIs) (CRITICAL)

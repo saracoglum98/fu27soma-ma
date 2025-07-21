@@ -33,3 +33,7 @@ async def convert(file: UploadFile):
         print(f"Error in {__file__}:{traceback.extract_tb(sys.exc_info()[2])[-1].lineno}:")
         print(traceback.format_exc())
         raise HTTPException(status_code=500, detail=str(e))
+    
+@router.post("/sysml", name="SysML", response_model=CommonResponse)
+async def sysml(option_uuid: str):
+    return {"data": "Hello World"}

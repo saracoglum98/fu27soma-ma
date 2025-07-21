@@ -5,6 +5,7 @@ from psycopg2.extras import RealDictCursor
 from minio import Minio
 import ollama
 from qdrant_client import QdrantClient
+from langchain_community.embeddings import OllamaEmbeddings
 load_dotenv()
 
 def my_db():
@@ -39,6 +40,14 @@ def my_ollama():
         return ollama_client
     except Exception as e:
         print(f"Error connecting to ollama: {e}")
+        raise e 
+
+def my_embeddings():
+    try:
+        embeddings = OllamaEmbeddings(model=os.getenv("MODEL_EMBEDDING"), base_url='http://llm-inference:11434')
+        return embeddings
+    except Exception as e:
+        print(f"Error connecting to embeddings: {e}")
         raise e 
 
 def my_qdrant():
