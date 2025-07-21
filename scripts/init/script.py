@@ -9,7 +9,6 @@ import json
 
 load_dotenv()
 
-
 def init_minio():
     # Initialize MinIO buckets
     print("Initializating MinIO")
@@ -82,6 +81,33 @@ def init_ollama():
         if model:
             ollama_client.pull(model)
 
+def init_models():
+    # Initialize models
+    print("Initializating Models")
+    ollama_client = ollama.Client(
+        host="http://localhost:11434"  # Default Ollama API endpoint
+    )
+    
+    # Create solver model from template
+    print("Creating solver model from template...")
+    script_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    system_prompt_path_solver = os.path.join(script_dir, "..", "models", "solver.j2")
+    system_prompt_path_expert = os.path.join(script_dir, "..", "models", "expert.j2")
+    
+    try:
+        with open(system_prompt_path_solver, 'r') as f:
+            system_prompt_content_solver = f.read()
+            
+        with open(system_prompt_path_expert, 'r') as f:
+            system_prompt_content_expert = f.read()
+            
+
+        ollama.create(model='solver', from_='qwen3:14b', system=system_prompt_content_solver)
+        ollama.create(model='expert', from_='qwen3:14b', system=system_prompt_content_expert)
+        print("Successfully created solver model")
+    except Exception as e:
+        print(f"Error creating solver model: {e}")
+
 
 if __name__ == "__main__":
     print("Starting initialization...")
@@ -89,3 +115,4 @@ if __name__ == "__main__":
     init_postgres()
     init_qdrant()
     init_ollama()
+    init_models()

@@ -46,7 +46,7 @@ def upload_knowledge_items(uuid: str, filename: str):
             
             # Make the request to the API
             response = requests.put(
-                f"http://localhost:8000/knowledge_items/upload/{uuid}",
+                f"http://localhost:10000/knowledge_items/upload/{uuid}",
                 files=files
             )
             

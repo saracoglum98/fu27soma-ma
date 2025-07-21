@@ -1,6 +1,6 @@
 import { Option } from "../types/Options";
 
-const API_URL = "http://localhost:8000/options";
+const API_URL = "http://localhost:10000/options";
 
 export const getAllOptions = async (): Promise<Option[]> => {
   const response = await fetch(`${API_URL}`);

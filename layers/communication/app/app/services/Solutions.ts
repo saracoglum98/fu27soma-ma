@@ -1,6 +1,6 @@
 import { Solution } from "../types/Solutions";
 
-const API_URL = "http://localhost:8000/solutions";
+const API_URL = "http://localhost:10000/solutions";
 
 export async function getAllSolutions(): Promise<Solution[]> {
   const response = await fetch(`${API_URL}/`);

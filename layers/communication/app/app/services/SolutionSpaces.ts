@@ -1,6 +1,6 @@
 import { SolutionSpace } from "../types/SolutionSpaces";
 
-const API_URL = "http://localhost:8000/solution_spaces";
+const API_URL = "http://localhost:10000/solution_spaces";
 
 export const getAllSolutionSpaces = async (): Promise<SolutionSpace[]> => {
   const response = await fetch(`${API_URL}`);

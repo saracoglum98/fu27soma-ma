@@ -166,7 +166,6 @@ if [ "$1" = "help" ]; then
 fi 
 
 if [ "$1" = "status" ]; then
-    echo -e "API \t\t\t\t$(tool_container_status "communication-api")"
     echo -e "Web App \t\t\t$(tool_container_status "communication-app")"
     echo -e "LLM Inference Engine \t\t$(tool_container_status "llm-inference")"
     echo -e "Relational knowledge Storage \t$(tool_container_status "knowledge-relational")"
@@ -179,7 +178,6 @@ fi
 if [ "$1" = "build" ]; then
     redirect=$(get_output_redirect)
     echo -e "🪜  Preparing to build\n"
-    eval "service_destroy \"communication-api\" $redirect"
     eval "service_destroy \"communication-app\" $redirect"
     eval "service_destroy \"llm-inference\" $redirect"
     eval "service_destroy \"knowledge-relational\" $redirect"
@@ -205,7 +203,6 @@ if [ "$1" = "build" ]; then
 fi
 
 if [ "$1" = "start" ]; then
-    service_start "communication-api"
     service_start "communication-app"
     service_start "llm-inference"
     service_start "knowledge-relational"
@@ -216,7 +213,6 @@ if [ "$1" = "start" ]; then
 fi
 
 if [ "$1" = "stop" ]; then
-    service_stop "communication-api"
     service_stop "communication-app"
     service_stop "llm-inference"
     service_stop "knowledge-relational"
@@ -227,7 +223,6 @@ if [ "$1" = "stop" ]; then
 fi
 
 if [ "$1" = "restart" ]; then
-    service_restart "communication-api"
     service_restart "communication-app"
     service_restart "llm-inference"
     service_restart "knowledge-relational"
@@ -238,7 +233,6 @@ if [ "$1" = "restart" ]; then
 fi
 
 if [ "$1" = "destroy" ]; then
-    service_destroy "communication-api"
     service_destroy "communication-app"
     service_destroy "llm-inference"
     service_destroy "knowledge-relational"

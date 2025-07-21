@@ -11,6 +11,19 @@ services:
     restart: unless-stopped
     networks:
       - app-network
+  llm-inference-2:
+    container_name: llm-inference-2
+    image: ghcr.io/ggerganov/llama.cpp:server
+    platform: linux/arm64
+    ports:
+      - "8000:8000"
+    environment:
+      - MODEL=/models/Qwen3-14B-Q4_K_M.gguf
+    volumes:
+      - ../../models/gguf:/models
+    restart: unless-stopped
+    networks:
+      - app-network
   llm-api:
     build:
       context: ./api

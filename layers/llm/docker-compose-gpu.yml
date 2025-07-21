@@ -24,7 +24,7 @@ services:
       dockerfile: Dockerfile
     container_name: llm-api
     ports:
-      - "8010:8010"
+      - "10010:10010"
     env_file:
       - .env
     restart: unless-stopped

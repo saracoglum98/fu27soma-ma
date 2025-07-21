@@ -39,7 +39,7 @@ services:
       dockerfile: Dockerfile
     container_name: knowledge-api
     ports:
-      - "8000:8000"
+      - "10000:10000"
     env_file:
       - .env
     restart: unless-stopped

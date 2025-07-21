@@ -8,9 +8,6 @@
 - Demo - Define layers and services, an API for each layer. (?)
 
 - Knowledge Layer - API - chunk using LangChain
-- Communication Layer - API - Implement Docling conversion using LLM
-- LLM Layer - Init - Create model for SysML v2 Conversion
-- LLM Layer - Init - Create model for Solution
 - LLM Layer - API - Model for SysML v2 Conversion
 - LLM Layer - API - Model for Solution
 - Communication Layer - API - Solution - Solve from UUID ( # of solutions, solver, KPIs) (CRITICAL)
@@ -18,6 +15,7 @@
 - Communication Layer - Data and API - Remove Knowledge Attachment from Functions?
 - Communication Layer - Chat UI - Flowise?
 
+- AnytingLLM for Chat Service
 
 ## Infrastructre
 - Rent a server and/or Tailscale and/or DynamicDNS?

@@ -1,6 +1,6 @@
 import { KnowledgeItems } from "../types/KnowledgeItems";
 
-const API_URL = "http://localhost:8000/knowledge_items";
+const API_URL = "http://localhost:10000/knowledge_items";
 
 export async function getAllKnowledgeItems(): Promise<KnowledgeItems[]> {
   try {
