@@ -1,7 +1,7 @@
 from dotenv import load_dotenv
 import os
 from connections import my_ollama, my_embeddings
-from langchain_community.embeddings import OllamaEmbeddings
+from langchain_ollama import OllamaEmbeddings
 from langchain_community.vectorstores import Qdrant 
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 

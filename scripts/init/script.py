@@ -3,11 +3,28 @@ from minio import Minio
 import os
 import ollama
 from qdrant_client import QdrantClient
-from qdrant_client.models import VectorParams, Distance
+from qdrant_client.models import VectorParams, Distance, PointStruct
 from dotenv import load_dotenv
 import json
+import uuid as uuid_pkg
+import traceback
+from markitdown import MarkItDown
+from langchain_ollama import OllamaEmbeddings
+from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 load_dotenv()
+
+def chunk_text(text: str):
+    text_splitter = RecursiveCharacterTextSplitter(chunk_size=int(os.getenv("EMBEDDING_CHUNK_SIZE")), chunk_overlap=int(os.getenv("EMBEDDING_CHUNK_OVERLAP")))
+    chunks = text_splitter.split_text(text)
+    return chunks
+
+def embed_text(text: str):
+    embeddings = OllamaEmbeddings(
+        model=os.getenv("MODEL_EMBEDDING"),
+        base_url="http://localhost:11434"
+    )
+    return embeddings.embed_query(text)
 
 def init_minio():
     # Initialize MinIO buckets
@@ -65,6 +82,11 @@ def init_qdrant():
         collection_name=os.getenv("QDRANT_DEFAULT_COLLECTION"),
         vectors_config=VectorParams(size=os.getenv("EMBEDDING_DIMENSION"), distance=Distance.COSINE),
     )
+    
+    qdrant_client.create_collection(
+        collection_name=os.getenv("QDRANT_SYSML_COLLECTION"),
+        vectors_config=VectorParams(size=os.getenv("EMBEDDING_DIMENSION"), distance=Distance.COSINE),
+    )
 
 
 def init_ollama():
@@ -108,6 +130,70 @@ def init_models():
     except Exception as e:
         print(f"Error creating solver model: {e}")
 
+def init_sysml_knowledge():
+    print("Initializing SysML Knowledge Base")
+    try:
+        # Get the path to raw data files
+        raw_data_path = os.path.join(os.getenv("INIT_DATA_FOLDER"), "raw")
+        
+        # Process each PDF file in the raw data directory
+        for filename in os.listdir(raw_data_path):
+            if filename.endswith('.pdf'):
+                print(f"Processing {filename}...")
+                file_path = os.path.join(raw_data_path, filename)
+                
+                # Convert PDF to text using MarkItDown
+                md = MarkItDown(enable_plugins=False)
+                result = md.convert(file_path)
+                content = result.text_content
+                
+                # Chunk the content
+                chunks = chunk_text(content)
+                
+                # Generate embeddings for each chunk
+                embeddings = []
+                for chunk in chunks:
+                    embedding = embed_text(chunk)
+                    embeddings.append(embedding)
+                
+                # Prepare metadata
+                metadata = {
+                    "filename": filename,
+                    "content_type": "application/pdf",
+                    "total_characters": len(content)
+                }
+                
+                # Create points for Qdrant
+                points = []
+                for i, (chunk, embedding) in enumerate(zip(chunks, embeddings)):
+                    point_id = str(uuid_pkg.uuid4())
+                    
+                    payload = {
+                        "text": chunk,
+                        "filename": filename,
+                        "chunk_index": i,
+                        "total_chunks": len(chunks),
+                        "chunk_size": len(chunk),
+                        **metadata
+                    }
+                    
+                    points.append(PointStruct(
+                        id=point_id,
+                        vector=embedding,
+                        payload=payload
+                    ))
+                
+                # Insert into Qdrant
+                qdrant_client = QdrantClient(host="localhost", port=6333)
+                qdrant_client.upsert(
+                    collection_name=os.getenv("QDRANT_SYSML_COLLECTION"),
+                    points=points
+                )
+                print(f"Successfully processed {filename}")
+                
+    except Exception as e:
+        print(f"Error initializing SysML knowledge: {str(e)}")
+        traceback.print_exc()
 
 if __name__ == "__main__":
     print("Starting initialization...")
@@ -116,3 +202,4 @@ if __name__ == "__main__":
     init_qdrant()
     init_ollama()
     init_models()
+    init_sysml_knowledge()
