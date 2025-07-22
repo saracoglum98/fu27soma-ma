@@ -65,11 +65,42 @@ def upload_knowledge_items(uuid: str, filename: str):
         print(f"Unexpected error: {str(e)}")
         raise
 
+def attach_knowledge_items_to_options(option_uuid: str, knowledge_item_uuid: str):
+    """
+    Attach a knowledge item to an option via the API.
+    
+    Args:
+        option_uuid (str): The UUID of the option
+        knowledge_item_uuid (str): The UUID of the knowledge item to attach
+    
+    Returns:
+        dict: The response from the API containing the updated option details
+    """
+    try:
+        # Make the request to the API
+        response = requests.put(
+            f"http://localhost:10000/options/attach/knowledge/{option_uuid}/{knowledge_item_uuid}"
+        )
+        
+        # Check if request was successful
+        response.raise_for_status()
+        
+        return response.json()
+        
+    except requests.exceptions.RequestException as e:
+        print(f"API request failed: {str(e)}")
+        raise
+    except Exception as e:
+        print(f"Unexpected error: {str(e)}")
+        raise
+
 if __name__ == "__main__":
     #process_sql_file("knowledge_items.sql")
     process_sql_file("options.sql")
     process_sql_file("functions.sql")
     process_sql_file("solution_spaces.sql")
-    #upload_knowledge_items("fd6727fa-d7fa-4e6a-b4b3-52c7e2824887", "test.pdf")
+    process_sql_file("knowledge_items.sql")
+    upload_knowledge_items("3ae112f2-131d-4263-bc2c-28297f1c1174", "conveyor-belt.pdf")
+    attach_knowledge_items_to_options("cc9a94a0-a303-452f-8153-4fd2927c6703", "3ae112f2-131d-4263-bc2c-28297f1c1174")
     #upload_knowledge_items("ca7d738e-1c9f-415e-b600-de22b3aab619", "report.pdf")
     #upload_knowledge_items("b09f05c9-da52-46c6-a84d-3fcdde0a8d52", "lecture.pdf")

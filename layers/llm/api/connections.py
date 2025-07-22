@@ -5,7 +5,7 @@ from psycopg2.extras import RealDictCursor
 from minio import Minio
 import ollama
 from qdrant_client import QdrantClient
-from langchain_community.embeddings import OllamaEmbeddings
+from langchain_ollama import OllamaEmbeddings
 load_dotenv()
 
 def my_db():

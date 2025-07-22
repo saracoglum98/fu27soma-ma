@@ -124,8 +124,8 @@ def init_models():
             system_prompt_content_expert = f.read()
             
 
-        ollama.create(model='solver', from_='qwen3:14b', system=system_prompt_content_solver)
-        ollama.create(model='expert', from_='qwen3:14b', system=system_prompt_content_expert)
+        ollama.create(model='solver', from_='qwen3:8b', system=system_prompt_content_solver)
+        ollama.create(model='expert', from_='qwen3:8b', system=system_prompt_content_expert)
         print("Successfully created solver model")
     except Exception as e:
         print(f"Error creating solver model: {e}")

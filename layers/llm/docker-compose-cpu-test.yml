@@ -1,26 +1,13 @@
 services:
   llm-inference:
     container_name: llm-inference
-    image: ollama/ollama:latest
+    image: ghcr.io/ggml-org/llama.cpp:server
+    platform: linux/amd64
+    command: --model /models/gemma-3-12b-it-UD-Q4_K_XL.gguf --host 0.0.0.0 --port 11434 --ctx-size 2048
     ports:
       - "11434:11434"
-    env_file:
-      - .env
     volumes:
-      - llm-inference-data:/root/.ollama
-    restart: unless-stopped
-    networks:
-      - app-network
-  llm-inference-2:
-    container_name: llm-inference-2
-    image: ghcr.io/ggerganov/llama.cpp:server
-    platform: linux/arm64
-    ports:
-      - "8000:8000"
-    environment:
-      - MODEL=/models/Qwen3-14B-Q4_K_M.gguf
-    volumes:
-      - ../../models/gguf:/models
+      - ../../models/old/gguf:/models
     restart: unless-stopped
     networks:
       - app-network

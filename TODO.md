@@ -5,7 +5,7 @@
 
 ## Functions
 - Demo - Define Knowledge for each Option
-- Demo - Define layers and services, an API for each layer. (?))
+- Demo - Define layers and services, an API for each layer. (?)
 
 - LLM Layer - API - Model for SysML v2 Conversion
 - LLM Layer - API - Model for Solution

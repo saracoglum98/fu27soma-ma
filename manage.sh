@@ -205,6 +205,8 @@ fi
 if [ "$1" = "start" ]; then
     service_start "communication-app"
     service_start "llm-inference"
+    service_start "llm-api"
+    service_start "knowledge-api"
     service_start "knowledge-relational"
     service_start "knowledge-object"
     service_start "knowledge-vector"
@@ -215,6 +217,8 @@ fi
 if [ "$1" = "stop" ]; then
     service_stop "communication-app"
     service_stop "llm-inference"
+    service_stop "llm-api"
+    service_stop "knowledge-api"
     service_stop "knowledge-relational"
     service_stop "knowledge-object"
     service_stop "knowledge-vector"
@@ -225,6 +229,8 @@ fi
 if [ "$1" = "restart" ]; then
     service_restart "communication-app"
     service_restart "llm-inference"
+    service_restart "llm-api"
+    service_restart "knowledge-api"
     service_restart "knowledge-relational"
     service_restart "knowledge-object"
     service_restart "knowledge-vector"
@@ -235,6 +241,8 @@ fi
 if [ "$1" = "destroy" ]; then
     service_destroy "communication-app"
     service_destroy "llm-inference"
+    service_destroy "llm-api"
+    service_destroy "knowledge-api"
     service_destroy "knowledge-relational"
     service_destroy "knowledge-object"
     service_destroy "knowledge-vector"
