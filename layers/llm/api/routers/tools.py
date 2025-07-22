@@ -127,3 +127,102 @@ Based on this context, please analyze the following option: {option["name"]}"""
         print(f"Error in sysml endpoint: {str(e)}")
         print(traceback.format_exc())
         raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/solve/{solution_uuid}", name="Solve", response_model=CommonResponse)
+async def solve(solution_uuid: str):
+    try:
+        # Get Qdrant client
+        qdrant_client = my_qdrant()
+
+        # Fetch solution details from the knowledge API
+        async with httpx.AsyncClient(timeout=10.0) as client:
+            print(f"Fetching solution details for UUID: {solution_uuid}")
+            response = await client.get(
+                f"http://knowledge-api:10000/solutions/{solution_uuid}/display"
+            )
+            if response.status_code == 404:
+                raise HTTPException(status_code=404, detail="Solution not found")
+            solution = response.json()
+
+            # Get document UUIDs from solution.knowledge
+            document_uuids = solution.get("knowledge", [])
+            if not document_uuids:
+                print("Warning: No document UUIDs found in solution.knowledge")
+
+        # Fetch relevant documents from Qdrant
+        context_documents = []
+        for doc_id in document_uuids:
+            try:
+                # Fetch the document by its ID
+                result = qdrant_client.retrieve(
+                    collection_name="documents",
+                    ids=[doc_id],
+                )
+                if result:
+                    # Extract the text content from the payload
+                    doc_content = result[0].payload.get("text", "")
+                    context_documents.append(doc_content)
+            except Exception as e:
+                print(f"Error fetching document {doc_id}: {str(e)}")
+                continue
+
+        # Combine all context documents
+        context = "\n\n---\n\n".join(context_documents)
+
+        # Prepare solution data for LLM
+        solution_data = {
+            "name": solution["name"],
+            "solution_space": solution["solution_space"],
+            "table": solution["table"],
+            "req_customer": solution["req_customer"],
+            "req_business": solution["req_business"]
+        }
+
+        # OpenAI-compatible endpoint configuration
+        api_endpoint = "http://host.docker.internal:1234/v1/chat/completions"
+        headers = {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer dummy-token",
+        }
+
+        # Prepare the chat completion request with context and solution data
+        prompt = f"""Here is some relevant context from our knowledge base:
+
+{context}
+
+Based on this context, please analyze the following solution:
+
+{json.dumps(solution_data, indent=2)}
+
+Please provide a detailed analysis of this solution considering the customer requirements, business requirements, and the selected options in the function table."""
+
+        payload = {
+            "model": "expert",
+            "messages": [{"role": "user", "content": prompt}],
+            "temperature": 0.7,
+        }
+
+        print(f"Making request to OpenAI-compatible endpoint: {api_endpoint}")
+        print(f"Payload: {json.dumps(payload, indent=2)}")
+
+        async with httpx.AsyncClient(timeout=120.0) as llm_client:
+            llm_response = await llm_client.post(
+                api_endpoint, json=payload, headers=headers
+            )
+            print(f"Response status: {llm_response.status_code}")
+            print(f"Response body: {llm_response.text}")
+
+            if llm_response.status_code != 200:
+                raise HTTPException(
+                    status_code=llm_response.status_code,
+                    detail=f"LLM request failed: {llm_response.text}",
+                )
+
+            llm_data = llm_response.json()
+            return {"data": llm_data["choices"][0]["message"]["content"]}
+
+    except Exception as e:
+        print(f"Error in solve endpoint: {str(e)}")
+        print(traceback.format_exc())
+        raise HTTPException(status_code=500, detail=str(e))

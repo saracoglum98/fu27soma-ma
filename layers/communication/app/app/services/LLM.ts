@@ -44,3 +44,24 @@ export const analyzeSysML = async (optionUuid: string): Promise<string> => {
   const result: CommonResponse = await response.json();
   return result.data;
 };
+
+/**
+ * Analyzes a solution using context from knowledge base and LLM
+ * @param solutionUuid The UUID of the solution to analyze
+ * @returns The LLM analysis result
+ */
+export const solveSolution = async (solutionUuid: string): Promise<string> => {
+  const response = await fetch(`${API_URL}/solve/${solutionUuid}`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    }
+  });
+
+  if (!response.ok) {
+    throw new Error('Failed to analyze solution');
+  }
+
+  const result: CommonResponse = await response.json();
+  return result.data;
+};

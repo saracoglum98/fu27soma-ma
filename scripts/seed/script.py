@@ -99,6 +99,7 @@ if __name__ == "__main__":
     process_sql_file("options.sql")
     process_sql_file("functions.sql")
     process_sql_file("solution_spaces.sql")
+    process_sql_file("solutions.sql")
     process_sql_file("knowledge_items.sql")
     upload_knowledge_items("3ae112f2-131d-4263-bc2c-28297f1c1174", "conveyor-belt.pdf")
     attach_knowledge_items_to_options("cc9a94a0-a303-452f-8153-4fd2927c6703", "3ae112f2-131d-4263-bc2c-28297f1c1174")
