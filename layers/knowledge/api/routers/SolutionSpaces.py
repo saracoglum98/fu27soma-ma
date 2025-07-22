@@ -88,6 +88,7 @@ async def solution_space_update(uuid: str, solution_space: SolutionSpacesCU):
             "functions": updated_solution_space["functions"] if updated_solution_space["functions"] else []
         }
     except Exception as e:
+        print(str(e))
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.delete("/{uuid}", name="Delete", status_code=status.HTTP_200_OK)

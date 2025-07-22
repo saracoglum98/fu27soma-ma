@@ -7,9 +7,17 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { IconArrowLeft } from "@tabler/icons-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
-import { Solution } from "@/app/types/Solutions";
-import { getSolution, updateSolution } from "@/app/services/Solutions";
+import { Solution, SolutionDisplayResponse } from "@/app/types/Solutions";
+import { getSolution, updateSolution, displaySolution } from "@/app/services/Solutions";
 
 export default function SolutionPage() {
   const router = useRouter();
@@ -17,6 +25,7 @@ export default function SolutionPage() {
   const uuid = searchParams.get("uuid");
 
   const [solutionData, setSolutionData] = useState<Solution | null>(null);
+  const [displayData, setDisplayData] = useState<SolutionDisplayResponse | null>(null);
   const [solutionName, setSolutionName] = useState("");
   const [customerRequirements, setCustomerRequirements] = useState("");
   const [businessRequirements, setBusinessRequirements] = useState("");
@@ -29,6 +38,7 @@ export default function SolutionPage() {
   useEffect(() => {
     if (uuid) {
       fetchSolution();
+      fetchDisplayData();
     }
   }, [uuid]);
 
@@ -49,6 +59,19 @@ export default function SolutionPage() {
     }
   };
 
+  const fetchDisplayData = async () => {
+    try {
+      if (!uuid) return;
+      const data = await displaySolution(uuid);
+      console.log("Display data received:", data);
+      console.log("Table data:", data.table);
+      console.log("Table keys:", Object.keys(data.table || {}));
+      setDisplayData(data);
+    } catch (err) {
+      console.error("Error fetching display data:", err);
+    }
+  };
+
   const handleSaveChanges = async () => {
     try {
       if (!uuid) return;
@@ -58,6 +81,7 @@ export default function SolutionPage() {
         req_business: businessRequirements,
       });
       await fetchSolution();
+      await fetchDisplayData(); // Refresh display data after save
     } catch (err) {
       setError("Failed to update solution");
       console.error("Error updating solution:", err);
@@ -124,6 +148,43 @@ export default function SolutionPage() {
           />
         </div>
       </div>
+      
+      {displayData?.table && Object.keys(displayData.table).length > 0 && (
+        <div className="space-y-2">
+          <h2 className="text-xl font-semibold">Functions and Options</h2>
+          <div className="border rounded-lg">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-1/3">Function</TableHead>
+                  <TableHead>Available Options</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {Object.entries(displayData.table).map(([functionName, options]) => {
+                  return (
+                    <TableRow key={functionName}>
+                      <TableCell className="font-medium">{functionName}</TableCell>
+                      <TableCell>
+                        <div className="flex flex-wrap gap-2">
+                          {options.map((option, index) => (
+                            <span 
+                              key={index} 
+                              className="px-2 py-1 bg-gray-100 rounded-md text-sm"
+                            >
+                              {option}
+                            </span>
+                          ))}
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          </div>
+        </div>
+      )}
 
       <div className="space-y-2">
         <h2 className="text-xl font-semibold">Business Requirements</h2>

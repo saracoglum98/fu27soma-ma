@@ -21,7 +21,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { MultiSelect } from "@/components/ui/multi-select";
-import { IconEdit, IconTrash, IconPlus, IconArrowLeft } from "@tabler/icons-react";
+import { IconEdit, IconTrash, IconPlus, IconArrowLeft, IconEye } from "@tabler/icons-react";
 
 import { Function } from "@/app/types/Functions";
 import { Option } from "@/app/types/Options";
@@ -30,6 +30,7 @@ import { getFunction, updateFunction, attachOption, detachOption } from "@/app/s
 import { createOption, updateOption, deleteOption, attachKnowledge, detachKnowledge } from "@/app/services/Options";
 import { getAllKnowledgeItems } from "@/app/services/KnowledgeItems";
 import { getOption } from "@/app/services/Options";
+import { analyzeSysML } from "@/app/services/LLM";
 
 export default function FunctionPage() {
   const router = useRouter();
@@ -46,6 +47,10 @@ export default function FunctionPage() {
   const [newOptionName, setNewOptionName] = useState("");
   const [selectedKnowledge, setSelectedKnowledge] = useState<string[]>([]);
   const [options, setOptions] = useState<Option[]>([]);
+  const [previewDialogOpen, setPreviewDialogOpen] = useState(false);
+  const [previewLoading, setPreviewLoading] = useState(false);
+  const [previewContent, setPreviewContent] = useState("");
+  const [previewingOption, setPreviewingOption] = useState<Option | null>(null);
 
   useEffect(() => {
     if (uuid) {
@@ -193,6 +198,21 @@ export default function FunctionPage() {
     setOptionDialogOpen(true);
   };
 
+  const handlePreview = async (option: Option) => {
+    try {
+      setPreviewingOption(option);
+      setPreviewLoading(true);
+      setPreviewDialogOpen(true);
+      const analysis = await analyzeSysML(option.uuid);
+      setPreviewContent(analysis);
+    } catch (err) {
+      setError("Failed to analyze option");
+      console.error("Error analyzing option:", err);
+    } finally {
+      setPreviewLoading(false);
+    }
+  };
+
   if (isLoading) {
     return <div>Loading...</div>;
   }
@@ -310,6 +330,18 @@ export default function FunctionPage() {
                   <Button
                     variant="outline"
                     size="sm"
+                    onClick={() => handlePreview(option)}
+                    disabled={previewLoading && previewingOption?.uuid === option.uuid}
+                  >
+                    {previewLoading && previewingOption?.uuid === option.uuid ? (
+                      <div className="animate-spin rounded-full h-4 w-4 border-2 border-b-transparent" />
+                    ) : (
+                      <IconEye className="w-4 h-4" />
+                    )}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
                     onClick={() => openEditDialog(option)}
                   >
                     <IconEdit className="w-4 h-4" />
@@ -328,6 +360,32 @@ export default function FunctionPage() {
           </TableBody>
         </Table>
       </div>
+
+      <Dialog open={previewDialogOpen} onOpenChange={setPreviewDialogOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>
+              {previewingOption?.name} - SysML Definition
+            </DialogTitle>
+            <DialogDescription>
+              This is the SysML definition of the option.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            {previewLoading ? (
+              <div className="flex justify-center items-center py-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-2 border-b-transparent" />
+              </div>
+            ) : (
+              <div className="bg-gray-50 p-4 rounded-md">
+                <p className="whitespace-pre-wrap font-mono text-sm">
+                  {previewContent}
+                </p>
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

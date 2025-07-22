@@ -4,6 +4,7 @@ export interface Solution {
     req_customer?: string;
     req_business?: string;
     results?: string[];
+    knowledge?: string[];
 }
 
 export interface SolutionCreate {
@@ -14,4 +15,9 @@ export interface SolutionUpdate {
     name: string;
     req_customer: string;
     req_business: string;
+}
+
+export interface SolutionDisplayResponse extends Solution {
+    solution_space: string;
+    table: { [key: string]: string[] };
 }

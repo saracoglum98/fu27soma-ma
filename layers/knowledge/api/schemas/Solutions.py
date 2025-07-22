@@ -8,6 +8,7 @@ class SolutionsR(BaseModel):
     req_customer: str
     req_business: str
     results: Optional[List[str]] = []
+    knowledge: Optional[List[str]] = []
 
 class SolutionsC(BaseModel):
     name: str

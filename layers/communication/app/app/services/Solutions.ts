@@ -1,4 +1,4 @@
-import { Solution } from "../types/Solutions";
+import { Solution, SolutionCreate, SolutionUpdate, SolutionDisplayResponse } from "../types/Solutions";
 
 const API_URL = "http://localhost:10000/solutions";
 
@@ -56,4 +56,12 @@ export async function deleteSolution(uuid: string): Promise<void> {
   if (!response.ok) {
     throw new Error("Failed to delete solution");
   }
+}
+
+export async function displaySolution(uuid: string): Promise<SolutionDisplayResponse> {
+  const response = await fetch(`${API_URL}/${uuid}/display`);
+  if (!response.ok) {
+    throw new Error("Failed to display solution");
+  }
+  return response.json();
 }

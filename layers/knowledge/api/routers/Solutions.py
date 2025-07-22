@@ -157,4 +157,98 @@ async def solution_update(uuid: str, solution: SolutionsU):
             "results": updated_solution["results"] if updated_solution["results"] else []
         }
     except Exception as e:
+        print(str(e))
         raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/{uuid}/display", name="Display", response_model=dict)
+async def solution_display(uuid: str):
+    try:
+        conn = my_db()
+        cur = conn.cursor()
+        
+        # Get the solution and its related solution space
+        cur.execute("""
+            SELECT s.uuid, s.name, s.req_customer, s.req_business, s.results,
+                   ss.name as solution_space_name,
+                   ss.uuid as solution_space_uuid
+            FROM solutions s
+            JOIN solution_spaces ss ON s.solution_space = ss.uuid
+            WHERE s.uuid = %s
+        """, (uuid,))
+        solution = cur.fetchone()
+        
+        if solution is None:
+            cur.close()
+            conn.close()
+            raise HTTPException(status_code=404, detail="Solution not found")
+        
+        # Get all functions, their options and knowledge for this solution space
+        cur.execute("""
+            WITH function_options AS (
+                SELECT 
+                    f.name as function_name,
+                    f.options as option_uuids
+                FROM functions f
+                WHERE f.uuid::uuid = ANY(
+                    SELECT UNNEST(functions)::uuid
+                    FROM solution_spaces 
+                    WHERE uuid = %s
+                )
+            ),
+            option_details AS (
+                SELECT 
+                    fo.function_name,
+                    o.name as option_name,
+                    o.knowledge as knowledge_uuids
+                FROM function_options fo
+                LEFT JOIN LATERAL (
+                    SELECT name, knowledge
+                    FROM options 
+                    WHERE uuid::uuid = ANY(fo.option_uuids::uuid[])
+                ) o ON true
+            ),
+            unnested_knowledge AS (
+                SELECT 
+                    od.function_name,
+                    od.option_name,
+                    k.knowledge_uuid
+                FROM option_details od
+                LEFT JOIN LATERAL UNNEST(od.knowledge_uuids) AS k(knowledge_uuid) ON true
+            )
+            SELECT 
+                od.function_name,
+                array_agg(DISTINCT od.option_name) as options,
+                array_agg(DISTINCT uk.knowledge_uuid) FILTER (WHERE uk.knowledge_uuid IS NOT NULL) as all_knowledge
+            FROM option_details od
+            LEFT JOIN unnested_knowledge uk ON uk.function_name = od.function_name
+            GROUP BY od.function_name
+        """, (solution["solution_space_uuid"],))
+        functions = cur.fetchall()
+        
+        # Create the table structure and collect all knowledge UUIDs
+        table = {}
+        all_knowledge = set()
+        for func in functions:
+            table[func["function_name"]] = func["options"]
+            if func["all_knowledge"]:
+                all_knowledge.update(func["all_knowledge"])
+        
+        # Build the human readable response
+        response = {
+            "name": solution["name"],
+            "solution_space": solution["solution_space_name"],
+            "table": table,
+            "req_customer": solution["req_customer"],
+            "req_business": solution["req_business"],
+            "results": solution["results"] if solution["results"] else [],
+            "knowledge": list(all_knowledge)
+        }
+        
+        cur.close()
+        conn.close()
+        
+        return response
+    except Exception as e:
+        print(str(e))
+        raise HTTPException(status_code=500, detail=str(e))
+
