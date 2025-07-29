@@ -7,8 +7,11 @@
 - Demo - Define Knowledge for each Option
 - Demo - Define layers and services, an API for each layer. (?)
 
-- LLM Layer - API - Model for SysML v2 Conversion
-- LLM Layer - API - Model for Solution
+- Astrom Meeting - Add if you don't know/don't have  into System Prompt
+- Astrom Meeting - RAG - Three Best Responses from Vector Storage
+- Astrom Meeting - RAG - Instead of Similarity Retrieval, Maximal Marginal Relevance
+- Astrom Meeting - RAG - Instead of Regular Chunking, Parent/Child Chunking
+
 - Communication Layer - API - Solution - Solve from UUID ( # of solutions, solver, KPIs) (CRITICAL)
 - Communication Layer - Data and API - Implement new field in Option schema - sysml
 - Communication Layer - Data and API - Remove Knowledge Attachment from Functions?
