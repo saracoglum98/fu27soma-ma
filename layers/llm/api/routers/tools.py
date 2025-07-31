@@ -10,6 +10,10 @@ import json
 import asyncio
 from typing import Optional, List
 from connections import my_qdrant
+from dotenv import load_dotenv
+
+load_dotenv()
+
 
 router = APIRouter(
     prefix="/tools",
@@ -70,7 +74,7 @@ async def sysml(option_uuid: str):
             try:
                 # Fetch the document by its ID
                 result = qdrant_client.retrieve(
-                    collection_name="documents",
+                    collection_name=os.getenv("QDRANT_DEFAULT_COLLECTION"),
                     ids=[doc_id],
                 )
                 if result:
@@ -80,6 +84,34 @@ async def sysml(option_uuid: str):
             except Exception as e:
                 print(f"Error fetching document {doc_id}: {str(e)}")
                 continue
+
+        # Fetch all documents from the second collection
+        second_collection = os.getenv("QDRANT_SYSML_COLLECTION")
+        if second_collection:
+            offset = None
+            while True:
+                try:
+                    # Get batch of documents using scroll
+                    results, offset = qdrant_client.scroll(
+                        collection_name=second_collection,
+                        limit=100,  # Fetch in batches of 100
+                        offset=offset
+                    )
+                    
+                    # Process the batch
+                    for point in results:
+                        doc_content = point.payload.get("text", "")
+                        if doc_content:
+                            context_documents.append(doc_content)
+                    
+                    # If no more results, break the loop
+                    if not offset:
+                        break
+                        
+                except Exception as e:
+                    print(f"Error fetching documents from second collection: {str(e)}")
+                    print(traceback.format_exc())
+                    break
 
         # Combine all context documents
         context = "\n\n---\n\n".join(context_documents)
@@ -156,7 +188,7 @@ async def solve(solution_uuid: str):
             try:
                 # Fetch the document by its ID
                 result = qdrant_client.retrieve(
-                    collection_name="documents",
+                    collection_name=os.getenv("QDRANT_DEFAULT_COLLECTION"),
                     ids=[doc_id],
                 )
                 if result:
