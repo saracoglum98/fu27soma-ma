@@ -9,7 +9,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { IconPlus, IconEdit, IconTrash, IconPlayerPlay, IconClipboardList, IconSearch } from "@tabler/icons-react";
+import { IconPlus, IconEdit, IconTrash, IconClipboardList, IconSearch, IconFlask2 } from "@tabler/icons-react";
 import {
   Table,
   TableBody,
@@ -150,7 +150,6 @@ export default function SolutionSpacesPage() {
           <TableHeader>
             <TableRow>
               <TableHead>Name</TableHead>
-              <TableHead>Functions</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -158,7 +157,6 @@ export default function SolutionSpacesPage() {
             {filteredData.map((space) => (
               <TableRow key={space.uuid}>
                 <TableCell>{space.name}</TableCell>
-                <TableCell>{space.functions?.length ?? 0} functions</TableCell>
                 <TableCell className="text-right">
                   <div className="flex justify-end gap-2">
                     {(space.results?.length ?? 0) > 0 && (
@@ -174,7 +172,7 @@ export default function SolutionSpacesPage() {
                             size="sm"
                             onClick={() => setSelectedSpaceUuid(space.uuid)}
                           >
-                            <IconPlayerPlay className="w-4 h-4" />
+                            <IconFlask2 className="w-4 h-4" />
                           </Button>
                         </DialogTrigger>
                         <DialogContent>

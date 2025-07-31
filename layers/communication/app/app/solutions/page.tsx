@@ -23,6 +23,7 @@ import { Solution } from "../types/Solutions";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { solveSolution } from "../services/LLM";
+import { IconPlayerPlay, IconEdit, IconTrash, IconSearch } from "@tabler/icons-react";
 
 export default function SolutionsPage() {
   const router = useRouter();
@@ -33,6 +34,7 @@ export default function SolutionsPage() {
   const [solvingLoading, setSolvingLoading] = useState(false);
   const [numSolutions, setNumSolutions] = useState<number>(1);
   const [selectedSolution, setSelectedSolution] = useState<Solution | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
     const fetchSolutions = async () => {
@@ -75,6 +77,10 @@ export default function SolutionsPage() {
     }
   };
 
+  const filteredData = solutions.filter((solution) =>
+    solution.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   if (loading) {
     return <div>Loading solutions...</div>;
   }
@@ -89,27 +95,31 @@ export default function SolutionsPage() {
         <h1 className="text-2xl font-bold text-black">Solutions</h1>
       </div>
       
+      <div className="w-full relative">
+        <IconSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-500" />
+        <Input
+          type="text"
+          placeholder="Search solutions..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="mb-4 pl-10"
+        />
+      </div>
+
       <div className="rounded-md border">
         <Table>
           <TableHeader>
             <TableRow>
               <TableHead>Name</TableHead>
-              <TableHead>Actions</TableHead>
+              <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {solutions.map((solution) => (
+            {filteredData.map((solution) => (
               <TableRow key={solution.uuid}>
                 <TableCell>{solution.name}</TableCell>
-                <TableCell className="space-x-2">
+                <TableCell className="text-right space-x-2">
                   <Button 
-                    variant="default" 
-                    size="sm"
-                    onClick={() => handleViewSolution(solution.uuid)}
-                  >
-                    View
-                  </Button>
-                  <Button
                     variant="outline"
                     size="sm"
                     onClick={() => handleSolveClick(solution)}
@@ -118,8 +128,22 @@ export default function SolutionsPage() {
                     {solvingLoading && selectedSolution?.uuid === solution.uuid ? (
                       <div className="animate-spin rounded-full h-4 w-4 border-2 border-b-transparent" />
                     ) : (
-                      "Solve"
+                      <IconPlayerPlay className="w-4 h-4" />
                     )}
+                  </Button>
+                  <Button 
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleViewSolution(solution.uuid)}
+                  >
+                    <IconEdit className="w-4 h-4" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="text-red-600 hover:text-red-700"
+                  >
+                    <IconTrash className="w-4 h-4" />
                   </Button>
                 </TableCell>
               </TableRow>

@@ -140,8 +140,6 @@ export default function FunctionsPage() {
           <TableHeader>
             <TableRow>
               <TableHead>Name</TableHead>
-              <TableHead>Knowledge Count</TableHead>
-              <TableHead>Options Count</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -149,8 +147,6 @@ export default function FunctionsPage() {
             {filteredData.map((item) => (
               <TableRow key={item.uuid}>
                 <TableCell>{item.name}</TableCell>
-                <TableCell>{(item.knowledge ?? []).length}</TableCell>
-                <TableCell>{(item.options ?? []).length}</TableCell>
                 <TableCell className="text-right space-x-2">
                   <Button
                     variant="outline"

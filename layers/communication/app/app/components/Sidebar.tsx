@@ -2,16 +2,17 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { IconDashboard, IconBook2, IconTrophy, IconSettings, IconPackages, IconChartLine, IconReportAnalytics } from '@tabler/icons-react';
 
 // Navigation items
 const navigation = [
-  { name: 'Dashboard', href: '/', icon: '📊' , divider: true },
-  { name: 'Knowledge Base', href: '/knowledge-base', icon: '📚'},
-  { name: 'KPIs', href: '/kpis', icon: '🏆', divider: true},
-  { name: 'Functions', href: '/functions', icon: '⚙️' },
-  { name: 'Solution Spaces', href: '/solution-spaces', icon: '🎯', divider: true},
-  { name: 'Solutions', href: '/solutions', icon: '📈'},
-  { name: 'Results', href: '/results', icon: '🧪' },
+  { name: 'Dashboard', href: '/', icon: <IconDashboard size={20} />, divider: true },
+  { name: 'Knowledge Base', href: '/knowledge-base', icon: <IconBook2 size={20} />},
+  { name: 'KPIs', href: '/kpis', icon: <IconTrophy size={20} />, divider: true},
+  { name: 'Functions', href: '/functions', icon: <IconSettings size={20} /> },
+  { name: 'Solution Spaces', href: '/solution-spaces', icon: <IconPackages size={20} />, divider: true},
+  { name: 'Solutions', href: '/solutions', icon: <IconReportAnalytics size={20} />},
+  { name: 'Results', href: '/results', icon: <IconChartLine size={20} /> },
 ];
 
 export default function Sidebar() {
