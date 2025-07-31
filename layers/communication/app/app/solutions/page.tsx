@@ -15,7 +15,9 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
+  DialogFooter,
 } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 import { getAllSolutions } from "../services/Solutions";
 import { Solution } from "../types/Solutions";
 import { useEffect, useState } from "react";
@@ -27,10 +29,10 @@ export default function SolutionsPage() {
   const [solutions, setSolutions] = useState<Solution[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [solveDialogOpen, setSolveDialogOpen] = useState(false);
+  const [numSolutionsDialogOpen, setNumSolutionsDialogOpen] = useState(false);
   const [solvingLoading, setSolvingLoading] = useState(false);
-  const [solveContent, setSolveContent] = useState("");
-  const [solvingSolution, setSolvingSolution] = useState<Solution | null>(null);
+  const [numSolutions, setNumSolutions] = useState<number>(1);
+  const [selectedSolution, setSelectedSolution] = useState<Solution | null>(null);
 
   useEffect(() => {
     const fetchSolutions = async () => {
@@ -52,19 +54,24 @@ export default function SolutionsPage() {
     router.push(`/solution?uuid=${uuid}`);
   };
 
-  const handleSolve = async (solution: Solution) => {
+  const handleSolveClick = (solution: Solution) => {
+    setSelectedSolution(solution);
+    setNumSolutionsDialogOpen(true);
+  };
+
+  const handleSolve = async () => {
+    if (!selectedSolution) return;
+    
     try {
-      setSolvingSolution(solution);
       setSolvingLoading(true);
-      setSolveDialogOpen(true);
-      const analysis = await solveSolution(solution.uuid);
-      // Pretty print the JSON response
-      setSolveContent(JSON.stringify(JSON.parse(analysis), null, 2));
+      await solveSolution(selectedSolution.uuid, numSolutions);
     } catch (err) {
       setError("Failed to solve solution");
       console.error("Error solving solution:", err);
     } finally {
       setSolvingLoading(false);
+      setNumSolutionsDialogOpen(false);
+      setSelectedSolution(null);
     }
   };
 
@@ -105,10 +112,10 @@ export default function SolutionsPage() {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => handleSolve(solution)}
-                    disabled={solvingLoading && solvingSolution?.uuid === solution.uuid}
+                    onClick={() => handleSolveClick(solution)}
+                    disabled={solvingLoading && selectedSolution?.uuid === solution.uuid}
                   >
-                    {solvingLoading && solvingSolution?.uuid === solution.uuid ? (
+                    {solvingLoading && selectedSolution?.uuid === solution.uuid ? (
                       <div className="animate-spin rounded-full h-4 w-4 border-2 border-b-transparent" />
                     ) : (
                       "Solve"
@@ -121,29 +128,46 @@ export default function SolutionsPage() {
         </Table>
       </div>
 
-      <Dialog open={solveDialogOpen} onOpenChange={setSolveDialogOpen}>
-        <DialogContent className="max-w-2xl">
+      <Dialog open={numSolutionsDialogOpen} onOpenChange={setNumSolutionsDialogOpen}>
+        <DialogContent>
           <DialogHeader>
-            <DialogTitle>
-              {solvingSolution?.name} - Solution Analysis
-            </DialogTitle>
+            <DialogTitle>Number of Solutions</DialogTitle>
             <DialogDescription>
-              This is the analysis result for the solution.
+              Enter the number of solutions you want to generate
             </DialogDescription>
           </DialogHeader>
-          <div className="space-y-4 py-4">
-            {solvingLoading ? (
-              <div className="flex justify-center items-center py-8">
-                <div className="animate-spin rounded-full h-8 w-8 border-2 border-b-transparent" />
-              </div>
-            ) : (
-              <div className="bg-gray-50 p-4 rounded-md">
-                <pre className="whitespace-pre-wrap font-mono text-sm max-h-[60vh] overflow-y-auto">
-                  {solveContent}
-                </pre>
-              </div>
-            )}
+          <div className="py-4">
+            <Input
+              type="number"
+              value={numSolutions}
+              onChange={(e) => {
+                const value = parseInt(e.target.value) || 1;
+                setNumSolutions(Math.min(Math.max(value, 1), 5));
+              }}
+              min={1}
+              max={5}
+              className="w-full"
+            />
           </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setNumSolutionsDialogOpen(false)}
+              disabled={solvingLoading}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleSolve}
+              disabled={solvingLoading}
+            >
+              {solvingLoading ? (
+                <div className="animate-spin rounded-full h-4 w-4 border-2 border-b-transparent" />
+              ) : (
+                "Solve"
+              )}
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>

@@ -12,6 +12,7 @@ from typing import Optional, List
 from connections import my_qdrant
 from dotenv import load_dotenv
 import re
+from connections import my_db
 
 load_dotenv()
 
@@ -148,7 +149,7 @@ Based on this context, please analyze the following option: {option["name"]}"""
         print(f"Making request to OpenAI-compatible endpoint: {api_endpoint}")
         print(f"Payload: {json.dumps(payload, indent=2)}")
 
-        async with httpx.AsyncClient(timeout=120.0) as llm_client:
+        async with httpx.AsyncClient(timeout=int(os.getenv("MODEL_TIMEOUT"))) as llm_client:
             llm_response = await llm_client.post(
                 api_endpoint, json=payload, headers=headers
             )
@@ -172,8 +173,8 @@ Based on this context, please analyze the following option: {option["name"]}"""
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.post("/solve/{solution_uuid}", name="Solve", response_model=CommonResponse)
-async def solve(solution_uuid: str):
+@router.post("/solve/{solution_uuid}/{num_of_solutions}", name="Solve", response_model=CommonResponse)
+async def solve(solution_uuid: str, num_of_solutions: int):
     try:
         # Get Qdrant client
         qdrant_client = my_qdrant()
@@ -216,6 +217,7 @@ async def solve(solution_uuid: str):
         # Prepare solution data for LLM
         solution_data = {
             "name": solution["name"],
+            "num_solutions": num_of_solutions,
             "solution_space": solution["solution_space"],
             "table": solution["table"],
             "req_customer": solution["req_customer"],
@@ -249,7 +251,9 @@ Please provide a detailed analysis of this solution considering the customer req
         print(f"Making request to OpenAI-compatible endpoint: {api_endpoint}")
         print(f"Payload: {json.dumps(payload, indent=2)}")
 
-        async with httpx.AsyncClient(timeout=120.0) as llm_client:
+        start_time = asyncio.get_event_loop().time()
+
+        async with httpx.AsyncClient(timeout=int(os.getenv("MODEL_TIMEOUT"))) as llm_client:
             llm_response = await llm_client.post(
                 api_endpoint, json=payload, headers=headers
             )
@@ -265,6 +269,39 @@ Please provide a detailed analysis of this solution considering the customer req
             llm_data = llm_response.json()
             content = llm_data["choices"][0]["message"]["content"]
             cleaned_content = clean_llm_response(content)
+            
+            # Calculate runtime in seconds
+            runtime = int(asyncio.get_event_loop().time() - start_time)
+            
+            # Clean and parse JSON content
+            try:
+                # First try to parse it as JSON
+                if isinstance(cleaned_content, str):
+                    content_json = json.loads(cleaned_content)
+                else:
+                    content_json = cleaned_content
+                
+                # Convert to a clean JSON string without escapes
+                clean_json = json.dumps(content_json, ensure_ascii=False, separators=(',', ':'))
+            except json.JSONDecodeError:
+                # If it's not valid JSON, store as a simple string
+                clean_json = json.dumps({"content": cleaned_content}, ensure_ascii=False, separators=(',', ':'))
+            
+            # Insert result into database
+            conn = my_db()
+            try:
+                with conn.cursor() as cur:
+                    cur.execute(
+                        """
+                        INSERT INTO results (solution, runtime, num_of_solutions, data)
+                        VALUES (%s, %s, %s, %s)
+                        """,
+                        (solution_uuid, runtime, num_of_solutions, clean_json)
+                    )
+                conn.commit()
+            finally:
+                conn.close()
+            
             return {"data": cleaned_content}
 
     except Exception as e:

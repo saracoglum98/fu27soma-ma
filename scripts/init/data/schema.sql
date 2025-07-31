@@ -39,6 +39,8 @@ CREATE TABLE IF NOT EXISTS solutions (
 
 CREATE TABLE IF NOT EXISTS results (
     uuid UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    name TEXT NOT NULL,
-    map JSONB NOT NULL
+    solution UUID REFERENCES solutions(uuid),
+    runtime INT,
+    num_of_solutions INT,
+    data JSONB NOT NULL
 );

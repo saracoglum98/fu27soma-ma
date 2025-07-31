@@ -50,8 +50,8 @@ export const analyzeSysML = async (optionUuid: string): Promise<string> => {
  * @param solutionUuid The UUID of the solution to analyze
  * @returns The LLM analysis result
  */
-export const solveSolution = async (solutionUuid: string): Promise<string> => {
-  const response = await fetch(`${API_URL}/solve/${solutionUuid}`, {
+export const solveSolution = async (solutionUuid: string, numOfSolutions: number): Promise<string> => {
+  const response = await fetch(`${API_URL}/solve/${solutionUuid}/${numOfSolutions}`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
