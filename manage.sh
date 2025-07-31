@@ -177,6 +177,7 @@ fi
 
 if [ "$1" = "build" ]; then
     redirect=$(get_output_redirect)
+    tic=$(date +%s)
     echo -e "🪜  Preparing to build\n"
     eval "service_destroy \"communication-app\" $redirect"
     eval "service_destroy \"llm-inference\" $redirect"
@@ -198,6 +199,8 @@ if [ "$1" = "build" ]; then
     fi
     
     clear
+    toc=$(date +%s)
+    echo -e "⌛️ Build took $(printf "%.2f" $(echo "scale=2; ($toc - $tic) / 60" | bc)) minutes"
     echo -e "🎉 All services are running"
     echo -e "🌐 Access the web app at http://localhost:3000\n"
 fi

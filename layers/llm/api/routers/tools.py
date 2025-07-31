@@ -11,6 +11,7 @@ import asyncio
 from typing import Optional, List
 from connections import my_qdrant
 from dotenv import load_dotenv
+import re
 
 load_dotenv()
 
@@ -21,6 +22,14 @@ router = APIRouter(
     responses={404: {"description": "Not found"}},
 )
 
+
+def clean_llm_response(response: str) -> str:
+    """Remove thinking/reasoning blocks from LLM response."""
+    # Remove <think> or <thinking> blocks
+    response = re.sub(r'<think(?:ing)?>[^<]*</think(?:ing)?>', '', response, flags=re.DOTALL)
+    # Clean up any extra newlines that might have been left
+    response = re.sub(r'\n{3,}', '\n\n', response.strip())
+    return response
 
 @router.post("/convert", name="Convert", response_model=CommonResponse)
 async def convert(file: UploadFile):
@@ -153,7 +162,9 @@ Based on this context, please analyze the following option: {option["name"]}"""
                 )
 
             llm_data = llm_response.json()
-            return {"data": llm_data["choices"][0]["message"]["content"]}
+            content = llm_data["choices"][0]["message"]["content"]
+            cleaned_content = clean_llm_response(content)
+            return {"data": cleaned_content}
 
     except Exception as e:
         print(f"Error in sysml endpoint: {str(e)}")
@@ -252,7 +263,9 @@ Please provide a detailed analysis of this solution considering the customer req
                 )
 
             llm_data = llm_response.json()
-            return {"data": llm_data["choices"][0]["message"]["content"]}
+            content = llm_data["choices"][0]["message"]["content"]
+            cleaned_content = clean_llm_response(content)
+            return {"data": cleaned_content}
 
     except Exception as e:
         print(f"Error in solve endpoint: {str(e)}")

@@ -7,10 +7,9 @@
 - Demo - Define Knowledge for each Option
 - Demo - Define layers and services, an API for each layer. (?)
 
-- Manage Script - Build took ... minutes
-
 - LLM Layer - System Prompt - User will define the number of solutions
 - LLM Layer - System Prompt - If you don't have information/don't know, mention it
+- LLM Layer - System Prompt - User might chat with you after the first prompt to give directions
 - LLM Layer - API - Solution - Solve from UUID w/ number of solutions
 - Communication Layer - UI - UI for Solution Display 
 - Communication Layer - Data and API - Remove Knowledge Attachment from Functions?

@@ -46,22 +46,23 @@ Alternatively, if you want to seed sample data after the build, run:
 
 The output of build command should look like this.
 ```
-🪜 Preparing to build
+🪜  Preparing to build
 
 🌍 Creating network
 
-🛠️ Setting environment variables
+🛠️  Setting environment variables
 
-🚀 Building communication
-🚀 Building data
+🚀 Building knowledge
 🚀 Building llm
+🚀 Building communication
 
 💨 Initializing services
 
-🌱 Seeding sample data
+🌱 Seeding sample knowledge
 
 🧹 Clearing build related files
 
+⌛️ Build took 14.67 minutes
 🎉 All services are running
 🌐 Access the web app at http://localhost:3000
 ```
