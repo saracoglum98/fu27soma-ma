@@ -12,7 +12,6 @@ const navigation = [
   { name: 'Functions', href: '/functions', icon: <IconSettings size={20} /> },
   { name: 'Solution Spaces', href: '/solution-spaces', icon: <IconPackages size={20} />, divider: true},
   { name: 'Solutions', href: '/solutions', icon: <IconReportAnalytics size={20} />},
-  { name: 'Results', href: '/results', icon: <IconChartLine size={20} /> },
 ];
 
 export default function Sidebar() {

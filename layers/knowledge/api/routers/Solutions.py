@@ -16,7 +16,7 @@ async def solutions_read_all():
     try:
         conn = my_db()
         cur = conn.cursor()
-        cur.execute("SELECT uuid, name, req_customer, req_business, results FROM solutions")
+        cur.execute("SELECT uuid, name, req_customer, req_business, runtime, data FROM solutions")
         solutions = cur.fetchall()
         cur.close()
         conn.close()
@@ -27,11 +27,13 @@ async def solutions_read_all():
                 "name": solution["name"],
                 "req_customer": solution["req_customer"],
                 "req_business": solution["req_business"],
-                "results": solution["results"] if solution["results"] else []
+                "runtime": solution["runtime"],
+                "data": solution["data"] if solution["data"] else None
             }
             for solution in solutions
         ]
     except Exception as e:
+        print(str(e))
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/{uuid}", name="Read single", response_model=SolutionsR)
@@ -39,7 +41,7 @@ async def solution_read_one(uuid: str):
     try:
         conn = my_db()
         cur = conn.cursor()
-        cur.execute("SELECT uuid, name, req_customer, req_business, results FROM solutions WHERE uuid = %s", (uuid,))
+        cur.execute("SELECT uuid, name, req_customer, req_business, runtime, data FROM solutions WHERE uuid = %s", (uuid,))
         solution = cur.fetchone()
         cur.close()
         conn.close()
@@ -52,9 +54,11 @@ async def solution_read_one(uuid: str):
             "name": solution["name"],
             "req_customer": solution["req_customer"],
             "req_business": solution["req_business"],
-            "results": solution["results"] if solution["results"] else []
+            "runtime": solution["runtime"],
+            "data": solution["data"] if solution["data"] else None
         }
     except Exception as e:
+        print(str(e))
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.post("/{solution_space_uuid}", name="Create", response_model=SolutionsR, status_code=status.HTTP_201_CREATED)
@@ -74,11 +78,11 @@ async def solution_create(solution_space_uuid: str, solution: SolutionsC):
         
         cur.execute(
             """
-            INSERT INTO solutions (uuid, name, solution_space, req_customer, req_business)
-            VALUES (%s, %s, %s, %s, %s)
-            RETURNING uuid, name, req_customer, req_business, results
+            INSERT INTO solutions (uuid, name, solution_space, req_customer, req_business, runtime, data)
+            VALUES (%s, %s, %s, %s, %s, %s, %s)
+            RETURNING uuid, name, req_customer, req_business, runtime, data
             """,
-            (new_uuid, solution.name, solution_space_uuid, "", "")  # Initialize with empty inputs
+            (new_uuid, solution.name, solution_space_uuid, "", "", None, None)  # Initialize with empty inputs
         )
         created_solution = cur.fetchone()
         
@@ -91,9 +95,11 @@ async def solution_create(solution_space_uuid: str, solution: SolutionsC):
             "name": created_solution["name"],
             "req_customer": created_solution["req_customer"],
             "req_business": created_solution["req_business"],
-            "results": created_solution["results"] if created_solution["results"] else []
+            "runtime": created_solution["runtime"],
+            "data": created_solution["data"] if created_solution["data"] else None
         }
     except Exception as e:
+        print(str(e))
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.delete("/{uuid}", name="Delete", status_code=status.HTTP_200_OK)
@@ -118,6 +124,7 @@ async def solution_delete(uuid: str):
         
         return None
     except Exception as e:
+        print(str(e))
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.put("/{uuid}", name="Update", response_model=SolutionsR)
@@ -139,7 +146,7 @@ async def solution_update(uuid: str, solution: SolutionsU):
             UPDATE solutions 
             SET name = %s, req_customer = %s, req_business = %s
             WHERE uuid = %s
-            RETURNING uuid, name, req_customer, req_business, results
+            RETURNING uuid, name, req_customer, req_business
             """,
             (solution.name, solution.req_customer, solution.req_business, uuid)
         )
@@ -154,7 +161,8 @@ async def solution_update(uuid: str, solution: SolutionsU):
             "name": updated_solution["name"],
             "req_customer": updated_solution["req_customer"],
             "req_business": updated_solution["req_business"],
-            "results": updated_solution["results"] if updated_solution["results"] else []
+            "runtime": updated_solution["runtime"],
+            "data": updated_solution["data"] if updated_solution["data"] else None
         }
     except Exception as e:
         print(str(e))
@@ -168,7 +176,7 @@ async def solution_display(uuid: str):
         
         # Get the solution and its related solution space
         cur.execute("""
-            SELECT s.uuid, s.name, s.req_customer, s.req_business, s.results,
+            SELECT s.uuid, s.name, s.req_customer, s.req_business, s.runtime, s.data,
                    ss.name as solution_space_name,
                    ss.uuid as solution_space_uuid
             FROM solutions s
@@ -240,7 +248,8 @@ async def solution_display(uuid: str):
             "table": table,
             "req_customer": solution["req_customer"],
             "req_business": solution["req_business"],
-            "results": solution["results"] if solution["results"] else [],
+            "runtime": solution["runtime"],
+            "data": solution["data"] if solution["data"] else None,
             "knowledge": list(all_knowledge)
         }
         

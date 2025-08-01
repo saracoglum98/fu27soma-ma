@@ -1,11 +1,12 @@
-export interface Solution {
-    uuid: string;
-    name: string;
-    req_customer?: string;
-    req_business?: string;
-    results?: string[];
-    knowledge?: string[];
-}
+export type Solution = {
+  uuid: string;
+  name: string;
+  req_customer: string;
+  req_business: string;
+  runtime?: number;
+  data?: Record<string, any>;
+  knowledge?: string[];
+};
 
 export interface SolutionCreate {
     name: string;

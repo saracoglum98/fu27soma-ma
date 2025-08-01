@@ -27,6 +27,7 @@
 - Astrom Meeting - RAG - Instead of Regular Chunking, Parent/Child Chunking [TODO]
 
 ## Before Deployment
+- Deployment - System Prompting in API Response
 - Deployment - Workstation on GPU with Proper Inference Services
 - Deployment - Persistent Storage
 - Fine-tune for running on Ubuntu 24.04 Server

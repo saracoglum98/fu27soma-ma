@@ -33,13 +33,6 @@ CREATE TABLE IF NOT EXISTS solutions (
     name TEXT NOT NULL,
     req_customer TEXT,
     req_business TEXT,
-    results VARCHAR(36)[]
-);
-
-CREATE TABLE IF NOT EXISTS results (
-    uuid UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    solution UUID REFERENCES solutions(uuid),
     runtime INT,
-    num_of_solutions INT,
-    data JSONB NOT NULL
+    data JSONB
 );

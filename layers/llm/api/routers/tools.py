@@ -287,16 +287,17 @@ Please provide a detailed analysis of this solution considering the customer req
                 # If it's not valid JSON, store as a simple string
                 clean_json = json.dumps({"content": cleaned_content}, ensure_ascii=False, separators=(',', ':'))
             
-            # Insert result into database
+            # Update solution in database
             conn = my_db()
             try:
                 with conn.cursor() as cur:
                     cur.execute(
                         """
-                        INSERT INTO results (solution, runtime, num_of_solutions, data)
-                        VALUES (%s, %s, %s, %s)
+                        UPDATE solutions
+                        SET runtime = %s, data = %s::jsonb
+                        WHERE uuid = %s
                         """,
-                        (solution_uuid, runtime, num_of_solutions, clean_json)
+                        (runtime, clean_json, solution_uuid)
                     )
                 conn.commit()
             finally:

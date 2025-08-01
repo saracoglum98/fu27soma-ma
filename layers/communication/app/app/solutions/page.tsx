@@ -23,7 +23,7 @@ import { Solution } from "../types/Solutions";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { solveSolution } from "../services/LLM";
-import { IconPlayerPlay, IconEdit, IconTrash, IconSearch } from "@tabler/icons-react";
+import { IconPlayerPlay, IconEdit, IconTrash, IconSearch, IconEye } from "@tabler/icons-react";
 
 export default function SolutionsPage() {
   const router = useRouter();
@@ -36,19 +36,19 @@ export default function SolutionsPage() {
   const [selectedSolution, setSelectedSolution] = useState<Solution | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
 
-  useEffect(() => {
-    const fetchSolutions = async () => {
-      try {
-        const data = await getAllSolutions();
-        setSolutions(data);
-        setError(null);
-      } catch (err) {
-        setError("Failed to fetch solutions");
-      } finally {
-        setLoading(false);
-      }
-    };
+  const fetchSolutions = async () => {
+    try {
+      const data = await getAllSolutions();
+      setSolutions(data);
+      setError(null);
+    } catch (err) {
+      setError("Failed to fetch solutions");
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchSolutions();
   }, []);
 
@@ -67,6 +67,7 @@ export default function SolutionsPage() {
     try {
       setSolvingLoading(true);
       await solveSolution(selectedSolution.uuid, numSolutions);
+      await fetchSolutions(); // Refresh the solutions list after solving
     } catch (err) {
       setError("Failed to solve solution");
       console.error("Error solving solution:", err);
@@ -75,6 +76,10 @@ export default function SolutionsPage() {
       setNumSolutionsDialogOpen(false);
       setSelectedSolution(null);
     }
+  };
+
+  const handleViewResult = (uuid: string) => {
+    router.push(`/result?uuid=${uuid}`);
   };
 
   const filteredData = solutions.filter((solution) =>
@@ -122,11 +127,16 @@ export default function SolutionsPage() {
                   <Button 
                     variant="outline"
                     size="sm"
-                    onClick={() => handleSolveClick(solution)}
+                    onClick={() => solution.data 
+                      ? handleViewResult(solution.uuid)
+                      : handleSolveClick(solution)
+                    }
                     disabled={solvingLoading && selectedSolution?.uuid === solution.uuid}
                   >
                     {solvingLoading && selectedSolution?.uuid === solution.uuid ? (
                       <div className="animate-spin rounded-full h-4 w-4 border-2 border-b-transparent" />
+                    ) : solution.data ? (
+                      <IconEye className="w-4 h-4" />
                     ) : (
                       <IconPlayerPlay className="w-4 h-4" />
                     )}
