@@ -5,7 +5,7 @@
 
 ## Functions
 - Communication Layer - UI - UI for Solution Display 
-- Communication Layer - Data and API - Remove Knowledge Attachment from Functions?
+- Communication Layer - Data and API - Remove Knowledge Attachment from Functions? [OK]
 - Communication Layer - API - KPIs - Quantitative and Qualitative
 - Communication Layer - UI - KPIs - Quantitative and Qualitative
 - LLM Layer - API - Analyze

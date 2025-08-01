@@ -74,23 +74,3 @@ export const detachOption = async (functionUuid: string, optionUuid: string): Pr
   }
   return response.json();
 };
-
-export const attachKnowledge = async (functionUuid: string, knowledgeUuid: string): Promise<Function> => {
-  const response = await fetch(`${API_URL}/attach/knowledge/${functionUuid}/${knowledgeUuid}`, {
-    method: "PUT",
-  });
-  if (!response.ok) {
-    throw new Error("Failed to attach knowledge");
-  }
-  return response.json();
-};
-
-export const detachKnowledge = async (functionUuid: string, knowledgeUuid: string): Promise<Function> => {
-  const response = await fetch(`${API_URL}/detach/knowledge/${functionUuid}/${knowledgeUuid}`, {
-    method: "PUT",
-  });
-  if (!response.ok) {
-    throw new Error("Failed to detach knowledge");
-  }
-  return response.json();
-};
