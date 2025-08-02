@@ -16,7 +16,7 @@ async def functions_read_all():
     try:
         conn = my_db()
         cur = conn.cursor()
-        cur.execute("SELECT uuid, name, knowledge, options FROM functions")
+        cur.execute("SELECT uuid, name, options FROM functions")
         functions = cur.fetchall()
         cur.close()
         conn.close()
@@ -25,12 +25,12 @@ async def functions_read_all():
             {
                 "uuid": str(option["uuid"]),
                 "name": option["name"],
-                "knowledge": option["knowledge"] if option["knowledge"] else [],
                 "options": option["options"] if option["options"] else []
             }
             for option in functions
         ]
     except Exception as e:
+        print(str(e))
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/{uuid}", name="Read single", response_model=FunctionsR)
@@ -38,7 +38,7 @@ async def function_read_one(uuid: str):
     try:
         conn = my_db()
         cur = conn.cursor()
-        cur.execute("SELECT uuid, name, knowledge, options FROM functions WHERE uuid = %s", (uuid,))
+        cur.execute("SELECT uuid, name, options FROM functions WHERE uuid = %s", (uuid,))
         option = cur.fetchone()
         cur.close()
         conn.close()
@@ -49,10 +49,10 @@ async def function_read_one(uuid: str):
         return {
             "uuid": str(option["uuid"]),
             "name": option["name"],
-            "knowledge": option["knowledge"] if option["knowledge"] else [],
             "options": option["options"] if option["options"] else []
         }
     except Exception as e:
+        print(str(e))
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.put("/{uuid}", name="Update", response_model=FunctionsR)
@@ -74,7 +74,7 @@ async def function_update(uuid: str, option: FunctionsCU):
             UPDATE functions 
             SET name = %s
             WHERE uuid = %s
-            RETURNING uuid, name, knowledge
+            RETURNING uuid, name, options
             """,
             (option.name, uuid)
         )
@@ -87,9 +87,10 @@ async def function_update(uuid: str, option: FunctionsCU):
         return {
             "uuid": str(updated_option["uuid"]),
             "name": updated_option["name"],
-            "knowledge": updated_option["knowledge"] if updated_option["knowledge"] else []
+            "options": updated_option["options"] if updated_option["options"] else []
         }
     except Exception as e:
+        print(str(e))
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.delete("/{uuid}", name="Delete")
@@ -114,6 +115,7 @@ async def function_delete(uuid: str):
         
         return None
     except Exception as e:
+        print(str(e))
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.post("/", name="Create", response_model=FunctionsR)
@@ -128,7 +130,7 @@ async def function_create(option: FunctionsCU):
             """
             INSERT INTO functions (uuid, name)
             VALUES (%s, %s)
-            RETURNING uuid, name, knowledge
+            RETURNING uuid, name, options
             """,
             (new_uuid, option.name)
         )
@@ -141,9 +143,10 @@ async def function_create(option: FunctionsCU):
         return {
             "uuid": str(created_option["uuid"]),
             "name": created_option["name"],
-            "knowledge": created_option["knowledge"] if created_option["knowledge"] else []
+            "options": created_option["options"] if created_option["options"] else []
         }
     except Exception as e:
+        print(str(e))
         raise HTTPException(status_code=500, detail=str(e))
     
 @router.put("/attach/option/{function_uuid}/{option_uuid}", name="Attach Option", response_model=FunctionsR)
@@ -153,7 +156,7 @@ async def function_attach_option(function_uuid: str, option_uuid: str):
         cur = conn.cursor()
         
         # First check if the function exists
-        cur.execute("SELECT uuid, name, knowledge, options FROM functions WHERE uuid = %s", (function_uuid,))
+        cur.execute("SELECT uuid, name, options FROM functions WHERE uuid = %s", (function_uuid,))
         function = cur.fetchone()
         
         if function is None:
@@ -175,7 +178,7 @@ async def function_attach_option(function_uuid: str, option_uuid: str):
                 UPDATE functions 
                 SET options = %s
                 WHERE uuid = %s
-                RETURNING uuid, name, knowledge, options
+                RETURNING uuid, name, options
                 """,
                 (current_options, function_uuid)
             )
@@ -188,7 +191,6 @@ async def function_attach_option(function_uuid: str, option_uuid: str):
             return {
                 "uuid": str(updated_function["uuid"]),
                 "name": updated_function["name"],
-                "knowledge": updated_function["knowledge"] if updated_function["knowledge"] else [],
                 "options": updated_function["options"] if updated_function["options"] else []
             }
         else:
@@ -198,11 +200,11 @@ async def function_attach_option(function_uuid: str, option_uuid: str):
             return {
                 "uuid": str(function["uuid"]),
                 "name": function["name"],
-                "knowledge": function["knowledge"] if function["knowledge"] else [],
                 "options": current_options
             }
             
     except Exception as e:
+        print(str(e))
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.put("/detach/option/{function_uuid}/{option_uuid}", name="Detach Option", response_model=FunctionsR)
@@ -212,7 +214,7 @@ async def function_detach_option(function_uuid: str, option_uuid: str):
         cur = conn.cursor()
         
         # First check if the function exists
-        cur.execute("SELECT uuid, name, knowledge, options FROM functions WHERE uuid = %s", (function_uuid,))
+        cur.execute("SELECT uuid, name, options FROM functions WHERE uuid = %s", (function_uuid,))
         function = cur.fetchone()
         
         if function is None:
@@ -234,7 +236,7 @@ async def function_detach_option(function_uuid: str, option_uuid: str):
                 UPDATE functions 
                 SET options = %s
                 WHERE uuid = %s
-                RETURNING uuid, name, knowledge, options
+                RETURNING uuid, name, options
                 """,
                 (current_options, function_uuid)
             )
@@ -247,7 +249,6 @@ async def function_detach_option(function_uuid: str, option_uuid: str):
             return {
                 "uuid": str(updated_function["uuid"]),
                 "name": updated_function["name"],
-                "knowledge": updated_function["knowledge"] if updated_function["knowledge"] else [],
                 "options": updated_function["options"] if updated_function["options"] else []
             }
         else:
@@ -257,9 +258,9 @@ async def function_detach_option(function_uuid: str, option_uuid: str):
             return {
                 "uuid": str(function["uuid"]),
                 "name": function["name"],
-                "knowledge": function["knowledge"] if function["knowledge"] else [],
                 "options": current_options
             }
             
     except Exception as e:
+        print(str(e))
         raise HTTPException(status_code=500, detail=str(e))

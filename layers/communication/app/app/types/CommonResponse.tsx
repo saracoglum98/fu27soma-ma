@@ -1,3 +1,3 @@
-export type CommonResponse = {
-  data: string;
+export type CommonResponse<T = string> = {
+  data: T;
 };

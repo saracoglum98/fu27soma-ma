@@ -200,7 +200,7 @@ if [ "$1" = "build" ]; then
     
     clear
     toc=$(date +%s)
-    echo -e "⌛️ Build took $(printf "%.2f" $(echo "scale=2; ($toc - $tic) / 60" | bc)) minutes"
+    echo -e "⌛️ Build took $(printf "%d minutes %d seconds" $(( ($toc - $tic) / 60 )) $(( ($toc - $tic) % 60 )))"
     echo -e "🎉 All services are running"
     echo -e "🌐 Access the web app at http://localhost:3000\n"
 fi

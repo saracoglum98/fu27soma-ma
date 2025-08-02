@@ -36,3 +36,11 @@ CREATE TABLE IF NOT EXISTS solutions (
     runtime INT,
     data JSONB
 );
+
+CREATE TYPE kpi_type AS ENUM ('qualitative', 'quantitative');
+
+CREATE TABLE IF NOT EXISTS kpis (
+    uuid UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    type kpi_type NOT NULL,
+    value TEXT NOT NULL
+);

@@ -4,11 +4,12 @@
 - Max File Size for Knowledge Item - 20 MB
 
 ## Functions
-- Communication Layer - UI - UI for Solution Display 
-- Communication Layer - Data and API - Remove Knowledge Attachment from Functions? [OK]
-- Communication Layer - API - KPIs - Quantitative and Qualitative
-- Communication Layer - UI - KPIs - Quantitative and Qualitative
-- LLM Layer - API - Analyze
+- Communication Layer - API - KPIs - Quantitative and Qualitative [STEP1]
+- Communication Layer - UI - KPIs - Quantitative and Qualitative [STEP2]
+- LLM Layer - API - Provide System Prompt in Request [STEP3]
+- LLM Layer - API - Solver - Refine System Prompt and Output Schema [STEP4]
+- Communication Layer - UI - UI for Solution Display [STEP5]
+- LLM Layer - API - Chat Endpoint to Refine [STEP6]
 
 ## Before Demo
 - Demo Data?

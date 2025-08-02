@@ -38,6 +38,18 @@ export default function SolutionSpacesPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const handleDeleteSpace = async (uuid: string) => {
+    try {
+      await SolutionSpacesService.deleteSolutionSpace(uuid);
+      // Refresh the list after deleting
+      await fetchSolutionSpaces();
+      setError(null);
+    } catch (err) {
+      console.error("Failed to delete solution space:", err);
+      setError("Failed to delete solution space");
+    }
+  };
+
   useEffect(() => {
     fetchSolutionSpaces();
   }, []);
@@ -204,7 +216,12 @@ export default function SolutionSpacesPage() {
                     <Button variant="outline" size="sm" onClick={() => router.push(`/solution-space?uuid=${space.uuid}`)}>
                       <IconEdit className="w-4 h-4" />
                     </Button>
-                    <Button variant="outline" size="sm" className="text-red-600 hover:text-red-700">
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="text-red-600 hover:text-red-700"
+                      onClick={() => handleDeleteSpace(space.uuid)}
+                    >
                       <IconTrash className="w-4 h-4" />
                     </Button>
                   </div>

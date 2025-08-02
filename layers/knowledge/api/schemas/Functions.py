@@ -6,7 +6,6 @@ from uuid import UUID
 class FunctionsR(BaseModel):
     uuid: UUID
     name: str
-    knowledge: Optional[List[str]] = []
     options: Optional[List[str]] = []
  
 class FunctionsCU(BaseModel):

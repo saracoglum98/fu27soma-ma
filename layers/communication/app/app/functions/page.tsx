@@ -22,7 +22,7 @@ import {
 import { IconPlus, IconEdit, IconTrash, IconSearch } from "@tabler/icons-react"
 import { useEffect, useState } from "react";
 import { Function } from "@/app/types/Functions";
-import { getAllFunctions, createFunction } from "@/app/services/Functions";
+import { getAllFunctions, createFunction, deleteFunction } from "@/app/services/Functions";
 import { useRouter } from "next/navigation";
 
 export default function FunctionsPage() {
@@ -72,6 +72,17 @@ export default function FunctionsPage() {
 
   const handleEdit = (uuid: string) => {
     router.push(`/function?uuid=${uuid}`);
+  };
+
+  const handleDelete = async (uuid: string) => {
+    try {
+      setError(null);
+      await deleteFunction(uuid);
+      setFunctions(functions.filter(func => func.uuid !== uuid));
+    } catch (err) {
+      setError("Failed to delete function");
+      console.error("Error deleting function:", err);
+    }
   };
 
   if (isLoading) {
@@ -159,6 +170,7 @@ export default function FunctionsPage() {
                     variant="outline"
                     size="sm"
                     className="text-red-600 hover:text-red-700"
+                    onClick={() => handleDelete(item.uuid)}
                   >
                     <IconTrash className="w-4 h-4" />
                   </Button>

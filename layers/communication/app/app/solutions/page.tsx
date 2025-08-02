@@ -18,11 +18,11 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { getAllSolutions } from "../services/Solutions";
-import { Solution } from "../types/Solutions";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { solveSolution } from "../services/LLM";
+import { getAllSolutions, deleteSolution } from "../services/Solutions";
+import { Solution } from "../types/Solutions";
 import { IconPlayerPlay, IconEdit, IconTrash, IconSearch, IconEye } from "@tabler/icons-react";
 
 export default function SolutionsPage() {
@@ -80,6 +80,17 @@ export default function SolutionsPage() {
 
   const handleViewResult = (uuid: string) => {
     router.push(`/result?uuid=${uuid}`);
+  };
+
+  const handleDelete = async (uuid: string) => {
+    try {
+      await deleteSolution(uuid);
+      await fetchSolutions(); // Refresh the list after deletion
+      setError(null);
+    } catch (err) {
+      setError("Failed to delete solution");
+      console.error("Error deleting solution:", err);
+    }
   };
 
   const filteredData = solutions.filter((solution) =>
@@ -152,6 +163,7 @@ export default function SolutionsPage() {
                     variant="outline"
                     size="sm"
                     className="text-red-600 hover:text-red-700"
+                    onClick={() => handleDelete(solution.uuid)}
                   >
                     <IconTrash className="w-4 h-4" />
                   </Button>
