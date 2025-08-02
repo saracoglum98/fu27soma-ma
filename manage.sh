@@ -191,7 +191,7 @@ if [ "$1" = "build" ]; then
     layer_build "knowledge"
     layer_build "llm"
     layer_build "communication"
-    #layer_build "management"
+    layer_build "management"
     init
     
     if [ "$2" = "--seed" ]; then

@@ -12,34 +12,14 @@ services:
     networks:
       - app-network
   management-data:
-    image: adminer:latest
     container_name: management-data
+    image: bitnami/postgresql:latest
     env_file:
       - .env
     ports:
-      - "8080:8080"
-    restart: unless-stopped
+      - "5433:5432"
     networks:
       - app-network
-    configs:
-      - source: adminer-index.php
-        target: /var/www/html/index.php
-
-configs:
-  adminer-index.php:
-    content: |
-      <?php
-        if(!count($$_GET)) {
-          $$_POST['auth'] = [
-            'server' => $$_ENV['ADMINER_DEFAULT_SERVER'],
-            'username' => $$_ENV['ADMINER_DEFAULT_USERNAME'],
-            'password' => $$_ENV['ADMINER_DEFAULT_PASSWORD'],
-            'driver' => $$_ENV['ADMINER_DEFAULT_DRIVER'],
-            'db'    => $$_ENV['ADMINER_DEFAULT_DB'],
-          ];
-        }
-        include './adminer.php';
-      ?>
 
 networks:
   app-network:

@@ -52,7 +52,7 @@ def init_minio():
     minio_client.set_bucket_policy(os.getenv("MINIO_DEFAULT_BUCKET"), json.dumps(policy))
 
 
-def init_postgres():
+def init_postgres_knowledge():
     # Initialize PostgreSQL
     print("Initializating PostgreSQL")
     postgres_conn = psycopg2.connect(
@@ -64,7 +64,28 @@ def init_postgres():
     )
     postgres_cursor = postgres_conn.cursor()
 
-    with open(f'{os.getenv("INIT_DATA_FOLDER")}/{os.getenv("INIT_SCHEMA_FILE")}', "r") as file:
+    with open(f'{os.getenv("INIT_DATA_FOLDER")}/{os.getenv("INIT_DATA_FOLDER_SQL")}/{os.getenv("INIT_KNOWLEDGE_SCHEMA_FILE")}', "r") as file:
+        sql_commands = file.read()
+        postgres_cursor.execute(sql_commands)
+
+    postgres_conn.commit()
+    postgres_cursor.close()
+    postgres_conn.close()
+
+
+def init_postgres_management():
+    # Initialize PostgreSQL
+    print("Initializating PostgreSQL")
+    postgres_conn = psycopg2.connect(
+        host="localhost",
+        port="5433",
+        database=os.getenv("POSTGRES_DB"),
+        user=os.getenv("POSTGRES_USER"),
+        password=os.getenv("POSTGRES_PASSWORD"),
+    )
+    postgres_cursor = postgres_conn.cursor()
+
+    with open(f'{os.getenv("INIT_DATA_FOLDER")}/{os.getenv("INIT_DATA_FOLDER_SQL")}/{os.getenv("INIT_MANAGEMENT_SCHEMA_FILE")}', "r") as file:
         sql_commands = file.read()
         postgres_cursor.execute(sql_commands)
 
@@ -200,7 +221,8 @@ def init_sysml_knowledge():
 if __name__ == "__main__":
     print("Starting initialization...")
     init_minio()
-    init_postgres()
+    init_postgres_knowledge()
+    init_postgres_management()
     init_qdrant()
     init_ollama()
     init_models()
