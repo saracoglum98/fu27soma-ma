@@ -10,6 +10,8 @@
 - LLM Layer - API - Solver - Refine System Prompt and Output Schema [STEP4]
 - Communication Layer - UI - UI for Solution Display [STEP5]
 - LLM Layer - API - Chat Endpoint to Refine [STEP6]
+- SysML Layer - Engine [STEP7]
+- SysML Layer - API - Visualize [STEP8]
 
 ## Before Demo
 - Demo Data?
