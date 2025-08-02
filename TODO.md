@@ -4,19 +4,16 @@
 - Max File Size for Knowledge Item - 20 MB
 
 ## Functions
-- Communication Layer - API - KPIs - Quantitative and Qualitative [STEP1] [OK]
-- Communication Layer - UI - KPIs - Quantitative and Qualitative [STEP2]
-- LLM Layer - API - Provide System Prompt in Request [STEP3]
-- LLM Layer - API - Provide Output JSON Schema in Request [STEP3]
-- Management Layer - DB
-- Management Layer - API
+- Communication Layer - UI - KPIs - Quantitative and Qualitative Add/Remove
+- LLM Layer - API - Provide System Prompt in Request
+- LLM Layer - API - Provide Output JSON Schema in Request
+- LLM Layer - API - Solver - Refine System Prompt and Output Schema
+- Communication Layer - UI - UI for Solution Display
+- LLM Layer - API - Chat Endpoint to Refine
 - SysML Layer - Engine
 - SysML Layer - API
-- LLM Layer - API - Solver - Refine System Prompt and Output Schema [STEP4]
-- Communication Layer - UI - UI for Solution Display [STEP5]
-- LLM Layer - API - Chat Endpoint to Refine [STEP6]
-- SysML Layer - Engine [STEP7]
-- SysML Layer - API - Visualize [STEP8]
+- SysML Layer - API - Visualize
+- Management Layer - Auth
 
 ## Before Demo
 - Demo Data?
