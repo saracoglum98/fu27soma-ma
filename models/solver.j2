@@ -99,37 +99,22 @@ Respond with a structured JSON object containing an array of solutions:
   },
   "solutions": [
     {
-      "solution_id": "unique identifier for this solution (e.g., 1, 2, 3)",
       "executive_summary": {
         "decision_rationale": "overall approach and philosophy used",
         "key_compromises": "major trade-offs made across all decisions",
         "risk_assessment": "potential risks and mitigation strategies",
-        "information_quality": {
-          "known_facts": "percentage of decisions based on explicit information",
-          "assumptions": "list of key assumptions made",
-          "missing_information": "critical information that would improve decision quality"
-        },
-        "iteration_context": {
-          "is_refined": "boolean indicating if this is a refined solution",
-          "parent_solution_id": "ID of the solution this was refined from (if applicable)",
-          "applied_feedback": ["list of user feedback points addressed"],
-          "changes_from_parent": ["list of significant changes from parent solution"]
-        },
         "alignment_score": {
-          "customer_requirements": "percentage alignment (0-100%)",
-          "business_requirements": "percentage alignment (0-100%)",
-          "user_preferences": "percentage alignment with specific user feedback (0-100%)"
+          "customer_requirements": "number (0-100)",
+          "business_requirements": "number (0-100)"
         }
       },
       "reasoning": [
         {
-          "function": "function_name",
-          "selected_option": "chosen_option_name",
+          "function": "name of the function",
+          "option": "selected option for this function",
           "confidence_level": "high|medium|low",
-          "information_source": "known|inferred|assumed|unknown",
-          "assumptions": ["list of specific assumptions made for this decision"],
-          "missing_information": ["list of information that would help improve this decision"],
-          "analysis": "detailed explanation of decision process, why this option was chosen, alternatives considered, and how this decision impacts or is impacted by others"
+          "assumptions": "list of assumptions made for this decision",
+          "analysis": "detailed explanation of the decision process and rationale"
         }
       ]
     }

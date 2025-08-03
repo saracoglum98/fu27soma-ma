@@ -232,20 +232,39 @@ async def solve(solution_uuid: str, num_of_solutions: int):
         }
 
         # Prepare the chat completion request with context and solution data
-        prompt = f"""Here is some relevant context from our knowledge base:
+        # Fetch agent configuration
+        async with httpx.AsyncClient(timeout=10.0) as agent_client:
+            print("Fetching agent configuration for 'expert'")
+            agent_response = await agent_client.get(
+                "http://management-api:10020/agents/ma-solver"
+            )
+            if agent_response.status_code == 404:
+                raise HTTPException(status_code=404, detail="Agent 'expert' not found")
+            agent_config = agent_response.json()
 
-{context}
-
-Based on this context, please analyze the following solution:
-
-{json.dumps(solution_data, indent=2)}
-
-Please provide a detailed analysis of this solution considering the customer requirements, business requirements, and the selected options in the function table."""
+        # Prepare the user prompt with context
+        user_prompt = agent_config["prompt_user"]
+        
+        # Replace placeholders if they exist
+        if "%context%" in user_prompt:
+            user_prompt = user_prompt.replace("%context%", context)
+        if "%solution_data%" in user_prompt:
+            user_prompt = user_prompt.replace("%solution_data%", json.dumps(solution_data, indent=2))
 
         payload = {
             "model": "expert",
-            "messages": [{"role": "user", "content": prompt}],
-            "temperature": 0.7,
+            "messages": [
+                {
+                    "role": "system",
+                    "content": agent_config["prompt_system"]
+                },
+                {"role": "user", "content": user_prompt}
+            ],
+            "response_format": {
+                "type": "json_schema",
+                "json_schema": json.loads(agent_config["output_schema"])
+            },
+            "temperature": agent_config["temperature"],
         }
 
         print(f"Making request to OpenAI-compatible endpoint: {api_endpoint}")

@@ -76,6 +76,7 @@ Based on this context, please analyze the following option: %option%',
 ## Input Structure
 You will receive structured data in the following JSON format:
 
+```json
 {
   "solution_space": "name of the solution space",
   "num_solutions": "number of different solutions to generate (integer >= 1)",
@@ -87,6 +88,7 @@ You will receive structured data in the following JSON format:
   "req_customer": "string containing customer requirements and needs",
   "req_business": "string containing business requirements and constraints"
 }
+```
 
 Additionally, you have access to a **Knowledge Base** through RAG (Retrieval-Augmented Generation) containing domain-specific information, best practices, technical constraints, and historical data relevant to the functions and options.
 
@@ -169,37 +171,22 @@ Respond with a structured JSON object containing an array of solutions:
   },
   "solutions": [
     {
-      "solution_id": "unique identifier for this solution (e.g., 1, 2, 3)",
       "executive_summary": {
         "decision_rationale": "overall approach and philosophy used",
         "key_compromises": "major trade-offs made across all decisions",
         "risk_assessment": "potential risks and mitigation strategies",
-        "information_quality": {
-          "known_facts": "percentage of decisions based on explicit information",
-          "assumptions": "list of key assumptions made",
-          "missing_information": "critical information that would improve decision quality"
-        },
-        "iteration_context": {
-          "is_refined": "boolean indicating if this is a refined solution",
-          "parent_solution_id": "ID of the solution this was refined from (if applicable)",
-          "applied_feedback": ["list of user feedback points addressed"],
-          "changes_from_parent": ["list of significant changes from parent solution"]
-        },
         "alignment_score": {
-          "customer_requirements": "percentage alignment (0-100%)",
-          "business_requirements": "percentage alignment (0-100%)",
-          "user_preferences": "percentage alignment with specific user feedback (0-100%)"
+          "customer_requirements": "number (0-100)",
+          "business_requirements": "number (0-100)"
         }
       },
       "reasoning": [
         {
-          "function": "function_name",
-          "selected_option": "chosen_option_name",
+          "function": "name of the function",
+          "option": "selected option for this function",
           "confidence_level": "high|medium|low",
-          "information_source": "known|inferred|assumed|unknown",
-          "assumptions": ["list of specific assumptions made for this decision"],
-          "missing_information": ["list of information that would help improve this decision"],
-          "analysis": "detailed explanation of decision process, why this option was chosen, alternatives considered, and how this decision impacts or is impacted by others"
+          "assumptions": "list of assumptions made for this decision",
+          "analysis": "detailed explanation of the decision process and rationale"
         }
       ]
     }
@@ -268,275 +255,128 @@ Based on this context, please analyze the following solution:
 
 Please provide a detailed analysis of this solution considering the customer requirements, business requirements, and the selected options in the function table.',
         '{
-  "$schema": "http://json-schema.org/draft-07/schema#",
-  "title": "Solution Space",
-  "description": "Schema for representing multiple solutions with detailed analysis and comparison",
-  "type": "object",
-  "required": [
-    "meta",
-    "solutions",
-    "comparison"
-  ],
-  "properties": {
-    "meta": {
-      "type": "object",
-      "description": "Metadata about the solution space",
-      "required": [
-        "num_solutions_requested",
-        "num_solutions_generated",
-        "solution_space"
-      ],
-      "properties": {
-        "num_solutions_requested": {
-          "type": "integer",
-          "minimum": 1,
-          "description": "Number of solutions requested"
-        },
-        "num_solutions_generated": {
-          "type": "integer",
-          "minimum": 0,
-          "description": "Number of solutions actually generated"
-        },
-        "solution_space": {
-          "type": "string",
-          "description": "Name of the solution space"
-        }
-      },
-      "additionalProperties": false
-    },
-    "solutions": {
-      "type": "array",
-      "description": "Array of solution objects",
-      "minItems": 0,
-      "items": {
+  "name": "report_response",
+  "strict": "true",
+  "schema": {
+    "type": "object",
+    "properties": {
+      "meta": {
         "type": "object",
-        "required": [
-          "solution_id",
-          "executive_summary",
-          "reasoning"
-        ],
         "properties": {
-          "solution_id": {
-            "type": [
-              "string",
-              "integer"
-            ],
-            "description": "Unique identifier for this solution"
+          "num_solutions_requested": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Number of solutions requested"
           },
-          "executive_summary": {
-            "type": "object",
-            "description": "High-level summary of the solution",
-            "required": [
-              "decision_rationale",
-              "key_compromises",
-              "risk_assessment",
-              "information_quality",
-              "iteration_context",
-              "alignment_score"
-            ],
-            "properties": {
-              "decision_rationale": {
-                "type": "string",
-                "description": "Overall approach and philosophy used"
-              },
-              "key_compromises": {
-                "type": "string",
-                "description": "Major trade-offs made across all decisions"
-              },
-              "risk_assessment": {
-                "type": "string",
-                "description": "Potential risks and mitigation strategies"
-              },
-              "information_quality": {
-                "type": "object",
-                "required": [
-                  "known_facts",
-                  "assumptions",
-                  "missing_information"
-                ],
-                "properties": {
-                  "known_facts": {
-                    "type": "string",
-                    "description": "Percentage of decisions based on explicit information"
-                  },
-                  "assumptions": {
-                    "type": "array",
-                    "items": {
-                      "type": "string"
-                    },
-                    "description": "List of key assumptions made"
-                  },
-                  "missing_information": {
-                    "type": "string",
-                    "description": "Critical information that would improve decision quality"
-                  }
-                },
-                "additionalProperties": false
-              },
-              "iteration_context": {
-                "type": "object",
-                "required": [
-                  "is_refined",
-                  "parent_solution_id",
-                  "applied_feedback",
-                  "changes_from_parent"
-                ],
-                "properties": {
-                  "is_refined": {
-                    "type": "boolean",
-                    "description": "Boolean indicating if this is a refined solution"
-                  },
-                  "parent_solution_id": {
-                    "type": [
-                      "string",
-                      "integer",
-                      "null"
-                    ],
-                    "description": "ID of the solution this was refined from (if applicable)"
-                  },
-                  "applied_feedback": {
-                    "type": "array",
-                    "items": {
-                      "type": "string"
-                    },
-                    "description": "List of user feedback points addressed"
-                  },
-                  "changes_from_parent": {
-                    "type": "array",
-                    "items": {
-                      "type": "string"
-                    },
-                    "description": "List of significant changes from parent solution"
-                  }
-                },
-                "additionalProperties": false
-              },
-              "alignment_score": {
-                "type": "object",
-                "required": [
-                  "customer_requirements",
-                  "business_requirements",
-                  "user_preferences"
-                ],
-                "properties": {
-                  "customer_requirements": {
-                    "type": "number",
-                    "minimum": 0,
-                    "maximum": 100,
-                    "description": "Percentage alignment with customer requirements (0-100%)"
-                  },
-                  "business_requirements": {
-                    "type": "number",
-                    "minimum": 0,
-                    "maximum": 100,
-                    "description": "Percentage alignment with business requirements (0-100%)"
-                  },
-                  "user_preferences": {
-                    "type": "number",
-                    "minimum": 0,
-                    "maximum": 100,
-                    "description": "Percentage alignment with specific user feedback (0-100%)"
-                  }
-                },
-                "additionalProperties": false
-              }
-            },
-            "additionalProperties": false
+          "num_solutions_generated": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Number of solutions actually generated"
           },
-          "reasoning": {
-            "type": "array",
-            "description": "Array of reasoning objects for each function/decision",
-            "minItems": 1,
-            "items": {
-              "type": "object",
-              "required": [
-                "function",
-                "selected_option",
-                "confidence_level",
-                "information_source",
-                "assumptions",
-                "missing_information",
-                "analysis"
-              ],
-              "properties": {
-                "function": {
-                  "type": "string",
-                  "description": "Function name"
-                },
-                "selected_option": {
-                  "type": "string",
-                  "description": "Chosen option name"
-                },
-                "confidence_level": {
-                  "type": "string",
-                  "enum": [
-                    "high",
-                    "medium",
-                    "low"
-                  ],
-                  "description": "Confidence level in the decision"
-                },
-                "information_source": {
-                  "type": "string",
-                  "enum": [
-                    "known",
-                    "inferred",
-                    "assumed",
-                    "unknown"
-                  ],
-                  "description": "Source of information used for the decision"
-                },
-                "assumptions": {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  },
-                  "description": "List of specific assumptions made for this decision"
-                },
-                "missing_information": {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  },
-                  "description": "List of information that would help improve this decision"
-                },
-                "analysis": {
-                  "type": "string",
-                  "description": "Detailed explanation of decision process, why this option was chosen, alternatives considered, and how this decision impacts or is impacted by others"
-                }
-              },
-              "additionalProperties": false
-            }
+          "solution_space": {
+            "type": "string",
+            "description": "Name of the solution space"
           }
         },
-        "additionalProperties": false
+        "required": ["num_solutions_requested", "num_solutions_generated", "solution_space"]
+      },
+      "comparison": {
+        "type": "object",
+        "properties": {
+          "key_differences": {
+            "type": "string",
+            "description": "Summary of main differences between solutions"
+          },
+          "trade_offs": {
+            "type": "string",
+            "description": "Analysis of major trade-offs between solutions"
+          },
+          "recommendations": {
+            "type": "string",
+            "description": "Guidance on which solution might be best for different scenarios"
+          }
+        },
+        "required": ["key_differences", "trade_offs", "recommendations"]
+      },
+      "solutions": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "executive_summary": {
+              "type": "object",
+              "properties": {
+                "decision_rationale": {
+                  "type": "string",
+                  "description": "Overall approach and philosophy used"
+                },
+                "key_compromises": {
+                  "type": "string",
+                  "description": "Major trade-offs made across all decisions"
+                },
+                "risk_assessment": {
+                  "type": "string",
+                  "description": "Potential risks and mitigation strategies"
+                },
+                "alignment_score": {
+                  "type": "object",
+                  "properties": {
+                    "customer_requirements": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 100,
+                      "description": "Percentage alignment with customer requirements"
+                    },
+                    "business_requirements": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 100,
+                      "description": "Percentage alignment with business requirements"
+                    }
+                  },
+                  "required": ["customer_requirements", "business_requirements"]
+                }
+              },
+              "required": ["decision_rationale", "key_compromises", "risk_assessment", "alignment_score"]
+            },
+            "reasoning": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "function": {
+                    "type": "string",
+                    "description": "Name of the function"
+                  },
+                  "option": {
+                    "type": "string",
+                    "description": "Selected option for this function"
+                  },
+                  "confidence_level": {
+                    "type": "string",
+                    "enum": ["high", "medium", "low"],
+                    "description": "Confidence level in the decision"
+                  },
+                  "assumptions": {
+                    "type": "string",
+                    "description": "List of assumptions made for this decision"
+                  },
+                  "analysis": {
+                    "type": "string",
+                    "description": "Detailed explanation of the decision process and rationale"
+                  }
+                },
+                "required": ["function", "option", "confidence_level", "assumptions", "analysis"]
+              },
+              "minItems": 1
+            }
+          },
+          "required": ["executive_summary", "reasoning"]
+        },
+        "minItems": 1
       }
     },
-    "comparison": {
-      "type": "object",
-      "description": "Comparison analysis between solutions",
-      "required": [
-        "key_differences",
-        "trade_offs",
-        "recommendations"
-      ],
-      "properties": {
-        "key_differences": {
-          "type": "string",
-          "description": "Summary of main differences between solutions"
-        },
-        "trade_offs": {
-          "type": "string",
-          "description": "Analysis of major trade-offs between solutions"
-        },
-        "recommendations": {
-          "type": "string",
-          "description": "Guidance on which solution might be best for different scenarios"
-        }
-      },
-      "additionalProperties": false
-    }
-  },
-  "additionalProperties": false
+    "required": ["comparison", "solutions"]
+  }
 }'
     );

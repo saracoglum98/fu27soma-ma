@@ -3,20 +3,22 @@
 ## Insights
 - Max File Size for Knowledge Item - 20 MB
 
-## Functions
-- LLM Layer - API - Provide System Prompt in Request
-- LLM Layer - API - Provide Output JSON Schema in Request
-- LLM Layer - API - Solver - Refine System Prompt and Output Schema
+## Immediate
 - Communication Layer - UI - UI for Solution Display
-- Infrastructure - manage.sh - Have a list of services
-- Infrastructure - init.sh - for Ubuntu 24.04
-- Infrastructure - Convert to Ubuntu
 - LLM Layer - API - Chat Endpoint to Refine
 - Communication Layer - UI - Agents
 - SysML Layer - Engine
 - SysML Layer - API
 - SysML Layer - API - Visualize
 - Management Layer - Auth
+
+## Secondary
+- LLM Layer - API - Provide System Prompt in Request
+- LLM Layer - API - Provide Output JSON Schema in Request
+- LLM Layer - API - Solver - Refine System Prompt and Output Schema
+- Infrastructure - manage.sh - Have a list of services
+- Infrastructure - init.sh - for Ubuntu 24.04
+- Infrastructure - Convert to Ubuntu
 
 ## Before Demo
 - Demo Data?

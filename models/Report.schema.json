@@ -1,0 +1,123 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Report Schema",
+  "type": "object",
+  "required": ["comparison", "solutions"],
+  "properties": {
+    "meta": {
+      "type": "object",
+      "required": ["num_solutions_requested", "num_solutions_generated", "solution_space"],
+      "properties": {
+        "num_solutions_requested": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Number of solutions requested"
+        },
+        "num_solutions_generated": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Number of solutions actually generated"
+        },
+        "solution_space": {
+          "type": "string",
+          "description": "Name of the solution space"
+        }
+      }
+    },
+    "comparison": {
+      "type": "object",
+      "required": ["key_differences", "trade_offs", "recommendations"],
+      "properties": {
+        "key_differences": {
+          "type": "string",
+          "description": "Summary of main differences between solutions"
+        },
+        "trade_offs": {
+          "type": "string",
+          "description": "Analysis of major trade-offs between solutions"
+        },
+        "recommendations": {
+          "type": "string",
+          "description": "Guidance on which solution might be best for different scenarios"
+        }
+      }
+    },
+    "solutions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["executive_summary", "reasoning"],
+        "properties": {
+          "executive_summary": {
+            "type": "object",
+            "required": ["decision_rationale", "key_compromises", "risk_assessment", "alignment_score"],
+            "properties": {
+              "decision_rationale": {
+                "type": "string",
+                "description": "Overall approach and philosophy used"
+              },
+              "key_compromises": {
+                "type": "string",
+                "description": "Major trade-offs made across all decisions"
+              },
+              "risk_assessment": {
+                "type": "string",
+                "description": "Potential risks and mitigation strategies"
+              },
+              "alignment_score": {
+                "type": "object",
+                "required": ["customer_requirements", "business_requirements"],
+                "properties": {
+                  "customer_requirements": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 100,
+                    "description": "Percentage alignment with customer requirements"
+                  },
+                  "business_requirements": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 100,
+                    "description": "Percentage alignment with business requirements"
+                  }
+                }
+              }
+            }
+          },
+          "reasoning": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["function", "option", "confidence_level", "assumptions", "analysis"],
+              "properties": {
+                "function": {
+                  "type": "string",
+                  "description": "Name of the function"
+                },
+                "option": {
+                  "type": "string",
+                  "description": "Selected option for this function"
+                },
+                "confidence_level": {
+                  "type": "string",
+                  "enum": ["high", "medium", "low"],
+                  "description": "Confidence level in the decision"
+                },
+                "assumptions": {
+                  "type": "string",
+                  "description": "List of assumptions made for this decision"
+                },
+                "analysis": {
+                  "type": "string",
+                  "description": "Detailed explanation of the decision process and rationale"
+                }
+              }
+            },
+            "minItems": 1
+          }
+        }
+      },
+      "minItems": 1
+    }
+  }
+}
