@@ -1,5 +1,6 @@
 "use client";
 
+import { Suspense } from "react";
 import { useEffect, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -19,7 +20,7 @@ import {
 import { Solution, SolutionDisplayResponse } from "@/app/types/Solutions";
 import { getSolution, updateSolution, displaySolution } from "@/app/services/Solutions";
 
-export default function SolutionPage() {
+function SolutionContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const uuid = searchParams.get("uuid");
@@ -228,5 +229,13 @@ export default function SolutionPage() {
         </Tabs>
       </div>
     </div>
+  );
+}
+
+export default function SolutionPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <SolutionContent />
+    </Suspense>
   );
 }

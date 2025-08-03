@@ -1,11 +1,11 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Solution } from '../types/Solutions';
 import { getSolution } from '../services/Solutions';
 
-export default function ResultPage() {
+function ResultContent() {
   const searchParams = useSearchParams();
   const uuid = searchParams.get('uuid');
   const [solution, setSolution] = useState<Solution | null>(null);
@@ -59,5 +59,13 @@ export default function ResultPage() {
         </pre>
       </div>
     </div>
+  );
+}
+
+export default function ResultPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <ResultContent />
+    </Suspense>
   );
 }

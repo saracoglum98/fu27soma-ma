@@ -32,6 +32,7 @@ app.include_router(SolutionSpaces.router)
 app.include_router(Solutions.router)
 app.include_router(Views.router)
 app.include_router(KPIs.router)
+
 @app.get("/", include_in_schema=False)
 async def root():
     return 'OK'

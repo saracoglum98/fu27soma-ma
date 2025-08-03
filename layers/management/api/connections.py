@@ -10,7 +10,7 @@ load_dotenv()
 def my_db():
     try:
         conn = psycopg2.connect(
-            host="knowledge-relational",
+            host="management-data",
             database=os.getenv("POSTGRES_DB"),
             user=os.getenv("POSTGRES_USER"),
             password=os.getenv("POSTGRES_PASSWORD"),

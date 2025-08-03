@@ -1,7 +1,7 @@
 from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
-from routers import root
+from routers import agents
 from dotenv import load_dotenv
 import os
 
@@ -24,11 +24,12 @@ app.add_middleware(
 )
 
 # Include routers
-app.include_router(root.router)
+app.include_router(agents.router)
 
-@app.get("/")
+@app.get("/", include_in_schema=False)
 async def root():
-    return {"status": "OK", "message": "Root endpoint"}
+    return 'OK'
+
 
 @app.get("/docs", include_in_schema=False)
 async def api_documentation(request: Request):

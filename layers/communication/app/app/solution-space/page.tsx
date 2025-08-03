@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -29,7 +29,7 @@ import { getSolutionSpace, updateSolutionSpace, attachFunction, detachFunction }
 import { getAllFunctions, getFunction } from "@/app/services/Functions";
 import { cn } from "@/lib/utils";
 
-export default function SolutionSpacePage() {
+function SolutionSpaceContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const uuid = searchParams.get("uuid");
@@ -248,5 +248,13 @@ export default function SolutionSpacePage() {
         </Table>
       </div>
     </div>
+  );
+}
+
+export default function SolutionSpacePage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <SolutionSpaceContent />
+    </Suspense>
   );
 }

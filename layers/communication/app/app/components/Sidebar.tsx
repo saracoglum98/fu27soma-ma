@@ -14,8 +14,32 @@ const navigation = [
   { name: 'Solutions', href: '/solutions', icon: <IconReportAnalytics size={20} />},
 ];
 
+// Bottom navigation items
+const bottomNavigation = [
+  { name: 'Agents', href: '/agents', icon: <IconSettings size={20} /> },
+];
+
 export default function Sidebar() {
   const pathname = usePathname();
+
+  const NavLink = ({ item }: { item: typeof navigation[0] }) => (
+    <div>
+      <Link
+        href={item.href}
+        className={`flex items-center px-4 py-2 text-sm rounded-lg transition-colors ${
+          pathname === item.href
+            ? 'bg-gray-800 text-white'
+            : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+        }`}
+      >
+        <span className="mr-3">{item.icon}</span>
+        {item.name}
+      </Link>
+      {item.divider && (
+        <div className="my-2 mx-3 border-t border-gray-700" />
+      )}
+    </div>
+  );
 
   return (
     <div className="flex h-full w-64 flex-col bg-gray-900 text-white">
@@ -23,28 +47,15 @@ export default function Sidebar() {
         <h1 className="text-xl font-bold">{process.env.NEXT_PUBLIC_APP_NAME}</h1>
       </div>
       <nav className="flex-1 space-y-0 px-2 py-4">
-        {navigation.map((item, index) => {
-          const isActive = pathname === item.href;
-          return (
-            <div key={item.name}>
-              <Link
-                href={item.href}
-                className={`flex items-center px-4 py-2 text-sm rounded-lg transition-colors ${
-                  isActive
-                    ? 'bg-gray-800 text-white'
-                    : 'text-gray-300 hover:bg-gray-800 hover:text-white'
-                }`}
-              >
-                <span className="mr-3">{item.icon}</span>
-                {item.name}
-              </Link>
-              {item.divider && (
-                <div className="my-2 mx-3 border-t border-gray-700" />
-              )}
-            </div>
-          );
-        })}
+        {navigation.map((item) => (
+          <NavLink key={item.name} item={item} />
+        ))}
       </nav>
+      <div className="px-2 py-4 border-t border-gray-700">
+        {bottomNavigation.map((item) => (
+          <NavLink key={item.name} item={item} />
+        ))}
+      </div>
     </div>
   );
 } 

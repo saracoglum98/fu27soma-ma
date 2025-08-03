@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -33,6 +33,14 @@ import { getOption } from "@/app/services/Options";
 import { analyzeSysML } from "@/app/services/LLM";
 
 export default function FunctionPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <FunctionContent />
+    </Suspense>
+  );
+}
+
+function FunctionContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const uuid = searchParams.get("uuid");

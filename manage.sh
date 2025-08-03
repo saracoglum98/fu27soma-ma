@@ -181,10 +181,13 @@ if [ "$1" = "build" ]; then
     echo -e "🪜  Preparing to build\n"
     eval "service_destroy \"communication-app\" $redirect"
     eval "service_destroy \"llm-inference\" $redirect"
+    eval "service_destroy \"llm-api\" $redirect"
     eval "service_destroy \"knowledge-relational\" $redirect"
     eval "service_destroy \"knowledge-object\" $redirect"
     eval "service_destroy \"knowledge-vector\" $redirect"
+    eval "service_destroy \"knowledge-api\" $redirect"
     eval "service_destroy \"management-api\" $redirect"
+    eval "service_destroy \"management-data\" $redirect"
     
     create_network
     env_create
@@ -214,6 +217,7 @@ if [ "$1" = "start" ]; then
     service_start "knowledge-object"
     service_start "knowledge-vector"
     service_start "management-api"
+    service_start "management-data"
     echo -e "\n🎉 All services started\n"
 fi
 
@@ -226,6 +230,7 @@ if [ "$1" = "stop" ]; then
     service_stop "knowledge-object"
     service_stop "knowledge-vector"
     service_stop "management-api"
+    service_stop "management-data"
     echo -e "\n🎉 All services stopped\n"
 fi
 
@@ -238,6 +243,7 @@ if [ "$1" = "restart" ]; then
     service_restart "knowledge-object"
     service_restart "knowledge-vector"
     service_restart "management-api"
+    service_restart "management-data"
     echo -e "\n🎉 All services restarted\n"
 fi
 
@@ -250,6 +256,7 @@ if [ "$1" = "destroy" ]; then
     service_destroy "knowledge-object"
     service_destroy "knowledge-vector"
     service_destroy "management-api"
+    service_destroy "management-data"
     echo -e "\n🎉 All services destroyed\n"
 fi
 
