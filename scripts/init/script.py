@@ -124,34 +124,63 @@ def init_ollama():
         if model:
             ollama_client.pull(model)
 
-def init_models():
-    # Initialize models
-    print("Initializating Models")
-    ollama_client = ollama.Client(
-        host="http://localhost:11434"  # Default Ollama API endpoint
-    )
-    
-    # Create solver model from template
-    print("Creating solver model from template...")
-    script_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    system_prompt_path_solver = os.path.join(script_dir, "..", "models", "solver.j2")
-    system_prompt_path_expert = os.path.join(script_dir, "..", "models", "expert.j2")
-    
+def init_agents(model_name):
+    print(f"Initializing agent for model: {model_name}")
     try:
-        with open(system_prompt_path_solver, 'r') as f:
-            system_prompt_content_solver = f.read()
-            
-        with open(system_prompt_path_expert, 'r') as f:
-            system_prompt_content_expert = f.read()
-            
-
-        ollama.create(model='solver', from_='qwen3:8b', system=system_prompt_content_solver)
-        print("Successfully created solver model")
-        ollama.create(model='expert', from_='qwen3:8b', system=system_prompt_content_expert)
-        print("Successfully created expert model")
+        # Construct paths to model files
+        model_dir = os.path.join("../../models", model_name)
+        system_path = os.path.join(model_dir, "system.j2")
+        user_path = os.path.join(model_dir, "user.j2")
+        schema_path = os.path.join(model_dir, "schema.json")
         
+        # Read system template
+        with open(system_path, "r") as file:
+            prompt_system = file.read()
+            
+        # Read user template
+        with open(user_path, "r") as file:
+            prompt_user = file.read()
+            
+        # Read schema
+        with open(schema_path, "r") as file:
+            output_schema = json.load(file)
+            
+        # Connect to management database
+        postgres_conn = psycopg2.connect(
+            host="localhost",
+            port="5433",
+            database=os.getenv("POSTGRES_DB"),
+            user=os.getenv("POSTGRES_USER"),
+            password=os.getenv("POSTGRES_PASSWORD"),
+        )
+        postgres_cursor = postgres_conn.cursor()
+        
+        # Insert agent into database
+        postgres_cursor.execute(
+            """
+            INSERT INTO agents (name, model, temperature, prompt_system, prompt_user, output_schema)
+            VALUES (%s, %s, %s, %s, %s, %s)
+            """,
+            (
+                model_name,  # name
+                'grok-3-reasoning-gemma3-12b-distilled-hf',
+                0.7,  # temperature
+                prompt_system,  # prompt_system
+                prompt_user,  # prompt_user
+                json.dumps(output_schema)  # output_schema as JSON string
+            )
+        )
+        
+        postgres_conn.commit()
+        postgres_cursor.close()
+        postgres_conn.close()
+        
+        print(f"Successfully initialized agent: {model_name}")
+            
     except Exception as e:
-        print(f"Error creating solver model: {e}")
+        print(f"Error initializing agent for model {model_name}: {str(e)}")
+        traceback.print_exc()
+        return None
 
 def init_sysml_knowledge():
     print("Initializing SysML Knowledge Base")
@@ -224,6 +253,8 @@ if __name__ == "__main__":
     init_postgres_knowledge()
     init_postgres_management()
     init_qdrant()
-    #init_ollama()
-    #init_models()
-    #init_sysml_knowledge()
+    init_ollama()
+    init_agents('sysml-expert')
+    init_agents('ma-solver')
+    init_agents('kpi-analyst')
+    init_sysml_knowledge()
