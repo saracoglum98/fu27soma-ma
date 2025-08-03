@@ -33,8 +33,9 @@ CREATE TABLE IF NOT EXISTS solutions (
     name TEXT NOT NULL,
     req_customer TEXT,
     req_business TEXT,
-    runtime INT,
-    data JSONB
+    result_initial JSONB,
+    result_final JSONB,
+    sysml JSONB
 );
 
 CREATE TYPE kpi_type AS ENUM ('qualitative', 'quantitative');

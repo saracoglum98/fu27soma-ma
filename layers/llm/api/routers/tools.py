@@ -57,26 +57,26 @@ async def convert(file: UploadFile):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.post("/sysml/{option_uuid}", name="SysML", response_model=CommonResponse)
-async def sysml(option_uuid: str):
+@router.post("/sysml-expert/{solution_uuid}", name="SysML Expert", response_model=CommonResponse)
+async def sysml_expert(solution_uuid: str):
     try:
         # Get Qdrant client
         qdrant_client = my_qdrant()
 
-        # Fetch option details from the knowledge API
+        # Fetch solution details from the knowledge API
         async with httpx.AsyncClient(timeout=10.0) as client:
-            print(f"Fetching option details for UUID: {option_uuid}")
+            print(f"Fetching solution details for UUID: {solution_uuid}")
             response = await client.get(
-                f"http://knowledge-api:10000/options/{option_uuid}"
+                f"http://knowledge-api:10000/solutions/{solution_uuid}/display"
             )
             if response.status_code == 404:
-                raise HTTPException(status_code=404, detail="Option not found")
-            option = response.json()
+                raise HTTPException(status_code=404, detail="Solution not found")
+            solution = response.json()
 
-            # Get document UUIDs from option.knowledge
-            document_uuids = option.get("knowledge", [])
+            # Get document UUIDs from solution.knowledge
+            document_uuids = solution.get("knowledge", [])
             if not document_uuids:
-                print("Warning: No document UUIDs found in option.knowledge")
+                print("Warning: No document UUIDs found in solution.knowledge")
 
         # Fetch relevant documents from Qdrant
         context_documents = []
@@ -125,7 +125,7 @@ async def sysml(option_uuid: str):
 
         # Combine all context documents
         context = "\n\n---\n\n".join(context_documents)
-
+        print('here')
         # OpenAI-compatible endpoint configuration
         api_endpoint = "http://host.docker.internal:1234/v1/chat/completions"
         headers = {
@@ -133,17 +133,58 @@ async def sysml(option_uuid: str):
             "Authorization": "Bearer dummy-token",
         }
 
-        # Prepare the chat completion request with context
-        prompt = f"""Here is some relevant context from our knowledge base:
+        # Prepare solution data for LLM
+        # Fetch result_final from database
+        conn = my_db()
+        try:
+            with conn.cursor() as cur:
+                cur.execute(
+                    """
+                    SELECT result_final
+                    FROM solutions
+                    WHERE uuid = %s
+                    """,
+                    (solution_uuid,)
+                )
+                result = cur.fetchone()
+                print(result['result_final'])
+                result_data = result['result_final'] if result is not None else {}
+        finally:
+            conn.close()
 
-{context}
+        # Fetch agent configuration
+        async with httpx.AsyncClient(timeout=10.0) as agent_client:
+            print("Fetching agent configuration for 'sysml-expert'")
+            agent_response = await agent_client.get(
+                "http://management-api:10020/agents/sysml-expert"
+            )
+            if agent_response.status_code == 404:
+                raise HTTPException(status_code=404, detail="Agent 'sysml-expert' not found")
+            agent_config = agent_response.json()
 
-Based on this context, please analyze the following option: {option["name"]}"""
+        # Prepare the user prompt with context
+        user_prompt = agent_config["prompt_user"]
+        
+        # Replace placeholders if they exist
+        if "%context%" in user_prompt:
+            user_prompt = user_prompt.replace("%context%", context)
+        if "%result_data%" in user_prompt:
+            user_prompt = user_prompt.replace("%result_data%", json.dumps(result_data, indent=2))
 
         payload = {
             "model": "expert",
-            "messages": [{"role": "user", "content": prompt}],
-            "temperature": 0.7,
+            "messages": [
+                {
+                    "role": "system",
+                    "content": agent_config["prompt_system"]
+                },
+                {"role": "user", "content": user_prompt}
+            ],
+            "response_format": {
+                "type": "json_schema",
+                "json_schema": json.loads(agent_config["output_schema"])
+            },
+            "temperature": agent_config["temperature"],
         }
 
         print(f"Making request to OpenAI-compatible endpoint: {api_endpoint}")
@@ -165,7 +206,38 @@ Based on this context, please analyze the following option: {option["name"]}"""
             llm_data = llm_response.json()
             content = llm_data["choices"][0]["message"]["content"]
             cleaned_content = clean_llm_response(content)
-            return {"data": cleaned_content}
+            
+            # Clean and parse JSON content
+            try:
+                # First try to parse it as JSON
+                if isinstance(cleaned_content, str):
+                    content_json = json.loads(cleaned_content)
+                else:
+                    content_json = cleaned_content
+                
+                # Convert to a clean JSON string without escapes
+                clean_json = json.dumps(content_json, ensure_ascii=False, separators=(',', ':'))
+            except json.JSONDecodeError:
+                # If it's not valid JSON, store as a simple string
+                clean_json = json.dumps({"content": cleaned_content}, ensure_ascii=False, separators=(',', ':'))
+            
+            # Update solution in database
+            conn = my_db()
+            try:
+                with conn.cursor() as cur:
+                    cur.execute(
+                        """
+                        UPDATE solutions
+                        SET sysml = %s::jsonb
+                        WHERE uuid = %s
+                        """,
+                        (clean_json, solution_uuid)
+                    )
+                conn.commit()
+            finally:
+                conn.close()
+            
+            return {"data": clean_json}
 
     except Exception as e:
         print(f"Error in sysml endpoint: {str(e)}")
@@ -173,8 +245,8 @@ Based on this context, please analyze the following option: {option["name"]}"""
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.post("/solve/{solution_uuid}/{num_of_solutions}", name="Solve", response_model=CommonResponse)
-async def solve(solution_uuid: str, num_of_solutions: int):
+@router.post("/ma-solver/{solution_uuid}/{num_of_solutions}", name="ma-solver", response_model=CommonResponse)
+async def ma_solver(solution_uuid: str, num_of_solutions: int):
     try:
         # Get Qdrant client
         qdrant_client = my_qdrant()
@@ -188,6 +260,8 @@ async def solve(solution_uuid: str, num_of_solutions: int):
             if response.status_code == 404:
                 raise HTTPException(status_code=404, detail="Solution not found")
             solution = response.json()
+            
+            print(solution)
 
             # Get document UUIDs from solution.knowledge
             document_uuids = solution.get("knowledge", [])
@@ -270,8 +344,6 @@ async def solve(solution_uuid: str, num_of_solutions: int):
         print(f"Making request to OpenAI-compatible endpoint: {api_endpoint}")
         print(f"Payload: {json.dumps(payload, indent=2)}")
 
-        start_time = asyncio.get_event_loop().time()
-
         async with httpx.AsyncClient(timeout=int(os.getenv("MODEL_TIMEOUT"))) as llm_client:
             llm_response = await llm_client.post(
                 api_endpoint, json=payload, headers=headers
@@ -288,9 +360,6 @@ async def solve(solution_uuid: str, num_of_solutions: int):
             llm_data = llm_response.json()
             content = llm_data["choices"][0]["message"]["content"]
             cleaned_content = clean_llm_response(content)
-            
-            # Calculate runtime in seconds
-            runtime = int(asyncio.get_event_loop().time() - start_time)
             
             # Clean and parse JSON content
             try:
@@ -313,10 +382,10 @@ async def solve(solution_uuid: str, num_of_solutions: int):
                     cur.execute(
                         """
                         UPDATE solutions
-                        SET runtime = %s, data = %s::jsonb
+                        SET result_initial = %s::jsonb
                         WHERE uuid = %s
                         """,
-                        (runtime, clean_json, solution_uuid)
+                        (clean_json, solution_uuid)
                     )
                 conn.commit()
             finally:
@@ -326,5 +395,159 @@ async def solve(solution_uuid: str, num_of_solutions: int):
 
     except Exception as e:
         print(f"Error in solve endpoint: {str(e)}")
+        print(traceback.format_exc())
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/ma-optimizer/{solution_uuid}/{prompt}", name="ma-optimizer", response_model=CommonResponse)
+async def ma_optimizer(solution_uuid: str, prompt: str):
+    try:
+        # Get Qdrant client
+        qdrant_client = my_qdrant()
+
+        # Fetch solution details from the knowledge API
+        async with httpx.AsyncClient(timeout=10.0) as client:
+            print(f"Fetching solution details for UUID: {solution_uuid}")
+            response = await client.get(
+                f"http://knowledge-api:10000/solutions/{solution_uuid}/display"
+            )
+            if response.status_code == 404:
+                raise HTTPException(status_code=404, detail="Solution not found")
+            solution = response.json()
+
+            # Get document UUIDs from solution.knowledge
+            document_uuids = solution.get("knowledge", [])
+            if not document_uuids:
+                print("Warning: No document UUIDs found in solution.knowledge")
+
+        # Fetch relevant documents from Qdrant
+        context_documents = []
+        for doc_id in document_uuids:
+            try:
+                # Fetch the document by its ID
+                result = qdrant_client.retrieve(
+                    collection_name=os.getenv("QDRANT_DEFAULT_COLLECTION"),
+                    ids=[doc_id],
+                )
+                if result:
+                    # Extract the text content from the payload
+                    doc_content = result[0].payload.get("text", "")
+                    context_documents.append(doc_content)
+            except Exception as e:
+                print(f"Error fetching document {doc_id}: {str(e)}")
+                continue
+
+        # Combine all context documents
+        context = "\n\n---\n\n".join(context_documents)
+
+        # Prepare solution data for LLM
+        solution_data = {
+            "name": solution["name"],
+            "solution_space": solution["solution_space"],
+            "table": solution["table"],
+            "req_customer": solution["req_customer"],
+            "req_business": solution["req_business"],
+            "result_initial": solution.get("result_initial", {}),  # Include initial results
+            "prompt": prompt  # Include the optimization prompt
+        }
+
+        # OpenAI-compatible endpoint configuration
+        api_endpoint = "http://host.docker.internal:1234/v1/chat/completions"
+        headers = {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer dummy-token",
+        }
+
+        # Fetch agent configuration
+        async with httpx.AsyncClient(timeout=10.0) as agent_client:
+            print("Fetching agent configuration for 'ma-optimizer'")
+            agent_response = await agent_client.get(
+                "http://management-api:10020/agents/ma-optimizer"
+            )
+            if agent_response.status_code == 404:
+                raise HTTPException(status_code=404, detail="Agent 'ma-optimizer' not found")
+            agent_config = agent_response.json()
+
+        # Prepare the user prompt with context
+        user_prompt = agent_config["prompt_user"]
+        
+        # Replace placeholders if they exist
+        if "%context%" in user_prompt:
+            user_prompt = user_prompt.replace("%context%", context)
+        if "%solution_data%" in user_prompt:
+            user_prompt = user_prompt.replace("%solution_data%", json.dumps(solution_data, indent=2))
+        if "%user_prompt%" in user_prompt:
+            user_prompt = user_prompt.replace("%user_prompt%", prompt)
+
+        payload = {
+            "model": "expert",
+            "messages": [
+                {
+                    "role": "system",
+                    "content": agent_config["prompt_system"]
+                },
+                {"role": "user", "content": user_prompt}
+            ],
+            "response_format": {
+                "type": "json_schema",
+                "json_schema": json.loads(agent_config["output_schema"])
+            },
+            "temperature": agent_config["temperature"],
+        }
+
+        print(f"Making request to OpenAI-compatible endpoint: {api_endpoint}")
+        print(f"Payload: {json.dumps(payload, indent=2)}")
+
+        async with httpx.AsyncClient(timeout=int(os.getenv("MODEL_TIMEOUT"))) as llm_client:
+            llm_response = await llm_client.post(
+                api_endpoint, json=payload, headers=headers
+            )
+            print(f"Response status: {llm_response.status_code}")
+            print(f"Response body: {llm_response.text}")
+
+            if llm_response.status_code != 200:
+                raise HTTPException(
+                    status_code=llm_response.status_code,
+                    detail=f"LLM request failed: {llm_response.text}",
+                )
+
+            llm_data = llm_response.json()
+            content = llm_data["choices"][0]["message"]["content"]
+            cleaned_content = clean_llm_response(content)
+            
+            # Clean and parse JSON content
+            try:
+                # First try to parse it as JSON
+                if isinstance(cleaned_content, str):
+                    content_json = json.loads(cleaned_content)
+                else:
+                    content_json = cleaned_content
+                
+                # Convert to a clean JSON string without escapes
+                clean_json = json.dumps(content_json, ensure_ascii=False, separators=(',', ':'))
+            except json.JSONDecodeError:
+                # If it's not valid JSON, store as a simple string
+                clean_json = json.dumps({"content": cleaned_content}, ensure_ascii=False, separators=(',', ':'))
+            
+            # Update solution in database
+            conn = my_db()
+            try:
+                with conn.cursor() as cur:
+                    cur.execute(
+                        """
+                        UPDATE solutions
+                        SET result_final = %s::jsonb
+                        WHERE uuid = %s
+                        """,
+                        (clean_json, solution_uuid)
+                    )
+                conn.commit()
+            finally:
+                conn.close()
+            
+            return {"data": cleaned_content}
+
+    except Exception as e:
+        print(f"Error in optimizer endpoint: {str(e)}")
         print(traceback.format_exc())
         raise HTTPException(status_code=500, detail=str(e))

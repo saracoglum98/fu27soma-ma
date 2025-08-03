@@ -257,4 +257,5 @@ if __name__ == "__main__":
     init_agents('sysml-expert')
     init_agents('ma-solver')
     init_agents('kpi-analyst')
+    init_agents('ma-optimizer')
     init_sysml_knowledge()

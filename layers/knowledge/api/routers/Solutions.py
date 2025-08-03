@@ -16,7 +16,7 @@ async def solutions_read_all():
     try:
         conn = my_db()
         cur = conn.cursor()
-        cur.execute("SELECT uuid, name, req_customer, req_business, runtime, data FROM solutions")
+        cur.execute("SELECT uuid, name, req_customer, req_business, result_initial, result_final, sysml FROM solutions")
         solutions = cur.fetchall()
         cur.close()
         conn.close()
@@ -27,8 +27,9 @@ async def solutions_read_all():
                 "name": solution["name"],
                 "req_customer": solution["req_customer"],
                 "req_business": solution["req_business"],
-                "runtime": solution["runtime"],
-                "data": solution["data"] if solution["data"] else None
+                "result_initial": solution["result_initial"] if solution["result_initial"] else None,
+                "result_final": solution["result_final"] if solution["result_final"] else None,
+                "sysml": solution["sysml"] if solution["sysml"] else None
             }
             for solution in solutions
         ]
@@ -41,7 +42,7 @@ async def solution_read_one(uuid: str):
     try:
         conn = my_db()
         cur = conn.cursor()
-        cur.execute("SELECT uuid, name, req_customer, req_business, runtime, data FROM solutions WHERE uuid = %s", (uuid,))
+        cur.execute("SELECT uuid, name, req_customer, req_business, result_initial, result_final, sysml FROM solutions WHERE uuid = %s", (uuid,))
         solution = cur.fetchone()
         cur.close()
         conn.close()
@@ -54,8 +55,9 @@ async def solution_read_one(uuid: str):
             "name": solution["name"],
             "req_customer": solution["req_customer"],
             "req_business": solution["req_business"],
-            "runtime": solution["runtime"],
-            "data": solution["data"] if solution["data"] else None
+            "result_initial": solution["result_initial"] if solution["result_initial"] else None,
+            "result_final": solution["result_final"] if solution["result_final"] else None,
+            "sysml": solution["sysml"] if solution["sysml"] else None
         }
     except Exception as e:
         print(str(e))
@@ -78,11 +80,11 @@ async def solution_create(solution_space_uuid: str, solution: SolutionsC):
         
         cur.execute(
             """
-            INSERT INTO solutions (uuid, name, solution_space, req_customer, req_business, runtime, data)
-            VALUES (%s, %s, %s, %s, %s, %s, %s)
-            RETURNING uuid, name, req_customer, req_business, runtime, data
+            INSERT INTO solutions (uuid, name, solution_space, req_customer, req_business, result_initial, result_final, sysml)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+            RETURNING uuid, name, req_customer, req_business, result_initial, result_final, sysml
             """,
-            (new_uuid, solution.name, solution_space_uuid, "", "", None, None)  # Initialize with empty inputs
+            (new_uuid, solution.name, solution_space_uuid, "", "", None, None, None)  # Initialize with empty inputs
         )
         created_solution = cur.fetchone()
         
@@ -95,8 +97,9 @@ async def solution_create(solution_space_uuid: str, solution: SolutionsC):
             "name": created_solution["name"],
             "req_customer": created_solution["req_customer"],
             "req_business": created_solution["req_business"],
-            "runtime": created_solution["runtime"],
-            "data": created_solution["data"] if created_solution["data"] else None
+            "result_initial": created_solution["result_initial"] if created_solution["result_initial"] else None,
+            "result_final": created_solution["result_final"] if created_solution["result_final"] else None,
+            "sysml": created_solution["sysml"] if created_solution["sysml"] else None
         }
     except Exception as e:
         print(str(e))
@@ -146,7 +149,7 @@ async def solution_update(uuid: str, solution: SolutionsU):
             UPDATE solutions 
             SET name = %s, req_customer = %s, req_business = %s
             WHERE uuid = %s
-            RETURNING uuid, name, req_customer, req_business
+            RETURNING uuid, name, req_customer, req_business, result_initial, result_final, sysml
             """,
             (solution.name, solution.req_customer, solution.req_business, uuid)
         )
@@ -161,8 +164,9 @@ async def solution_update(uuid: str, solution: SolutionsU):
             "name": updated_solution["name"],
             "req_customer": updated_solution["req_customer"],
             "req_business": updated_solution["req_business"],
-            "runtime": updated_solution["runtime"],
-            "data": updated_solution["data"] if updated_solution["data"] else None
+            "result_initial": updated_solution["result_initial"] if updated_solution["result_initial"] else None,
+            "result_final": updated_solution["result_final"] if updated_solution["result_final"] else None,
+            "sysml": updated_solution["sysml"] if updated_solution["sysml"] else None
         }
     except Exception as e:
         print(str(e))
@@ -176,7 +180,7 @@ async def solution_display(uuid: str):
         
         # Get the solution and its related solution space
         cur.execute("""
-            SELECT s.uuid, s.name, s.req_customer, s.req_business, s.runtime, s.data,
+            SELECT s.uuid, s.name, s.req_customer, s.req_business, s.result_initial, s.result_final, s.sysml,
                    ss.name as solution_space_name,
                    ss.uuid as solution_space_uuid
             FROM solutions s
@@ -248,8 +252,9 @@ async def solution_display(uuid: str):
             "table": table,
             "req_customer": solution["req_customer"],
             "req_business": solution["req_business"],
-            "runtime": solution["runtime"],
-            "data": solution["data"] if solution["data"] else None,
+            "result_initial": solution["result_initial"] if solution["result_initial"] else None,
+            "result_final": solution["result_final"] if solution["result_final"] else None,
+            "sysml": solution["sysml"] if solution["sysml"] else None,
             "knowledge": list(all_knowledge)
         }
         

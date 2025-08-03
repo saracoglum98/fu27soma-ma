@@ -1,0 +1,87 @@
+{
+  "name": "report_response",
+  "strict": "true",
+  "schema": {
+    "type": "object",
+    "properties": {
+      "meta": {
+        "type": "object",
+        "properties": {
+          "solution_space": {
+            "type": "string",
+            "description": "Name of the solution space"
+          }
+        },
+        "required": ["solution_space"]
+      },
+      "executive_summary": {
+        "type": "object",
+        "properties": {
+          "decision_rationale": {
+            "type": "string",
+            "description": "Overall approach and philosophy used"
+          },
+          "key_compromises": {
+            "type": "string",
+            "description": "Major trade-offs made across all decisions"
+          },
+          "risk_assessment": {
+            "type": "string",
+            "description": "Potential risks and mitigation strategies"
+          },
+          "alignment_score": {
+            "type": "object",
+            "properties": {
+              "customer_requirements": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 100,
+                "description": "Percentage alignment with customer requirements"
+              },
+              "business_requirements": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 100,
+                "description": "Percentage alignment with business requirements"
+              }
+            },
+            "required": ["customer_requirements", "business_requirements"]
+          }
+        },
+        "required": ["decision_rationale", "key_compromises", "risk_assessment", "alignment_score"]
+      },
+      "reasoning": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "function": {
+              "type": "string",
+              "description": "Name of the function"
+            },
+            "option": {
+              "type": "string",
+              "description": "Selected option for this function"
+            },
+            "confidence_level": {
+              "type": "string",
+              "enum": ["high", "medium", "low"],
+              "description": "Confidence level in the decision"
+            },
+            "assumptions": {
+              "type": "string",
+              "description": "List of assumptions made for this decision"
+            },
+            "analysis": {
+              "type": "string",
+              "description": "Detailed explanation of the decision process and rationale"
+            }
+          },
+          "required": ["function", "option", "confidence_level", "assumptions", "analysis"]
+        },
+        "minItems": 1
+      }
+    },
+    "required": ["meta", "executive_summary", "reasoning"]
+  }
+}

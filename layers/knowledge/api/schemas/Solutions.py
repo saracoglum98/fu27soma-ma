@@ -7,8 +7,9 @@ class SolutionsR(BaseModel):
     name: str
     req_customer: str
     req_business: str
-    runtime: Optional[int] = None
-    data: Optional[dict] = None
+    result_initial: Optional[dict] = None
+    result_final: Optional[dict] = None
+    sysml: Optional[dict] = None
     knowledge: Optional[List[str]] = []
 
 class SolutionsC(BaseModel):
