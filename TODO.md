@@ -4,12 +4,13 @@
 - Max File Size for Knowledge Item - 20 MB
 
 ## Functions
-- Communication Layer - UI - KPIs - Quantitative and Qualitative Add/Remove
+- Communication Layer - UI - KPIs - Quantitative and Qualitative Add/Remove [OK]
 - LLM Layer - API - Provide System Prompt in Request
 - LLM Layer - API - Provide Output JSON Schema in Request
 - LLM Layer - API - Solver - Refine System Prompt and Output Schema
 - Communication Layer - UI - UI for Solution Display
 - LLM Layer - API - Chat Endpoint to Refine
+- Communication Layer - UI - Agents
 - SysML Layer - Engine
 - SysML Layer - API
 - SysML Layer - API - Visualize
