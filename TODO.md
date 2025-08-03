@@ -4,12 +4,13 @@
 - Max File Size for Knowledge Item - 20 MB
 
 ## Immediate
-- Communication Layer - UI - UI for Solution Display
+- Communication Layer - UI - UI for Solution Display [INPROGRESS]
+- Sample KPIs [INPROGRESS]
 - LLM Layer - API - Chat Endpoint to Refine
-- Communication Layer - UI - Agents
-- SysML Layer - Engine
-- SysML Layer - API
-- SysML Layer - API - Visualize
+- Communication Layer - UI - Agents [OK]
+- SysML Layer - Engine [TUESDAY]
+- SysML Layer - API [TUESDAY]
+- SysML Layer - API - Visualize [TUESDAY]
 - Management Layer - Auth
 
 ## Secondary

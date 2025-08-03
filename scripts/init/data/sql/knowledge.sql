@@ -44,3 +44,14 @@ CREATE TABLE IF NOT EXISTS kpis (
     type kpi_type NOT NULL,
     value TEXT NOT NULL
 );
+
+INSERT INTO kpis (type, value) VALUES ('quantitative', 'Profit Margin');
+INSERT INTO kpis (type, value) VALUES ('quantitative', 'COGS');
+INSERT INTO kpis (type, value) VALUES ('quantitative', 'Waste Percentage');
+INSERT INTO kpis (type, value) VALUES ('quantitative', 'Ingredient Utilization');
+INSERT INTO kpis (type, value) VALUES ('quantitative', 'Energy Consumption');
+
+INSERT INTO kpis (type, value) VALUES ('qualitative', 'Product Quality');
+INSERT INTO kpis (type, value) VALUES ('qualitative', 'Visual Appeal');
+INSERT INTO kpis (type, value) VALUES ('qualitative', 'Freshness');
+INSERT INTO kpis (type, value) VALUES ('qualitative', 'Sustainability');
