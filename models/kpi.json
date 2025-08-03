@@ -1,0 +1,38 @@
+{
+  "name": "kpi_analysis_response",
+  "strict": "true",
+  "schema": {
+    "type": "object",
+    "properties": {
+      "kpi_analysis": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "solution_index": {
+              "type": "integer",
+              "minimum": 1,
+              "description": "Index of the solution being analyzed"
+            },
+            "ratings": {
+              "type": "object",
+              "patternProperties": {
+                "^.*$": {
+                  "type": "string",
+                  "enum": ["low", "medium", "high"],
+                  "description": "Rating level for each KPI"
+                }
+              },
+              "description": "Map of KPI names to their rating levels",
+              "minProperties": 1
+            }
+          },
+          "required": ["solution_index", "ratings"]
+        },
+        "minItems": 1,
+        "description": "Array of KPI analyses for each solution"
+      }
+    },
+    "required": ["kpi_analysis"]
+  }
+}
