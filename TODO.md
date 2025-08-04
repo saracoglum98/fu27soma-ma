@@ -8,7 +8,7 @@
 - sidebar attention
 - SysML v2 dialog bigger
 - SysML v2 buttons primary
-
+- Edit KPI logic
 
 - TEMIZLE VE CHECKOUT
 - SysML Layer - Engine [MONDAY]
