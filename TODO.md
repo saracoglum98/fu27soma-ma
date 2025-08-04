@@ -4,6 +4,12 @@
 - Max File Size for Knowledge Item - 20 MB
 
 ## Immediate
+- replace all timeouts
+- sidebar attention
+- SysML v2 dialog bigger
+- SysML v2 buttons primary
+
+
 - TEMIZLE VE CHECKOUT
 - SysML Layer - Engine [MONDAY]
 - SysML Layer - API [TUESDAY]
