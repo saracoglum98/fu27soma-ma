@@ -20,7 +20,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { solveSolution } from "../services/LLM";
+import { solveSolution } from "../services/AgentCalls";
 import { getAllSolutions, deleteSolution } from "../services/Solutions";
 import { Solution } from "../types/Solutions";
 import { IconPlayerPlay, IconEdit, IconTrash, IconSearch, IconEye } from "@tabler/icons-react";
@@ -138,7 +138,7 @@ export default function SolutionsPage() {
                   <Button 
                     variant="outline"
                     size="sm"
-                    onClick={() => solution.data 
+                    onClick={() => solution.result_initial 
                       ? handleViewResult(solution.uuid)
                       : handleSolveClick(solution)
                     }
@@ -146,7 +146,7 @@ export default function SolutionsPage() {
                   >
                     {solvingLoading && selectedSolution?.uuid === solution.uuid ? (
                       <div className="animate-spin rounded-full h-4 w-4 border-2 border-b-transparent" />
-                    ) : solution.data ? (
+                    ) : solution.result_initial ? (
                       <IconEye className="w-4 h-4" />
                     ) : (
                       <IconPlayerPlay className="w-4 h-4" />

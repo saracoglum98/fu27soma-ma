@@ -34,6 +34,7 @@ CREATE TABLE IF NOT EXISTS solutions (
     req_customer TEXT,
     req_business TEXT,
     result_initial JSONB,
+    result_analysis JSONB,
     result_final JSONB,
     sysml JSONB
 );

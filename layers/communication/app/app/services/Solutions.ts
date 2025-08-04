@@ -18,7 +18,7 @@ export async function getSolution(uuid: string): Promise<Solution> {
   return response.json();
 }
 
-export async function createSolution(solutionSpaceUuid: string, solution: Pick<Solution, "name">): Promise<Solution> {
+export async function createSolution(solutionSpaceUuid: string, solution: SolutionCreate): Promise<Solution> {
   const response = await fetch(`${API_URL}/${solutionSpaceUuid}`, {
     method: "POST",
     headers: {
@@ -32,10 +32,7 @@ export async function createSolution(solutionSpaceUuid: string, solution: Pick<S
   return response.json();
 }
 
-export async function updateSolution(
-  uuid: string, 
-  solution: Pick<Solution, "name" | "req_customer" | "req_business">
-): Promise<Solution> {
+export async function updateSolution(uuid: string, solution: SolutionUpdate): Promise<Solution> {
   const response = await fetch(`${API_URL}/${uuid}`, {
     method: "PUT",
     headers: {

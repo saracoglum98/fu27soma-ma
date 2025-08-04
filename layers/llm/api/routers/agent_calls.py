@@ -13,51 +13,207 @@ from connections import my_qdrant
 from dotenv import load_dotenv
 import re
 from connections import my_db
+from tools import generate_kpi_analyst_schema, clean_llm_response
 
 load_dotenv()
 
 
 router = APIRouter(
-    prefix="/tools",
-    tags=["tools"],
+    prefix="/agent-calls",
+    tags=["agent-calls"],
     responses={404: {"description": "Not found"}},
 )
 
-
-def clean_llm_response(response: str) -> str:
-    """Remove thinking/reasoning blocks from LLM response."""
-    # Remove <think> or <thinking> blocks
-    response = re.sub(r'<think(?:ing)?>[^<]*</think(?:ing)?>', '', response, flags=re.DOTALL)
-    # Clean up any extra newlines that might have been left
-    response = re.sub(r'\n{3,}', '\n\n', response.strip())
-    return response
-
-@router.post("/convert", name="Convert", response_model=CommonResponse)
-async def convert(file: UploadFile):
+@router.get("/kpi-analyst/{solution_uuid}", name="KPI Analyst", response_model=CommonResponse)
+async def kpi_analyst(solution_uuid: str):
     try:
-        # Read file content
-        file_content = await file.read()
+        # Get Qdrant client
+        qdrant_client = my_qdrant()
 
-        # Create a temporary URL-like string for the file
-        temp_url = f"memory://{file.filename}"
+        # Fetch solution details from the knowledge API
+        async with httpx.AsyncClient(timeout=10.0) as client:
+            print(f"Fetching solution details for UUID: {solution_uuid}")
+            response = await client.get(
+                f"http://knowledge-api:10000/solutions/{solution_uuid}/display"
+            )
+            if response.status_code == 404:
+                raise HTTPException(status_code=404, detail="Solution not found")
+            solution = response.json()
 
-        # Initialize MarkItDown
-        md = MarkItDown(enable_plugins=False)
+            # Get the number of solutions
+            num_of_solutions = len(solution["result_initial"]["solutions"])
+            if num_of_solutions < 1:
+                raise HTTPException(status_code=400, detail="Solution has no functions to analyze")
 
-        # Convert file content
-        result = md.convert_bytes(file_content, mime_type=file.content_type)
+            # Get document UUIDs from solution.knowledge
+            document_uuids = solution.get("knowledge", [])
+            if not document_uuids:
+                print("Warning: No document UUIDs found in solution.knowledge")
 
-        return {"data": result.text_content}
+        # Fetch relevant documents from Qdrant
+        context_documents = []
+        for doc_id in document_uuids:
+            try:
+                # Fetch the document by its ID
+                result = qdrant_client.retrieve(
+                    collection_name=os.getenv("QDRANT_DEFAULT_COLLECTION"),
+                    ids=[doc_id],
+                )
+                if result:
+                    # Extract the text content from the payload
+                    doc_content = result[0].payload.get("text", "")
+                    context_documents.append(doc_content)
+            except Exception as e:
+                print(f"Error fetching document {doc_id}: {str(e)}")
+                continue
 
+        # Combine all context documents
+        context = "\n\n---\n\n".join(context_documents)
+
+        # Prepare solution data for LLM
+        solution_data = solution["result_initial"]["solutions"]
+
+        # Fetch KPIs for the prompt
+        async with httpx.AsyncClient(timeout=10.0) as client:
+            # Fetch qualitative KPIs
+            qual_response = await client.get("http://knowledge-api:10000/kpi/qualitative")
+            quant_response = await client.get("http://knowledge-api:10000/kpi/quantitative")
+            
+            kpis = []
+            if qual_response.status_code == 200:
+                data = qual_response.json()["data"]
+                kpis.extend([kpi["value"] for kpi in data])
+            if quant_response.status_code == 200:
+                data = quant_response.json()["data"]
+                kpis.extend([kpi["value"] for kpi in data])
+
+        # OpenAI-compatible endpoint configuration
+        api_endpoint = "http://host.docker.internal:1234/v1/chat/completions"
+        headers = {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer dummy-token",
+        }
+
+        # Fetch agent configuration
+        async with httpx.AsyncClient(timeout=10.0) as agent_client:
+            print("Fetching agent configuration for kpi-analyst")
+            agent_response = await agent_client.get(
+                "http://management-api:10020/agents/kpi-analyst"
+            )
+            if agent_response.status_code == 404:
+                raise HTTPException(status_code=404, detail="Agent 'kpi-analyst' not found")
+            agent_config = agent_response.json()
+
+        # Prepare the user prompt with context
+        user_prompt = agent_config["prompt_user"]
+        
+        # Replace placeholders if they exist
+        if "%context%" in user_prompt:
+            user_prompt = user_prompt.replace("%context%", context)
+        if "%solution_data%" in user_prompt:
+            user_prompt = user_prompt.replace("%solution_data%", json.dumps(solution_data, indent=2))
+        if "%kpis%" in user_prompt:
+            user_prompt = user_prompt.replace("%kpis%", json.dumps(kpis, indent=2))
+
+        # Generate schema for validation
+        schema = await generate_kpi_analyst_schema(num_of_solutions)
+
+        payload = {
+            "model": "expert",
+            "messages": [
+                {
+                    "role": "system",
+                    "content": agent_config["prompt_system"]
+                },
+                {"role": "user", "content": user_prompt}
+            ],
+            "response_format": {
+                "type": "json_schema",
+                "json_schema": {"schema": schema}
+            }
+        }
+
+        # Make the request to the LLM
+        async with httpx.AsyncClient(timeout=60.0) as client:
+            response = await client.post(
+                api_endpoint,
+                headers=headers,
+                json=payload,
+                timeout=60.0
+            )
+            
+            if response.status_code != 200:
+                print(response.text)
+                raise HTTPException(
+                    status_code=500,
+                    detail=f"LLM request failed with status {response.status_code}"
+                )
+
+            # Parse and clean the response
+            llm_response = response.json()
+            if "choices" not in llm_response or not llm_response["choices"]:
+                raise HTTPException(
+                    status_code=500,
+                    detail="Invalid response format from LLM"
+                )
+
+            # Clean and parse the response
+            content = llm_response["choices"][0]["message"]["content"]
+            cleaned_content = clean_llm_response(content)
+            
+            # Clean and parse JSON content
+            try:
+                # First try to parse it as JSON
+                if isinstance(cleaned_content, str):
+                    content_json = json.loads(cleaned_content)
+                else:
+                    content_json = cleaned_content
+                
+                # Convert to a clean JSON string without escapes
+                clean_json = json.dumps(content_json, ensure_ascii=False, separators=(',', ':'))
+            except json.JSONDecodeError:
+                # If it's not valid JSON, store as a simple string
+                clean_json = json.dumps({"content": cleaned_content}, ensure_ascii=False, separators=(',', ':'))
+            
+            # Update the solution in the database with the analysis results
+            db = my_db()
+            try:
+                with db.cursor() as cur:
+                    query = """
+                        UPDATE solutions 
+                        SET result_analysis = %s::jsonb 
+                        WHERE uuid = %s::uuid
+                        RETURNING uuid
+                    """
+                    cur.execute(query, (clean_json, solution_uuid))
+                    result = cur.fetchone()
+                    db.commit()
+                    
+                    if not result:
+                        raise HTTPException(
+                            status_code=404,
+                            detail="Solution not found"
+                        )
+            except Exception as e:
+                db.rollback()
+                print(f"Database error: {str(e)}")
+                raise HTTPException(
+                    status_code=500,
+                    detail=f"Failed to update solution analysis in database: {str(e)}"
+                )
+            finally:
+                db.close()
+
+            return {"data": content_json}
+
+    except HTTPException:
+        raise
     except Exception as e:
-        print(
-            f"Error in {__file__}:{traceback.extract_tb(sys.exc_info()[2])[-1].lineno}:"
-        )
+        print(f"Error in kpi-analyst endpoint: {str(e)}")
         print(traceback.format_exc())
         raise HTTPException(status_code=500, detail=str(e))
 
-
-@router.post("/sysml-expert/{solution_uuid}", name="SysML Expert", response_model=CommonResponse)
+@router.get("/sysml-expert/{solution_uuid}", name="SysML Expert", response_model=CommonResponse)
 async def sysml_expert(solution_uuid: str):
     try:
         # Get Qdrant client
@@ -245,7 +401,7 @@ async def sysml_expert(solution_uuid: str):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.post("/ma-solver/{solution_uuid}/{num_of_solutions}", name="ma-solver", response_model=CommonResponse)
+@router.get("/ma-solver/{solution_uuid}/{num_of_solutions}", name="ma-solver", response_model=CommonResponse)
 async def ma_solver(solution_uuid: str, num_of_solutions: int):
     try:
         # Get Qdrant client
@@ -399,7 +555,7 @@ async def ma_solver(solution_uuid: str, num_of_solutions: int):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.post("/ma-optimizer/{solution_uuid}/{prompt}", name="ma-optimizer", response_model=CommonResponse)
+@router.get("/ma-optimizer/{solution_uuid}/{prompt}", name="ma-optimizer", response_model=CommonResponse)
 async def ma_optimizer(solution_uuid: str, prompt: str):
     try:
         # Get Qdrant client

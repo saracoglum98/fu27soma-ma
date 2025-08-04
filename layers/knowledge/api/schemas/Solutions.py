@@ -9,6 +9,7 @@ class SolutionsR(BaseModel):
     req_business: str
     result_initial: Optional[dict] = None
     result_final: Optional[dict] = None
+    result_analysis: Optional[dict] = None
     sysml: Optional[dict] = None
     knowledge: Optional[List[str]] = []
 

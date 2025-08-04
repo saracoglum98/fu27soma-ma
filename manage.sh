@@ -188,6 +188,9 @@ if [ "$1" = "build" ]; then
     eval "service_destroy \"knowledge-api\" $redirect"
     eval "service_destroy \"management-api\" $redirect"
     eval "service_destroy \"management-data\" $redirect"
+    #eval "docker rm $(docker ps -f status=exited -aq) $redirect"
+    #eval "docker rmi $(docker images -f "dangling=true" -q) $redirect"
+    #eval "docker volume rm $(docker volume ls -f "dangling=true" -q) $redirect"
     
     create_network
     env_create

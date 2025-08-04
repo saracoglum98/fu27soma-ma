@@ -6,6 +6,57 @@ Instructions:
 3. For each solution, evaluate its performance against ALL KPIs
 4. Assign a rating of "low", "medium", or "high" for each KPI based on the solution's characteristics
 
+Sample Input:
+{
+  "kpis": [
+    {
+      "name": "Resource Efficiency",
+      "type": "quantitative",
+      "description": "Measures how effectively resources are utilized"
+    },
+    {
+      "name": "Customer Satisfaction",
+      "type": "qualitative",
+      "description": "Evaluates potential customer satisfaction with the solution"
+    }
+  ],
+  "solutions": [
+    {
+      "reasoning": [
+        {
+          "option": "Fruit-based",
+          "analysis": "Selecting 'Fruit-based' allows for flexibility with other fruits to complement or replace strawberries based on freshness.",
+          "function": "Flavor Delivery",
+          "assumptions": "Customer prefers a general fruit flavor profile.",
+          "confidence_level": "high"
+        }
+      ],
+      "executive_summary": {
+        "alignment_score": {
+          "business_requirements": 75,
+          "customer_requirements": 90
+        },
+        "key_compromises": "The main compromise is not fully utilizing the strawberries due to potential spoilage.",
+        "risk_assessment": "Risk: Strawberries may expire before use. Mitigation: Quick preparation.",
+        "decision_rationale": "This solution balances customer preference with business constraints."
+      }
+    }
+  ]
+}
+
+Expected Output:
+{
+  "kpi_analysis": [
+    {
+      "solution_index": 1,
+      "ratings": {
+        "Resource Efficiency": "medium",
+        "Customer Satisfaction": "high"
+      }
+    }
+  ]
+}
+
 Rating Guidelines:
 For each KPI, consider:
 - High: Solution demonstrates exceptional performance or strong positive impact on this KPI

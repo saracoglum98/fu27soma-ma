@@ -4,11 +4,8 @@
 - Max File Size for Knowledge Item - 20 MB
 
 ## Immediate
-- LLM Layer - API - kpi-analyst Endpoint [MONDAY] [INPROGRESS]
-- LLM Layer - API - Endpoint for ma-optimizer agent [MONDAY] [INPROGRESS]
-- LLM Layer - API - Refine SysML Endpoint [MONDAY] [INPROGRESS]
-- LLM Layer - UI - User Story [MONDAYEARLYMORNING] 
-- SysML Layer - Engine [EARLYMONDAY]
+- TEMIZLE VE CHECKOUT
+- SysML Layer - Engine [MONDAY]
 - SysML Layer - API [TUESDAY]
 - SysML Layer - API - Visualize [TUESDAY]
 - Management Layer - Auth

@@ -30,7 +30,7 @@ import { getFunction, updateFunction, attachOption, detachOption } from "@/app/s
 import { createOption, updateOption, deleteOption, attachKnowledge, detachKnowledge } from "@/app/services/Options";
 import { getAllKnowledgeItems } from "@/app/services/KnowledgeItems";
 import { getOption } from "@/app/services/Options";
-import { analyzeSysML } from "@/app/services/LLM";
+import { analyzeSysML } from "@/app/services/AgentCalls";
 
 export default function FunctionPage() {
   return (

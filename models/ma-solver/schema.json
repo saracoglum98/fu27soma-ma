@@ -47,6 +47,10 @@
         "items": {
           "type": "object",
           "properties": {
+            "solution_id": {
+              "type": "string",
+              "description": "Unique identifier for the solution (e.g., solution_1, solution_2)"
+            },
             "executive_summary": {
               "type": "object",
               "properties": {
@@ -115,7 +119,7 @@
               "minItems": 1
             }
           },
-          "required": ["executive_summary", "reasoning"]
+          "required": ["solution_id", "executive_summary", "reasoning"]
         },
         "minItems": 1
       }
