@@ -5,7 +5,7 @@ export type Solution = {
   req_business: string;
   result_initial?: Record<string, any>;
   result_final?: Record<string, any>;
-  result_analysis?: Record<string, any>;
+  result_initial_analysis?: Record<string, any>;
   sysml?: Record<string, any>;
   knowledge?: string[];
 };
@@ -23,4 +23,5 @@ export interface SolutionUpdate {
 export interface SolutionDisplayResponse extends Solution {
   solution_space: string;
   table: { [key: string]: string[] };
+  result_initial_analysis?: Record<string, any>;
 }

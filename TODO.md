@@ -3,20 +3,9 @@
 ## Insights
 - Max File Size for Knowledge Item - 20 MB
 
-## Immediate
-- replace all timeouts
-- sidebar attention
-- SysML v2 dialog bigger
-- SysML v2 buttons primary
-- Edit KPI logic
-
-- TEMIZLE VE CHECKOUT
-- SysML Layer - Engine [MONDAY]
-- SysML Layer - API [TUESDAY]
-- SysML Layer - API - Visualize [TUESDAY]
-- Management Layer - Auth
-
 ## Infrastructure
+- replace all timeouts
+- move KPIs seed to seed script
 - Build on home linux
 - in management DB, bring model column
 - LM studio packing

@@ -7,8 +7,8 @@ const API_URL = "http://localhost:10010/agent-calls";
  * @param solutionUuid The UUID of the solution to analyze
  * @returns The KPI analysis result
  */
-export const analyzeKPI = async (solutionUuid: string): Promise<string> => {
-  const response = await fetch(`${API_URL}/kpi-analyst/${solutionUuid}`, {
+export const analyzeKPI = async (solutionUuid: string, type: 'initial' | 'final' = 'initial'): Promise<string> => {
+  const response = await fetch(`${API_URL}/kpi-analyst/${solutionUuid}/${type}`, {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',

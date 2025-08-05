@@ -31,20 +31,22 @@ interface ExecutiveSummary {
   decision_rationale: string;
 }
 
-interface KPIRating {
-  rating: 'low' | 'medium' | 'high';
-  direction: 'low_is_better' | 'high_is_better';
+interface QualitativeKPIResult {
+  kpi: string;
+  rationale: string;
+  assessment: 'low' | 'medium' | 'high';
 }
 
-interface KPIAnalysisResult {
-  ratings: {
-    [key: string]: KPIRating;
-  };
-  solution_index: number;
+interface QuantitativeKPIResult {
+  kpi: string;
+  rationale: string;
+  assessment: 'hit' | 'miss';
 }
 
 interface KPIAnalysis {
-  kpi_analysis: KPIAnalysisResult[];
+  solution_id: number;
+  qualitative_analysis: QualitativeKPIResult[];
+  quantitative_analysis: QuantitativeKPIResult[];
 }
 
 interface InitialSolutionData {
@@ -69,23 +71,6 @@ interface FinalSolutionData {
   executive_summary: ExecutiveSummary;
 }
 
-const getRatingColor = (rating: KPIRating): string => {
-  const { rating: value, direction } = rating;
-  
-  if (direction === 'high_is_better') {
-    switch (value) {
-      case 'high': return 'text-green-600 font-semibold';
-      case 'medium': return 'text-yellow-600';
-      case 'low': return 'text-red-600';
-    }
-  } else {
-    switch (value) {
-      case 'low': return 'text-green-600 font-semibold';
-      case 'medium': return 'text-yellow-600';
-      case 'high': return 'text-red-600';
-    }
-  }
-};
 
 function ResultContent() {
   const router = useRouter();
@@ -133,17 +118,17 @@ function ResultContent() {
     }
   };
 
-  const handleKPIAnalysis = async () => {
+  const handleKPIAnalysis = async (type: 'initial' | 'final' = 'initial') => {
     if (!uuid) return;
     setAnalyzing(true);
     try {
-      await analyzeKPI(uuid);
+      await analyzeKPI(uuid, type);
       // Refresh the solution data after analysis
       const updatedData = await displaySolution(uuid);
       setSolution(updatedData);
     } catch (err) {
       console.error('Error analyzing KPIs:', err);
-      setError('Failed to analyze KPIs');
+      setError(`Failed to analyze ${type} KPIs`);
     } finally {
       setAnalyzing(false);
     }
@@ -199,9 +184,9 @@ function ResultContent() {
           </h1>
         </div>
         <div className="flex gap-2">
-          {!solution.result_analysis && (
+          {!solution.result_initial_analysis && (
             <Button 
-              onClick={handleKPIAnalysis} 
+              onClick={() => handleKPIAnalysis('initial')} 
               disabled={analyzing}
             >
               {analyzing ? 'Analyzing KPIs...' : 'Analyze KPIs'}
@@ -343,48 +328,102 @@ function ResultContent() {
       </Tabs>
 
       {/* KPI Analysis Table */}
-      {solution.result_analysis && (
+      {solution.result_initial_analysis && (
         <Card className="mt-6">
           <CardHeader>
             <CardTitle>KPI Analysis of Initial Solutions</CardTitle>
           </CardHeader>
           <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>KPI</TableHead>
-                  <TableHead>Optimization Goal</TableHead>
-                  {data.solutions.map((_, index) => (
-                    <TableHead key={index}>Solution {index + 1}</TableHead>
-                  ))}
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {Object.entries((solution.result_analysis as KPIAnalysis).kpi_analysis[0].ratings).map(([kpiName, rating]) => (
-                  <TableRow key={kpiName}>
-                    <TableCell className="font-medium">{kpiName}</TableCell>
-                    <TableCell>
-                      {rating.direction === 'low_is_better' ? 'Minimize' : 'Maximize'}
-                    </TableCell>
-                    {(solution.result_analysis as KPIAnalysis).kpi_analysis.map((analysis) => (
-                      <TableCell 
-                        key={analysis.solution_index} 
-                        className={getRatingColor(analysis.ratings[kpiName])}
-                      >
-                        {analysis.ratings[kpiName].rating.charAt(0).toUpperCase() + 
-                         analysis.ratings[kpiName].rating.slice(1)}
-                      </TableCell>
+            <Tabs defaultValue="qualitative" className="w-full">
+              <TabsList>
+                <TabsTrigger value="qualitative">Qualitative Analysis</TabsTrigger>
+                <TabsTrigger value="quantitative">Quantitative Analysis</TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="qualitative">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>KPI</TableHead>
+                      {(solution.result_initial_analysis as any[]).map((_, index) => (
+                        <TableHead key={index}>Solution {index + 1}</TableHead>
+                      ))}
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {Array.from(new Set((solution.result_initial_analysis as any[]).flatMap(s => s.qualitative_analysis.map((a: QualitativeKPIResult) => a.kpi)))).map((kpi) => (
+                      <TableRow key={kpi}>
+                        <TableCell className="font-medium">{kpi}</TableCell>
+                        {(solution.result_initial_analysis as any[]).map((sol, index) => {
+                          const analysis = sol.qualitative_analysis.find((a: any) => a.kpi === kpi);
+                          return (
+                            <TableCell key={index}>
+                              <HoverCard>
+                                <HoverCardTrigger>
+                                  <span className={
+                                    analysis?.assessment === 'high' ? 'text-green-600 font-semibold' :
+                                    analysis?.assessment === 'medium' ? 'text-yellow-600' :
+                                    'text-red-600'
+                                  }>
+                                    {analysis?.assessment.charAt(0).toUpperCase() + analysis?.assessment.slice(1)}
+                                  </span>
+                                </HoverCardTrigger>
+                                <HoverCardContent>
+                                  <p className="text-sm">{analysis?.rationale}</p>
+                                </HoverCardContent>
+                              </HoverCard>
+                            </TableCell>
+                          );
+                        })}
+                      </TableRow>
                     ))}
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                  </TableBody>
+                </Table>
+              </TabsContent>
+
+              <TabsContent value="quantitative">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>KPI</TableHead>
+                      {(solution.result_initial_analysis as any[]).map((_, index) => (
+                        <TableHead key={index}>Solution {index + 1}</TableHead>
+                      ))}
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {Array.from(new Set((solution.result_initial_analysis as any[]).flatMap(s => s.quantitative_analysis.map((a: QuantitativeKPIResult) => a.kpi)))).map((kpi) => (
+                      <TableRow key={kpi}>
+                        <TableCell className="font-medium">{kpi}</TableCell>
+                        {(solution.result_initial_analysis as any[]).map((sol, index) => {
+                          const analysis = sol.quantitative_analysis.find((a: any) => a.kpi === kpi);
+                          return (
+                            <TableCell key={index}>
+                              <HoverCard>
+                                <HoverCardTrigger>
+                                  <span className={analysis?.assessment === 'hit' ? 'text-green-600 font-semibold' : 'text-red-600'}>
+                                    {analysis?.assessment.charAt(0).toUpperCase() + analysis?.assessment.slice(1)}
+                                  </span>
+                                </HoverCardTrigger>
+                                <HoverCardContent>
+                                  <p className="text-sm">{analysis?.rationale}</p>
+                                </HoverCardContent>
+                              </HoverCard>
+                            </TableCell>
+                          );
+                        })}
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TabsContent>
+            </Tabs>
           </CardContent>
         </Card>
       )}
 
       {/* Optimization Card */}
-      {solution.result_initial && solution.result_analysis && (
+      {solution.result_initial && solution.result_initial_analysis && (
         <Card className="mt-6">
           <CardHeader>
             <CardTitle>Optimize</CardTitle>
@@ -408,7 +447,7 @@ function ResultContent() {
       )}
 
       {/* Final KPI Results */}
-      {solution.result_final && solution.result_analysis && (
+      {solution.result_final && solution.result_initial_analysis && (
         <Card className="mt-6">
           <CardHeader>
             <CardTitle>Optimized Solution</CardTitle>

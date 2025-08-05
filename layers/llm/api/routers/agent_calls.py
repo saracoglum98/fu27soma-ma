@@ -24,8 +24,10 @@ router = APIRouter(
     responses={404: {"description": "Not found"}},
 )
 
-@router.get("/kpi-analyst/{solution_uuid}", name="KPI Analyst", response_model=CommonResponse)
-async def kpi_analyst(solution_uuid: str):
+@router.get("/kpi-analyst/{solution_uuid}/{mytype}", name="KPI Analyst", response_model=CommonResponse)
+async def kpi_analyst(solution_uuid: str, mytype: str="initial"):
+    if mytype == "final":
+        print('final icin geldi')
     try:
         # Get Qdrant client
         qdrant_client = my_qdrant()
@@ -40,10 +42,22 @@ async def kpi_analyst(solution_uuid: str):
                 raise HTTPException(status_code=404, detail="Solution not found")
             solution = response.json()
 
-            # Get the number of solutions
-            num_of_solutions = len(solution["result_initial"]["solutions"])
+            # Get the number of solutions based on type
+            result_type = "result_final" if mytype == "final" else "result_initial"
+            result_data = solution.get(result_type, {})
+            
+            # Handle different structures for initial and final results
+            if mytype == "final":
+                if not isinstance(result_data, dict):
+                    raise HTTPException(status_code=400, detail="Final result data is not in the expected format")
+                solution_data = [result_data]  # Treat the entire result as one solution
+                num_of_solutions = 1
+            else:
+                solution_data = result_data.get("solutions", [])
+                num_of_solutions = len(solution_data)
+            
             if num_of_solutions < 1:
-                raise HTTPException(status_code=400, detail="Solution has no functions to analyze")
+                raise HTTPException(status_code=400, detail="Solution has no data to analyze")
 
             # Get document UUIDs from solution.knowledge
             document_uuids = solution.get("knowledge", [])
@@ -70,8 +84,7 @@ async def kpi_analyst(solution_uuid: str):
         # Combine all context documents
         context = "\n\n---\n\n".join(context_documents)
 
-        # Prepare solution data for LLM
-        solution_data = solution["result_initial"]["solutions"]
+        # Use the previously prepared solutions_data
 
         # Fetch KPIs for the prompt
         async with httpx.AsyncClient(timeout=180.0) as client:
@@ -90,7 +103,7 @@ async def kpi_analyst(solution_uuid: str):
                     })
 
         # Generate KPI analyst schema
-        kpi_schema = await generate_kpi_analyst_schema(kpis)
+        kpi_schema = await generate_kpi_analyst_schema(kpis, num_of_solutions)
 
         # OpenAI-compatible endpoint configuration
         api_endpoint = "http://host.docker.internal:1234/v1/chat/completions"
@@ -184,7 +197,12 @@ async def kpi_analyst(solution_uuid: str):
                 with db.cursor() as cur:
                     query = """
                         UPDATE solutions 
-                        SET result_analysis = %s::jsonb 
+                        SET result_initial_analysis = %s::jsonb 
+                        WHERE uuid = %s::uuid
+                        RETURNING uuid
+                    """ if mytype == "initial" else """
+                        UPDATE solutions 
+                        SET result_final_analysis = %s::jsonb 
                         WHERE uuid = %s::uuid
                         RETURNING uuid
                     """
@@ -284,7 +302,7 @@ async def sysml_expert(solution_uuid: str):
 
         # Combine all context documents
         context = "\n\n---\n\n".join(context_documents)
-        print('here')
+
         # OpenAI-compatible endpoint configuration
         api_endpoint = "http://host.docker.internal:1234/v1/chat/completions"
         headers = {
@@ -306,7 +324,6 @@ async def sysml_expert(solution_uuid: str):
                     (solution_uuid,)
                 )
                 result = cur.fetchone()
-                print(result['result_final'])
                 result_data = result['result_final'] if result is not None else {}
         finally:
             conn.close()
@@ -419,8 +436,6 @@ async def ma_solver(solution_uuid: str, num_of_solutions: int):
             if response.status_code == 404:
                 raise HTTPException(status_code=404, detail="Solution not found")
             solution = response.json()
-            
-            print(solution)
 
             # Get document UUIDs from solution.knowledge
             document_uuids = solution.get("knowledge", [])
@@ -703,6 +718,19 @@ async def ma_optimizer(solution_uuid: str, prompt: str):
                 conn.commit()
             finally:
                 conn.close()
+            
+            # Trigger KPI analysis after optimization
+            print(f"Triggering KPI analysis for solution {solution_uuid}")
+            try:
+                async with httpx.AsyncClient(timeout=180.0) as client:
+                    kpi_response = await client.get(
+                        f"http://llm-api:10010/agent-calls/kpi-analyst/{solution_uuid}/final"
+                    )
+                    if kpi_response.status_code != 200:
+                        print(f"Warning: KPI analysis failed with status {kpi_response.status_code}: {kpi_response.text}")
+            except Exception as e:
+                print(f"Warning: Failed to trigger KPI analysis: {str(e)}")
+                # Don't raise the exception - we don't want to fail the optimization if KPI analysis fails
             
             return {"data": cleaned_content}
 

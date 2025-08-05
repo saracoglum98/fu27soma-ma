@@ -2,7 +2,7 @@ import re
 import httpx
 
 
-async def generate_kpi_analyst_schema(kpis: list):
+async def generate_kpi_analyst_schema(kpis: list, num_of_solutions: int):
     """Generate schema for KPI analyst based on input KPIs.
     
     Args:
@@ -26,52 +26,61 @@ async def generate_kpi_analyst_schema(kpis: list):
         if kpi["type"] not in ["qualitative", "quantitative"]:
             raise ValueError(f"Invalid KPI type '{kpi['type']}'. Must be 'qualitative' or 'quantitative'")
     schema = {
-        "type": "object",
-        "properties": {
-            "qualitative_analysis": {
-                "type": "array",
-                "items": {
-                    "type": "object",
-                    "properties": {
-                        "kpi": {
-                            "type": "string",
-                            "enum": [kpi["key"] for kpi in kpis if kpi["type"] == "qualitative"]
+        "type": "array",
+        "minItems": num_of_solutions,
+        "maxItems": num_of_solutions,
+        "items": {
+            "type": "object",
+            "properties": {
+                "solution_id": {
+                    "type": "integer",
+                    "minimum": 1
+                },
+                "qualitative_analysis": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "kpi": {
+                                "type": "string",
+                                "enum": [kpi["key"] for kpi in kpis if kpi["type"] == "qualitative"]
+                            },
+                            "assessment": {
+                                "type": "string",
+                                "enum": ["low", "medium", "high"]
+                            },
+                            "rationale": {
+                                "type": "string",
+                                "description": "Brief explanation of the analysis"
+                            }
                         },
-                        "assessment": {
-                            "type": "string",
-                            "enum": ["low", "medium", "high"]
+                        "required": ["kpi", "assessment", "rationale"]
+                    }
+                },
+                "quantitative_analysis": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "kpi": {
+                                "type": "string",
+                                "enum": [kpi["key"] for kpi in kpis if kpi["type"] == "quantitative"]
+                            },
+                            "assessment": {
+                                "type": "string",
+                                "enum": ["hit", "miss"]
+                            },
+                            "rationale": {
+                                "type": "string",
+                                "description": "Brief explanation of the analysis"
+                            }
                         },
-                        "rationale": {
-                            "type": "string",
-                            "description": "Brief explanation of the analysis"
-                        }
-                    },
-                    "required": ["kpi", "assessment", "rationale"]
+                        "required": ["kpi", "assessment", "rationale"]
+                    }
                 }
             },
-            "quantitative_analysis": {
-                "type": "array",
-                "items": {
-                    "type": "object",
-                    "properties": {
-                        "kpi": {
-                            "type": "string",
-                            "enum": [kpi["key"] for kpi in kpis if kpi["type"] == "quantitative"]
-                        },
-                        "assessment": {
-                            "type": "string",
-                            "enum": ["hit", "miss"]
-                        },
-                        "rationale": {
-                            "type": "string",
-                            "description": "Brief explanation of the analysis"
-                        }
-                    },
-                    "required": ["kpi", "assessment", "rationale"]
-                }
-            }
-        },
-        "required": ["qualitative_analysis", "quantitative_analysis"]
+            "required": ["solution_id", "qualitative_analysis", "quantitative_analysis"]
+        }
     }
     
     return schema
