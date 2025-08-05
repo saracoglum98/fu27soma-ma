@@ -21,13 +21,9 @@
 
 
 ## UI
-- communication-app -- New KPI view
-- communication-app -- sidebar attention include single ones
-- communication-app -- solution play, close the dialog
 - communication-app -- solution space and function, show good title, change name dialog
-- communication-app -- back button of result
+- communication-app -- result - show solution space name
 - communication-app -- top right - go to SysML engine
-- communication-app -- minimum solution number 2
 
 ## Secondary
 - LLM Layer - API - Provide System Prompt in Request

@@ -27,7 +27,11 @@ export default function Sidebar() {
       <Link
         href={item.href}
         className={`flex items-center px-4 py-2 text-sm rounded-lg transition-colors ${
-          pathname === item.href
+          pathname === item.href || 
+          (item.href !== '/' && (
+            pathname.split('/')[1] === item.href.split('/')[1].replace(/s$/, '') ||
+            (item.href === '/solutions' && pathname.split('/')[1] === 'result')
+          ))
             ? 'bg-gray-800 text-white'
             : 'text-gray-300 hover:bg-gray-800 hover:text-white'
         }`}

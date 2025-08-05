@@ -64,6 +64,7 @@ export default function SolutionsPage() {
   const handleSolve = async () => {
     if (!selectedSolution) return;
     
+    setNumSolutionsDialogOpen(false); // Close dialog immediately
     try {
       setSolvingLoading(true);
       await solveSolution(selectedSolution.uuid, numSolutions);
@@ -73,7 +74,6 @@ export default function SolutionsPage() {
       console.error("Error solving solution:", err);
     } finally {
       setSolvingLoading(false);
-      setNumSolutionsDialogOpen(false);
       setSelectedSolution(null);
     }
   };
@@ -187,10 +187,10 @@ export default function SolutionsPage() {
               type="number"
               value={numSolutions}
               onChange={(e) => {
-                const value = parseInt(e.target.value) || 1;
-                setNumSolutions(Math.min(Math.max(value, 1), 5));
+                const value = parseInt(e.target.value) || 2;
+                setNumSolutions(Math.min(Math.max(value, 2), 5));
               }}
-              min={1}
+              min={2}
               max={5}
               className="w-full"
             />

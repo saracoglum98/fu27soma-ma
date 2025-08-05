@@ -2,6 +2,7 @@
 
 import { Suspense, useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { IconArrowLeft } from "@tabler/icons-react";
 import { SolutionDisplayResponse } from '../types/Solutions';
 import { displaySolution } from '../services/Solutions';
 import { analyzeKPI, optimizeSolution, analyzeSysML } from '../services/AgentCalls';
@@ -176,7 +177,13 @@ function ResultContent() {
       {/* Header */}
       <div className="flex items-center justify-between gap-4">
         <div className="flex items-center gap-4">
-          <Button variant="outline" onClick={() => router.back()}>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => router.back()}
+            className="mb-4"
+          >
+            <IconArrowLeft className="w-4 h-4 mr-2" />
             Back
           </Button>
           <h1 className="text-2xl font-bold">
