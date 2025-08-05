@@ -38,6 +38,8 @@ async def generate_kpi_analyst_schema(kpis: list, num_of_solutions: int):
                 },
                 "qualitative_analysis": {
                     "type": "array",
+                    "minItems": len([kpi for kpi in kpis if kpi["type"] == "qualitative"]),
+                    "maxItems": len([kpi for kpi in kpis if kpi["type"] == "qualitative"]),
                     "items": {
                         "type": "object",
                         "properties": {
@@ -55,10 +57,13 @@ async def generate_kpi_analyst_schema(kpis: list, num_of_solutions: int):
                             }
                         },
                         "required": ["kpi", "assessment", "rationale"]
-                    }
+                    },
+                    "uniqueItems": True
                 },
                 "quantitative_analysis": {
                     "type": "array",
+                    "minItems": len([kpi for kpi in kpis if kpi["type"] == "quantitative"]),
+                    "maxItems": len([kpi for kpi in kpis if kpi["type"] == "quantitative"]),
                     "items": {
                         "type": "object",
                         "properties": {
@@ -76,7 +81,8 @@ async def generate_kpi_analyst_schema(kpis: list, num_of_solutions: int):
                             }
                         },
                         "required": ["kpi", "assessment", "rationale"]
-                    }
+                    },
+                    "uniqueItems": True
                 }
             },
             "required": ["solution_id", "qualitative_analysis", "quantitative_analysis"]

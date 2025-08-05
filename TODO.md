@@ -4,8 +4,10 @@
 - Max File Size for Knowledge Item - 20 MB
 
 ## Infrastructure
+- remove unnecessary files
+- better Readme
 - replace all timeouts
-- move KPIs seed to seed script
+- move KPIs seed to seed script [DEMO]
 - Build on home linux
 - in management DB, bring model column
 - LM studio packing
@@ -13,8 +15,8 @@
 - change embedding to lm studio
 - change agent calls to lm studio
 - ui - agents - set model and context window and load
-- sysmlengine packing
-- sysmlengine API
+- sysmlengine packing [DEMO]
+- sysmlengine API [DEMO]
 - keycloak
 
 
