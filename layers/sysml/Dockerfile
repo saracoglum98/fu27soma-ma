@@ -1,25 +1,25 @@
-FROM --platform=linux/arm64 ubuntu:22.04
+FROM ubuntu:24.04
 
-RUN apt-get update && apt-get install -y \
-    python3 \
-    python3-pip \
-    git \
+RUN apt update -y && \
+    apt install -y \
     openjdk-21-jdk \
+    git \
     wget \
-    && rm -rf /var/lib/apt/lists/*
+    ucommon-utils
 
 # Install Miniconda
-RUN wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-aarch64.sh -O /tmp/miniconda.sh \
-    && chmod +x /tmp/miniconda.sh \
-    && /tmp/miniconda.sh -b -p /opt/conda \
-    && rm /tmp/miniconda.sh
+RUN wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh && \
+    ln -s /usr/bin/md5sum /bin/md5 && \
+    bash Miniconda3-latest-Linux-x86_64.sh -b -p /opt/conda && \
+    rm Miniconda3-latest-Linux-x86_64.sh
 
 # Add conda to path
-ENV PATH="/opt/conda/bin:${PATH}"
+ENV PATH=/opt/conda/bin:$PATH
 
-WORKDIR /app
+COPY install.sh /install.sh
+RUN chmod +x /install.sh && \
+    /install.sh
 
-RUN git clone https://github.com/Systems-Modeling/SysML-v2-Release.git .
+EXPOSE 8888
 
-RUN chmod +x install/jupyter/install.sh
-RUN ./install.sh
+CMD ["jupyter", "lab", "--allow-root", "--ip=0.0.0.0", "--port=8888"]
