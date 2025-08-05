@@ -2,82 +2,76 @@ import re
 import httpx
 
 
-async def generate_kpi_analyst_schema(num_of_solutions: int):
-    """Generate schema for KPI analyst by fetching qualitative and quantitative KPIs.
+async def generate_kpi_analyst_schema(kpis: list):
+    """Generate schema for KPI analyst based on input KPIs.
     
     Args:
-        num_of_solutions: Number of solutions to generate analysis for
+        kpis: List of KPI objects containing type, key, and value
         
     Returns:
         dict: A schema matching the required format for KPI analysis
+        
+    Raises:
+        ValueError: If kpis is not a list or if required fields are missing
     """
-    qualitative_kpis = []
-    quantitative_kpis = []
-
-    # Make HTTP requests to fetch KPIs
-    async with httpx.AsyncClient(timeout=10.0) as client:
-        # Fetch qualitative KPIs
-        response = await client.get("http://knowledge-api:10000/kpi/qualitative")
-        if response.status_code == 200:
-            data = response.json()["data"]
-            qualitative_kpis = [kpi["value"] for kpi in data]
-
-        # Fetch quantitative KPIs
-        response = await client.get("http://knowledge-api:10000/kpi/quantitative")
-        if response.status_code == 200:
-            data = response.json()["data"]
-            quantitative_kpis = [kpi["value"] for kpi in data]
-
-    # Combine all KPIs
-    kpis = qualitative_kpis + quantitative_kpis
-    
-    # Generate the schema structure
+    if not isinstance(kpis, list):
+        raise ValueError(f"Expected kpis to be a list, got {type(kpis)}")
+        
+    # Validate KPI structure
+    for kpi in kpis:
+        if not isinstance(kpi, dict):
+            raise ValueError(f"Expected KPI to be a dict, got {type(kpi)}")
+        if "type" not in kpi or "key" not in kpi:
+            raise ValueError(f"KPI missing required fields 'type' or 'key': {kpi}")
+        if kpi["type"] not in ["qualitative", "quantitative"]:
+            raise ValueError(f"Invalid KPI type '{kpi['type']}'. Must be 'qualitative' or 'quantitative'")
     schema = {
         "type": "object",
         "properties": {
-            "kpi_analysis": {
+            "qualitative_analysis": {
                 "type": "array",
                 "items": {
                     "type": "object",
                     "properties": {
-                        "solution_index": {
-                            "type": "integer",
-                            "minimum": 1,
-                            "description": "Index of the solution being analyzed"
+                        "kpi": {
+                            "type": "string",
+                            "enum": [kpi["key"] for kpi in kpis if kpi["type"] == "qualitative"]
                         },
-                        "ratings": {
-                            "type": "object",
-                            "properties": {
-                                kpi: {
-                                    "type": "object",
-                                    "properties": {
-                                        "rating": {
-                                            "type": "string",
-                                            "enum": ["low", "medium", "high"],
-                                            "description": "Rating level for KPI"
-                                        },
-                                        "direction": {
-                                            "type": "string",
-                                            "enum": ["high_is_better", "low_is_better"],
-                                            "description": "Whether high or low values are better for this KPI"
-                                        }
-                                    },
-                                    "required": ["rating", "direction"],
-                                    "description": "Object containing rating and direction for the KPI"
-                                } for kpi in kpis
-                            },
-                            "required": kpis,
-                            "description": "Map of KPI names to their rating levels"
+                        "assessment": {
+                            "type": "string",
+                            "enum": ["low", "medium", "high"]
+                        },
+                        "rationale": {
+                            "type": "string",
+                            "description": "Brief explanation of the analysis"
                         }
                     },
-                    "required": ["solution_index", "ratings"]
-                },
-                "minItems": num_of_solutions,
-                "maxItems": num_of_solutions,
-                "description": "Array of KPI analyses for each solution"
+                    "required": ["kpi", "assessment", "rationale"]
+                }
+            },
+            "quantitative_analysis": {
+                "type": "array",
+                "items": {
+                    "type": "object",
+                    "properties": {
+                        "kpi": {
+                            "type": "string",
+                            "enum": [kpi["key"] for kpi in kpis if kpi["type"] == "quantitative"]
+                        },
+                        "assessment": {
+                            "type": "string",
+                            "enum": ["hit", "miss"]
+                        },
+                        "rationale": {
+                            "type": "string",
+                            "description": "Brief explanation of the analysis"
+                        }
+                    },
+                    "required": ["kpi", "assessment", "rationale"]
+                }
             }
         },
-        "required": ["kpi_analysis"]
+        "required": ["qualitative_analysis", "quantitative_analysis"]
     }
     
     return schema

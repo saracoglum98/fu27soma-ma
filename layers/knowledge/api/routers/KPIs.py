@@ -3,6 +3,7 @@ from typing import List
 from uuid import UUID
 from schemas.KPIs import (
     KPIsR,
+    KPIsSimpleR,
     QualitativeKPIC,
     QuantitativeKPIC,
     QualitativeKPIU,
@@ -51,6 +52,25 @@ async def get_quantitative_kpis():
             uuid=row['uuid'],
             key=row['key'],
             type=KPIType.quantitative,
+            value=row['value']
+        ) for row in result
+    ]
+    cursor.close()
+    conn.close()
+    return kpis
+
+@router.get("/all", name="Get All KPIs", response_model=List[KPIsSimpleR])
+async def get_all_kpis():
+    conn = my_db()
+    cursor = conn.cursor()
+    cursor.execute(
+        "SELECT key, type, value FROM kpis ORDER BY type, key"
+    )
+    result = cursor.fetchall()
+    kpis = [
+        KPIsSimpleR(
+            key=row['key'],
+            type=row['type'],
             value=row['value']
         ) for row in result
     ]

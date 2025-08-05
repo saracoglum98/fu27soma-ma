@@ -24,6 +24,11 @@ class KPIsR(BaseModel):
     key: str
     value: Optional[str] = None
 
+class KPIsSimpleR(BaseModel):
+    type: KPIType
+    key: str
+    value: Optional[str] = None
+
 # Create models
 class QualitativeKPIC(BaseModel):
     key: str

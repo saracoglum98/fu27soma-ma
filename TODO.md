@@ -16,6 +16,28 @@
 - SysML Layer - API - Visualize [TUESDAY]
 - Management Layer - Auth
 
+## Infrastructure
+- Build on home linux
+- in management DB, bring model column
+- LM studio packing
+- lm studio init load models
+- change embedding to lm studio
+- change agent calls to lm studio
+- ui - agents - set model and context window and load
+- sysmlengine packing
+- sysmlengine API
+- keycloak
+
+
+## UI
+- communication-app -- New KPI view
+- communication-app -- sidebar attention include single ones
+- communication-app -- solution play, close the dialog
+- communication-app -- solution space and function, show good title, change name dialog
+- communication-app -- back button of result
+- communication-app -- top right - go to SysML engine
+- communication-app -- minimum solution number 2
+
 ## Secondary
 - LLM Layer - API - Provide System Prompt in Request
 - LLM Layer - API - Provide Output JSON Schema in Request

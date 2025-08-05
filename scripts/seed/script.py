@@ -3,26 +3,40 @@ from dotenv import load_dotenv
 import os
 import requests
 import time
+import logging
+
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    datefmt='%Y-%m-%d %H:%M:%S'
+)
 
 load_dotenv()
 
 def process_sql_file(filename):
-    postgres_conn = psycopg2.connect(
-        host="localhost",
-        port="5432",
-        database=os.getenv("POSTGRES_DB"),
-        user=os.getenv("POSTGRES_USER"),
-        password=os.getenv("POSTGRES_PASSWORD"),
-    )
-    postgres_cursor = postgres_conn.cursor()
+    logging.info(f"Starting to process SQL file: {filename}")
+    try:
+        postgres_conn = psycopg2.connect(
+            host="localhost",
+            port="5432",
+            database=os.getenv("POSTGRES_DB"),
+            user=os.getenv("POSTGRES_USER"),
+            password=os.getenv("POSTGRES_PASSWORD"),
+        )
+        postgres_cursor = postgres_conn.cursor()
 
-    with open(f'{os.getenv("SEED_DATA_FOLDER")}/{os.getenv("SEED_DATA_FOLDER_SQL")}/{filename}', "r") as file:
-        sql_commands = file.read()
-        postgres_cursor.execute(sql_commands)
+        with open(f'{os.getenv("SEED_DATA_FOLDER")}/{os.getenv("SEED_DATA_FOLDER_SQL")}/{filename}', "r") as file:
+            sql_commands = file.read()
+            postgres_cursor.execute(sql_commands)
 
-    postgres_conn.commit()
-    postgres_cursor.close()
-    postgres_conn.close()
+        postgres_conn.commit()
+        postgres_cursor.close()
+        postgres_conn.close()
+        logging.info(f"Successfully processed SQL file: {filename}")
+    except Exception as e:
+        logging.error(f"Error processing SQL file {filename}: {str(e)}")
+        raise
 
 def upload_knowledge_items(uuid: str, filename: str):
     """

@@ -76,16 +76,21 @@ async def kpi_analyst(solution_uuid: str):
         # Fetch KPIs for the prompt
         async with httpx.AsyncClient(timeout=180.0) as client:
             # Fetch qualitative KPIs
-            qual_response = await client.get("http://knowledge-api:10000/kpi/qualitative")
-            quant_response = await client.get("http://knowledge-api:10000/kpi/quantitative")
+            response = await client.get("http://knowledge-api:10000/kpi/all")
             
             kpis = []
-            if qual_response.status_code == 200:
-                data = qual_response.json()["data"]
-                kpis.extend([kpi["value"] for kpi in data])
-            if quant_response.status_code == 200:
-                data = quant_response.json()["data"]
-                kpis.extend([kpi["value"] for kpi in data])
+            if response.status_code == 200:
+                data = response.json()
+                # Process the KPIs into the expected format
+                for kpi in data:
+                    kpis.append({
+                        "key": kpi["key"],
+                        "type": kpi["type"],
+                        "value": None  # Initial value is null, will be populated with actual values later
+                    })
+
+        # Generate KPI analyst schema
+        kpi_schema = await generate_kpi_analyst_schema(kpis)
 
         # OpenAI-compatible endpoint configuration
         api_endpoint = "http://host.docker.internal:1234/v1/chat/completions"
@@ -115,9 +120,7 @@ async def kpi_analyst(solution_uuid: str):
         if "%kpis%" in user_prompt:
             user_prompt = user_prompt.replace("%kpis%", json.dumps(kpis, indent=2))
 
-        # Generate schema for validation
-        schema = await generate_kpi_analyst_schema(num_of_solutions)
-
+        # Use the previously generated schema for validation
         payload = {
             "model": "expert",
             "messages": [
@@ -129,7 +132,7 @@ async def kpi_analyst(solution_uuid: str):
             ],
             "response_format": {
                 "type": "json_schema",
-                "json_schema": {"schema": schema}
+                "json_schema": {"schema": kpi_schema}
             }
         }
 
