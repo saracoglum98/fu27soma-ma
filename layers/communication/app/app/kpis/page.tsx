@@ -11,29 +11,34 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
-import { IconPlus, IconTrash } from "@tabler/icons-react";
+import { IconEdit, IconPlus, IconTrash } from "@tabler/icons-react";
 
 import {
   getQualitativeKPIs,
   getQuantitativeKPIs,
   createQualitativeKPI,
   createQuantitativeKPI,
-  deleteQualitativeKPI,
-  deleteQuantitativeKPI,
+  updateQualitativeKPI,
+  updateQuantitativeKPI,
+  deleteKPI,
 } from "../services/KPIs";
-
-interface KPI {
-  uuid: string;
-  value: string;
-}
+import { KPIResponse, KPIType } from "../types/KPIs";
 
 interface KPIDialogProps {
-  onSave: (value: string) => Promise<void>;
+  onSave: (key: string) => Promise<void>;
   title: string;
+  initialValue?: string;
 }
 
-function KPIDialog({ onSave, title }: KPIDialogProps) {
-  const [value, setValue] = useState("");
+interface EditKPIDialogProps {
+  kpi: KPIResponse;
+  onSave: (key: string, value?: string) => Promise<void>;
+  title: string;
+  type: KPIType;
+}
+
+function KPIDialog({ onSave, title, initialValue = "" }: KPIDialogProps) {
+  const [value, setValue] = useState(initialValue);
   const [isOpen, setIsOpen] = useState(false);
 
   const handleSave = async () => {
@@ -51,13 +56,16 @@ function KPIDialog({ onSave, title }: KPIDialogProps) {
           <IconPlus className="h-4 w-4" />
         </Button>
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent className="sm:max-w-[425px]" aria-describedby={`${title}-description`}>
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
+          <p id={`${title}-description`} className="text-sm text-muted-foreground">
+            Enter the key for the KPI below.
+          </p>
         </DialogHeader>
         <div className="space-y-4 pt-4">
           <Input
-            placeholder="Enter KPI name"
+            placeholder="Enter KPI key"
             value={value}
             onChange={(e) => setValue(e.target.value)}
           />
@@ -70,12 +78,67 @@ function KPIDialog({ onSave, title }: KPIDialogProps) {
   );
 }
 
-interface KPIListProps {
-  items: KPI[];
-  onDelete: (uuid: string) => Promise<void>;
+function EditKPIDialog({ kpi, onSave, title, type }: EditKPIDialogProps) {
+  const [key, setKey] = useState(kpi.key);
+  const [value, setValue] = useState(type === KPIType.quantitative ? (kpi.value || "") : "");
+  const [isOpen, setIsOpen] = useState(false);
+
+  const handleSave = async () => {
+    if (key.trim()) {
+      const newValue = type === KPIType.quantitative ? (value.trim() || undefined) : undefined;
+      await onSave(key, newValue);
+      setIsOpen(false);
+    }
+  };
+
+  return (
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <DialogTrigger asChild>
+        <Button variant="outline" size="sm">
+          <IconEdit className="h-4 w-4" />
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-[425px]" aria-describedby={`${title}-description`}>
+        <DialogHeader>
+          <DialogTitle>{title}</DialogTitle>
+          <p id={`${title}-description`} className="text-sm text-muted-foreground">
+            Edit the KPI details below.
+          </p>
+        </DialogHeader>
+        <div className="space-y-4 pt-4">
+          <Input
+            placeholder="Enter KPI key"
+            value={key}
+            onChange={(e) => setKey(e.target.value)}
+          />
+          {type === KPIType.quantitative && (
+            <Input
+              placeholder="Enter KPI value (optional)"
+              value={value}
+              onChange={(e) => setValue(e.target.value)}
+            />
+          )}
+          <Button onClick={handleSave} className="w-full">
+            Save
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
 }
 
-function KPIList({ items, onDelete }: KPIListProps) {
+interface KPIListProps {
+  items: KPIResponse[];
+  onDelete: (uuid: string) => Promise<void>;
+  onEdit: (kpi: KPIResponse) => Promise<void>;
+  type: KPIType;
+}
+
+function KPIList({ items = [], onDelete, onEdit, type }: KPIListProps) {
+  if (!Array.isArray(items)) {
+    return <div>No items available</div>;
+  }
+
   return (
     <div className="space-y-2">
       {items.map((item) => (
@@ -83,15 +146,33 @@ function KPIList({ items, onDelete }: KPIListProps) {
           key={item.uuid}
           className="flex items-center justify-between rounded-md border p-2"
         >
-          <span>{item.value}</span>
-          <Button
-            variant="outline"
-            size="sm"
-            className="text-red-600 hover:text-red-700"
-            onClick={() => onDelete(item.uuid)}
-          >
-            <IconTrash className="h-4 w-4" />
-          </Button>
+          <div className="flex flex-col">
+            <span className="font-medium">{item.key}</span>
+            {item.value && <span className="text-sm text-gray-500">{item.value}</span>}
+          </div>
+          <div className="flex gap-2">
+            <EditKPIDialog
+              kpi={item}
+              type={type}
+              onSave={async (key, value) => {
+                if (type === KPIType.qualitative) {
+                  await updateQualitativeKPI(item.uuid, { key, value });
+                } else {
+                  await updateQuantitativeKPI(item.uuid, { key, value });
+                }
+                await onEdit(item);
+              }}
+              title={`Edit ${type} KPI`}
+            />
+            <Button
+              variant="outline"
+              size="sm"
+              className="text-red-600 hover:text-red-700"
+              onClick={() => onDelete(item.uuid)}
+            >
+              <IconTrash className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
       ))}
     </div>
@@ -99,39 +180,52 @@ function KPIList({ items, onDelete }: KPIListProps) {
 }
 
 export default function KPIsPage() {
-  const [qualitativeKPIs, setQualitativeKPIs] = useState<KPI[]>([]);
-  const [quantitativeKPIs, setQuantitativeKPIs] = useState<KPI[]>([]);
+  const [qualitativeKPIs, setQualitativeKPIs] = useState<KPIResponse[]>([]);
+  const [quantitativeKPIs, setQuantitativeKPIs] = useState<KPIResponse[]>([]);
 
   const fetchKPIs = async () => {
-    const [qualitative, quantitative] = await Promise.all([
-      getQualitativeKPIs(),
-      getQuantitativeKPIs(),
-    ]);
-    setQualitativeKPIs(qualitative);
-    setQuantitativeKPIs(quantitative);
+    try {
+      const [qualitative, quantitative] = await Promise.all([
+        getQualitativeKPIs(),
+        getQuantitativeKPIs(),
+      ]);
+      setQualitativeKPIs(qualitative || []);
+      setQuantitativeKPIs(quantitative || []);
+    } catch (error) {
+      console.error('Failed to fetch KPIs:', error);
+      setQualitativeKPIs([]);
+      setQuantitativeKPIs([]);
+    }
   };
 
   useEffect(() => {
     fetchKPIs();
   }, []);
 
-  const handleCreateQualitative = async (value: string) => {
-    await createQualitativeKPI(value);
+  const handleCreateQualitative = async (key: string) => {
+    try {
+      await createQualitativeKPI({ key });
+      await fetchKPIs();
+    } catch (error) {
+      console.error('Failed to create qualitative KPI:', error);
+    }
+  };
+
+  const handleCreateQuantitative = async (key: string) => {
+    try {
+      await createQuantitativeKPI({ key, value: "" });
+      await fetchKPIs();
+    } catch (error) {
+      console.error('Failed to create quantitative KPI:', error);
+    }
+  };
+
+  const handleDelete = async (uuid: string) => {
+    await deleteKPI(uuid);
     await fetchKPIs();
   };
 
-  const handleCreateQuantitative = async (value: string) => {
-    await createQuantitativeKPI(value);
-    await fetchKPIs();
-  };
-
-  const handleDeleteQualitative = async (uuid: string) => {
-    await deleteQualitativeKPI(uuid);
-    await fetchKPIs();
-  };
-
-  const handleDeleteQuantitative = async (uuid: string) => {
-    await deleteQuantitativeKPI(uuid);
+  const handleEdit = async () => {
     await fetchKPIs();
   };
 
@@ -152,7 +246,9 @@ export default function KPIsPage() {
           </div>
           <KPIList
             items={quantitativeKPIs}
-            onDelete={handleDeleteQuantitative}
+            onDelete={handleDelete}
+            onEdit={handleEdit}
+            type={KPIType.quantitative}
           />
         </div>
 
@@ -169,7 +265,9 @@ export default function KPIsPage() {
           </div>
           <KPIList
             items={qualitativeKPIs}
-            onDelete={handleDeleteQualitative}
+            onDelete={handleDelete}
+            onEdit={handleEdit}
+            type={KPIType.qualitative}
           />
         </div>
       </div>

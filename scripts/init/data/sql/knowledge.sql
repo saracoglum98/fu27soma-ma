@@ -44,16 +44,16 @@ CREATE TYPE kpi_type AS ENUM ('qualitative', 'quantitative');
 CREATE TABLE IF NOT EXISTS kpis (
     uuid UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     type kpi_type NOT NULL,
-    value TEXT NOT NULL
+    key TEXT NOT NULL,
+    value TEXT
 );
 
-INSERT INTO kpis (type, value) VALUES ('quantitative', 'Profit Margin');
-INSERT INTO kpis (type, value) VALUES ('quantitative', 'COGS');
-INSERT INTO kpis (type, value) VALUES ('quantitative', 'Waste Percentage');
-INSERT INTO kpis (type, value) VALUES ('quantitative', 'Ingredient Utilization');
-INSERT INTO kpis (type, value) VALUES ('quantitative', 'Energy Consumption');
+INSERT INTO kpis (type, key, value) VALUES ('quantitative', 'COGS', '5 USD');
+INSERT INTO kpis (type, key, value) VALUES ('quantitative', 'Waste Percentage', '20%');
+INSERT INTO kpis (type, key, value) VALUES ('quantitative', 'Ingredient Utilization', '80%');
+INSERT INTO kpis (type, key, value) VALUES ('quantitative', 'Energy Consumption', '100 kWh');
 
-INSERT INTO kpis (type, value) VALUES ('qualitative', 'Product Quality');
-INSERT INTO kpis (type, value) VALUES ('qualitative', 'Visual Appeal');
-INSERT INTO kpis (type, value) VALUES ('qualitative', 'Freshness');
-INSERT INTO kpis (type, value) VALUES ('qualitative', 'Sustainability');
+INSERT INTO kpis (type, key) VALUES ('qualitative', 'Product Quality');
+INSERT INTO kpis (type, key) VALUES ('qualitative', 'Visual Appeal');
+INSERT INTO kpis (type, key) VALUES ('qualitative', 'Freshness');
+INSERT INTO kpis (type, key) VALUES ('qualitative', 'Sustainability');
