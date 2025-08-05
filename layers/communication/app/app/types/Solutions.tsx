@@ -24,4 +24,5 @@ export interface SolutionDisplayResponse extends Solution {
   solution_space: string;
   table: { [key: string]: string[] };
   result_initial_analysis?: Record<string, any>;
+  result_final_analysis?: Record<string, any>;
 }

@@ -457,6 +457,9 @@ function ResultContent() {
               <TabsList>
                 <TabsTrigger value="summary">Executive Summary</TabsTrigger>
                 <TabsTrigger value="reasoning">Reasoning</TabsTrigger>
+                {solution.result_final_analysis && (
+                  <TabsTrigger value="kpi">KPI Analysis</TabsTrigger>
+                )}
               </TabsList>
 
               <TabsContent value="summary" className="space-y-4">
@@ -506,6 +509,81 @@ function ResultContent() {
                   </TableBody>
                 </Table>
               </TabsContent>
+
+              {solution.result_final_analysis && (
+                <TabsContent value="kpi">
+                  <Tabs defaultValue="qualitative" className="w-full">
+                    <TabsList>
+                      <TabsTrigger value="qualitative">Qualitative Analysis</TabsTrigger>
+                      <TabsTrigger value="quantitative">Quantitative Analysis</TabsTrigger>
+                    </TabsList>
+
+                    <TabsContent value="qualitative">
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead>KPI</TableHead>
+                            <TableHead>Assessment</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {(solution.result_final_analysis[0] as KPIAnalysis).qualitative_analysis.map((analysis, idx) => (
+                            <TableRow key={idx}>
+                              <TableCell className="font-medium">{analysis.kpi}</TableCell>
+                              <TableCell>
+                                <HoverCard>
+                                  <HoverCardTrigger>
+                                    <span className={
+                                      analysis.assessment === 'high' ? 'text-green-600 font-semibold' :
+                                      analysis.assessment === 'medium' ? 'text-yellow-600' :
+                                      'text-red-600'
+                                    }>
+                                      {analysis.assessment.charAt(0).toUpperCase() + analysis.assessment.slice(1)}
+                                    </span>
+                                  </HoverCardTrigger>
+                                  <HoverCardContent>
+                                    <p className="text-sm">{analysis.rationale}</p>
+                                  </HoverCardContent>
+                                </HoverCard>
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </TabsContent>
+
+                    <TabsContent value="quantitative">
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead>KPI</TableHead>
+                            <TableHead>Assessment</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {(solution.result_final_analysis[0] as KPIAnalysis).quantitative_analysis.map((analysis, idx) => (
+                            <TableRow key={idx}>
+                              <TableCell className="font-medium">{analysis.kpi}</TableCell>
+                              <TableCell>
+                                <HoverCard>
+                                  <HoverCardTrigger>
+                                    <span className={analysis.assessment === 'hit' ? 'text-green-600 font-semibold' : 'text-red-600'}>
+                                      {analysis.assessment.charAt(0).toUpperCase() + analysis.assessment.slice(1)}
+                                    </span>
+                                  </HoverCardTrigger>
+                                  <HoverCardContent>
+                                    <p className="text-sm">{analysis.rationale}</p>
+                                  </HoverCardContent>
+                                </HoverCard>
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </TabsContent>
+                  </Tabs>
+                </TabsContent>
+              )}
             </Tabs>
           </CardContent>
         </Card>
