@@ -164,7 +164,7 @@ def init_agents(model_name):
             (
                 model_name,  # name
                 'grok-3-reasoning-gemma3-12b-distilled-hf',
-                0.7,  # temperature
+                0.5,  # temperature
                 prompt_system,  # prompt_system
                 prompt_user,  # prompt_user
                 json.dumps(output_schema)  # output_schema as JSON string

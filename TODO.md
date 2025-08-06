@@ -7,6 +7,8 @@
 - remove unnecessary files
 - better Readme
 - replace all timeouts
+- when click Solve, auto click KPI Analysis
+- default temperature
 - move KPIs seed to seed script [DEMO]
 - Build on home linux
 - in management DB, bring model column
