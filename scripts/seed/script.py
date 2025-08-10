@@ -114,5 +114,6 @@ if __name__ == "__main__":
     process_sql_file("solution_spaces.sql")
     process_sql_file("solutions.sql")
     process_sql_file("knowledge_items.sql")
+    process_sql_file("kpis.sql")
     upload_knowledge_items("3ae112f2-131d-4263-bc2c-28297f1c1174", "layered-cake.pdf")
     attach_knowledge_items_to_options("1a243517-767c-4b92-a9b1-4d136032bbaa", "3ae112f2-131d-4263-bc2c-28297f1c1174")
