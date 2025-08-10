@@ -35,7 +35,7 @@ tool_replace_inplace() {
     local replace_string="$3"
 
     # Silently perform the replacement using sed
-    sed -i '' "s|${search_string}|${replace_string}|g" "$file_path" 2>/dev/null
+    sed -i "s|${search_string}|${replace_string}|g" "$file_path" 2>/dev/null
 }
 
 tool_container_status() {
