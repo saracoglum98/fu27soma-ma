@@ -11,9 +11,29 @@ tool_read_yaml() {
     # Add leading dot for yq syntax
     local yq_path=".$keys"
 
+    # Check if yq is available
+    if ! command -v yq >/dev/null 2>&1; then
+        echo "Error: yq is not installed. Please install yq to use this script." >&2
+        return 1
+    fi
+
+    # Check if config file exists
+    if [ ! -f "$SCRIPT_DIR/$CONFIG_FILE" ]; then
+        echo "Error: Config file $SCRIPT_DIR/$CONFIG_FILE not found" >&2
+        return 1
+    fi
+
     # Try to read the YAML file with the path, using absolute path
     if ! value=$(yq eval "$yq_path" "$SCRIPT_DIR/$CONFIG_FILE" 2>/dev/null); then
-        echo "Error: Failed to read YAML path: $yq_path" >&2
+        echo "Error: Failed to read YAML path: $yq_path from $SCRIPT_DIR/$CONFIG_FILE" >&2
+        echo "Available keys in config:" >&2
+        yq eval 'keys' "$SCRIPT_DIR/$CONFIG_FILE" 2>/dev/null >&2 || echo "Could not read config file" >&2
+        return 1
+    fi
+
+    # Check if the value is null
+    if [ "$value" = "null" ]; then
+        echo "Error: Key '$keys' not found in config file" >&2
         return 1
     fi
 
@@ -21,7 +41,7 @@ tool_read_yaml() {
 }
 
 get_output_redirect() {
-    local debug_mode=$(tool_read_yaml "debug")
+    local debug_mode=$(tool_read_yaml "debug" 2>/dev/null || echo "false")
     if [ "$debug_mode" = "true" ]; then
         echo ""
     else
