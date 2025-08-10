@@ -52,15 +52,8 @@ layer_build() {
     local folder=$1
     cd "$SCRIPT_DIR/layers/$folder"
     echo -e "🚀 Building $folder"
-    
     local redirect=$(get_output_redirect)
-    
-    if [ "$folder" = "llm" ]; then
-        deployment_type=$(cd "$SCRIPT_DIR" && tool_read_yaml "deployment.type")
-        eval "docker compose -f \"docker-compose-${deployment_type}.yml\" up -d --build --force-recreate $redirect"
-    else
-        eval "docker compose up -d --build --force-recreate $redirect"
-    fi
+    eval "docker compose up -d --build --force-recreate $redirect"
     cd $SCRIPT_DIR
 }
 
@@ -121,6 +114,7 @@ env_create() {
     cp .env layers/knowledge/.env
     cp .env layers/llm/.env
     cp .env layers/management/.env
+    cp .env layers/sysml/.env
     cp .env scripts/init/.env
     cp .env scripts/seed/.env
     cd $SCRIPT_DIR
@@ -132,6 +126,7 @@ clear() {
     rm -rf layers/knowledge/.env
     rm -rf layers/llm/.env
     rm -rf layers/management/.env
+    rm -rf layers/sysml/.env
     rm -rf scripts/init/.env
     rm -rf scripts/seed/.env
     cd $SCRIPT_DIR
@@ -166,12 +161,21 @@ if [ "$1" = "help" ]; then
 fi 
 
 if [ "$1" = "status" ]; then
-    echo -e "Web App \t\t\t$(tool_container_status "communication-app")"
-    echo -e "LLM Inference Engine \t\t$(tool_container_status "llm-inference")"
-    echo -e "Relational knowledge Storage \t$(tool_container_status "knowledge-relational")"
-    echo -e "Object knowledge Storage \t\t$(tool_container_status "knowledge-object")"
-    echo -e "Vector knowledge Storage \t\t$(tool_container_status "knowledge-vector")"
-    echo -e "Management API \t\t\t$(tool_container_status "management-api")"
+    echo -e "Communication \t App \t\t\t$(tool_container_status "communication-app")"
+    echo
+    echo -e "Management \t API \t\t\t$(tool_container_status "management-api")"
+    echo -e "Management \t Data \t\t\t$(tool_container_status "management-data")"
+    echo -e "Management \t Logs \t\t\t$(tool_container_status "management-logs")"
+    echo
+    echo -e "LLM \t\t API \t\t\t$(tool_container_status "llm-api")"
+    echo -e "LLM \t\t Inference Engine \t$(tool_container_status "llm-inference")"
+    echo -e "LLM \t\t Finetuning \t\t$(tool_container_status "llm-finetuning")"
+    echo
+    echo -e "Data \t\t API \t\t\t$(tool_container_status "knowledge-api")"
+    echo -e "Data \t\t Relational \t\t$(tool_container_status "knowledge-relational")"
+    echo -e "Data \t\t Object \t\t$(tool_container_status "knowledge-object")"
+    echo -e "Data \t\t Vector \t\t$(tool_container_status "knowledge-vector")"
+    
     exit 0
 fi 
 
@@ -182,12 +186,14 @@ if [ "$1" = "build" ]; then
     eval "service_destroy \"communication-app\" $redirect"
     eval "service_destroy \"llm-inference\" $redirect"
     eval "service_destroy \"llm-api\" $redirect"
+    eval "service_destroy \"llm-finetuning\" $redirect"
     eval "service_destroy \"knowledge-relational\" $redirect"
     eval "service_destroy \"knowledge-object\" $redirect"
     eval "service_destroy \"knowledge-vector\" $redirect"
     eval "service_destroy \"knowledge-api\" $redirect"
     eval "service_destroy \"management-api\" $redirect"
     eval "service_destroy \"management-data\" $redirect"
+    eval "service_destroy \"management-logs\" $redirect"
     #eval "docker rm $(docker ps -f status=exited -aq) $redirect"
     #eval "docker rmi $(docker images -f "dangling=true" -q) $redirect"
     #eval "docker volume rm $(docker volume ls -f "dangling=true" -q) $redirect"
@@ -198,6 +204,7 @@ if [ "$1" = "build" ]; then
     layer_build "llm"
     layer_build "communication"
     layer_build "management"
+    layer_build "sysml"
     init
     
     if [ "$2" = "--seed" ]; then
@@ -215,12 +222,14 @@ if [ "$1" = "start" ]; then
     service_start "communication-app"
     service_start "llm-inference"
     service_start "llm-api"
+    service_start "llm-finetuning"
     service_start "knowledge-api"
     service_start "knowledge-relational"
     service_start "knowledge-object"
     service_start "knowledge-vector"
     service_start "management-api"
     service_start "management-data"
+    service_start "management-logs"
     echo -e "\n🎉 All services started\n"
 fi
 
@@ -228,12 +237,14 @@ if [ "$1" = "stop" ]; then
     service_stop "communication-app"
     service_stop "llm-inference"
     service_stop "llm-api"
+    service_stop "llm-finetuning"
     service_stop "knowledge-api"
     service_stop "knowledge-relational"
     service_stop "knowledge-object"
     service_stop "knowledge-vector"
     service_stop "management-api"
     service_stop "management-data"
+    service_stop "management-logs"
     echo -e "\n🎉 All services stopped\n"
 fi
 
@@ -241,12 +252,14 @@ if [ "$1" = "restart" ]; then
     service_restart "communication-app"
     service_restart "llm-inference"
     service_restart "llm-api"
+    service_restart "llm-finetuning"
     service_restart "knowledge-api"
     service_restart "knowledge-relational"
     service_restart "knowledge-object"
     service_restart "knowledge-vector"
     service_restart "management-api"
     service_restart "management-data"
+    service_restart "management-logs"
     echo -e "\n🎉 All services restarted\n"
 fi
 
@@ -254,12 +267,14 @@ if [ "$1" = "destroy" ]; then
     service_destroy "communication-app"
     service_destroy "llm-inference"
     service_destroy "llm-api"
+    service_destroy "llm-finetuning"
     service_destroy "knowledge-api"
     service_destroy "knowledge-relational"
     service_destroy "knowledge-object"
     service_destroy "knowledge-vector"
     service_destroy "management-api"
     service_destroy "management-data"
+    service_destroy "management-logs"
     echo -e "\n🎉 All services destroyed\n"
 fi
 

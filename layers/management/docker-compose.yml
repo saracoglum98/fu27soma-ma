@@ -20,6 +20,16 @@ services:
       - "5433:5432"
     networks:
       - app-network
+  management-logs:
+    container_name: management-logs
+    image: amir20/dozzle:latest
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
+    networks:
+      - app-network
 
 networks:
   app-network:

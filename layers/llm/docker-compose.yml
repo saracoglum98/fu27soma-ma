@@ -23,6 +23,18 @@ services:
     restart: unless-stopped
     networks:
       - app-network
+  llm-finetuning:
+    build:
+      context: ./finetuning
+      dockerfile: Dockerfile
+    container_name: llm-finetuning
+    ports:
+      - "6969:6969"
+    env_file:
+      - .env
+    restart: unless-stopped
+    networks:
+      - app-network
 
 volumes:
   llm-inference-data:
