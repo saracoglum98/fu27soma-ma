@@ -30,6 +30,24 @@ services:
     restart: unless-stopped
     networks:
       - app-network
+  management-auth:
+    container_name: management-auth
+    image: quay.io/keycloak/keycloak:latest
+    command: start-dev
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://management-data:5432/postgres
+      KC_DB_USERNAME: root
+      KC_DB_PASSWORD: fu27soma
+    ports:
+      - "9090:8080"
+    depends_on:
+      - management-data
+    restart: unless-stopped
+    networks:
+      - app-network
 
 networks:
   app-network:
