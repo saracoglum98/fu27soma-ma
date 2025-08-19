@@ -167,12 +167,12 @@ seed() {
 
 # Check if help argument is provided
 if [ "$1" = "help" ]; then
-    echo "Usage: ./manage.sh [command]"
+    echo "Usage: llm-se [command]"
     echo ""
     echo "Commands:"
     echo "  help            Show this help message"
     echo "  build           Build all services"
-    echo "  build --seed    Build all services and seed sample knowledge"
+    echo "  seed            Seed sample data"
     echo "  start           Start all services"
     echo "  stop            Stop all services"
     echo "  restart         Restart all services"
@@ -199,6 +199,10 @@ if [ "$1" = "status" ]; then
     
     exit 0
 fi 
+
+if [ "$1" = "seed" ]; then
+    seed
+fi
 
 if [ "$1" = "build" ]; then
     redirect=$(get_output_redirect)
@@ -227,10 +231,6 @@ if [ "$1" = "build" ]; then
     layer_build "management"
     layer_build "sysml"
     init
-    
-    if [ "$2" = "--seed" ]; then
-        seed
-    fi
     
     clear
     toc=$(date +%s)

@@ -1,7 +1,17 @@
 # fu27soma-ma
 
-After a clean installation of Ubuntu Server 24.04 LTS on a host machine or a virtual machine, SSH into it and run the following code block.
+## 1. Preparation
+Install Debian 13 on x86 based machine with a CUDA enabled NVIDIA GPU. Make sure to enable SSH server during the installation and note your username.
 
+SSH into the machine and add your user into the *sudoers* group by running the following code block:
+```
+su -l
+adduser {YOURUSERNAME} sudo
+exit
+exit
+```
+
+To install the dependencies and prepare the OS, SSH into the machine again and run the following commands:
 ```
 sudo apt update -y
 sudo apt upgrade -y
@@ -13,18 +23,20 @@ chmod +x init.sh
 ./init.sh
 ```
 
-This code block will install dependencies, and prepare the operating system. 
+Finally, the machine will reboot itself. After the OS boots up, the host machine is ready for operation.
+
+## 2. Managing the Framework
 
 The default configraution will use CPU only for LLM inference. If the host machine is a GPU enabled machine, you will have to edit the configuration file accordingly.  Using `nano config.yaml`, or another method, change the `type: cpu` to `type: gpu`. If you want to do LLM inference on CPU only, you can skip this step. If you want to do further configuration for each microservice, you can have a look at `.env` file and `Dockerfile` files for each layer under `layers` folder. However, this is not suggested unless you know what you are doing.
 
-You can use `manage.sh` script to manage the codebase. run `./manage.sh help` and you will see the available options.
+You can use the alias `llm-se` to manage the codebase. run `llm-se help` and you will see the available options.
 ```
-Usage: ./manage.sh [command]
+Usage: llm-se [command]
 
 Commands:
   help            Show this help message
   build           Build all services
-  build --seed    Build all services and seed sample data
+  seed            Seed sample data
   start           Start all services
   stop            Stop all services
   restart         Restart all services
@@ -32,36 +44,14 @@ Commands:
   destroy         Destroy all services
 ```
 
-Finally, run one of the following commands to build all services. This can take 5 to 30 minutes, depending on your host machine and internet connection.
+## 3. Building
 
-If you want a clean build, run:
+Run the command below to build the framework. The build process can take 5 to 30 minutes, depending on your host machine and internet connection.
 ```
 ./manage.sh build
 ```
-Alternatively, if you want to seed sample data after the build, run:
+
+In addition, if you want to seed sample data after the build, run:
 ```
 ./manage.sh build --seed
-```
-
-The output of build command should look like this.
-```
-🪜  Preparing to build
-
-🌍 Creating network
-
-🛠️  Setting environment variables
-
-🚀 Building knowledge
-🚀 Building llm
-🚀 Building communication
-
-💨 Initializing services
-
-🌱 Seeding sample knowledge
-
-🧹 Clearing build related files
-
-⌛️ Build took 14.67 minutes
-🎉 All services are running
-🌐 Access the web app at http://localhost:3000
 ```
