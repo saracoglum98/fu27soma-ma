@@ -1,23 +1,19 @@
-# Preparation
 DEBIAN_FRONTEND=noninteractive
 
-# install JDK
-apt install openjdk-21-jdk
+# General dependencies
+sudo apt install -y yq curl ffmpeg uidmap zsh
 
-# install anaconda
-wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
-bash Miniconda3-latest-Linux-x86_64.sh
-source ~/.bashrc
+# oh-my-zsh
+echo "y\ny\n" | sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
 
-# accept TOS
-conda tos accept --override-channels --channel https://repo.anaconda.com/pkgs/main
-conda tos accept --override-channels --channel https://repo.anaconda.com/pkgs/r
-conda install -c conda-forge nodejs
-
-# git clone the repo
-git clone https://github.com/Systems-Modeling/SysML-v2-Release.git
-cd SysML-v2-Release/install/jupyter
-chmod +x install.sh
-./install.sh
-
+# docker
 curl -fsSL get.docker.com | bash
+dockerd-rootless-setuptool.sh install
+
+# uv package manager
+curl -LsSf https://astral.sh/uv/install.sh | sh
+source $HOME/.local/bin/env
+
+# LM studio
+
+cd -L
