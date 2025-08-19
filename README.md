@@ -3,13 +3,25 @@
 After a clean installation of Ubuntu Server 24.04 LTS on a host machine or a virtual machine, SSH into it and run the following code block.
 
 ```
+DEBIAN_FRONTEND=noninteractive
 apt update -y
 apt upgrade -y
 apt install git -y
 apt install yq -y
-# Docker installation
+apt install curl -y
+apt install ffmpeg -y
+apt install uidmap -y
+apt install zsh -y
+echo "y\ny\n" | sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+curl -fsSL get.docker.com | bash
+dockerd-rootless-setuptool.sh install
+curl -LsSf https://astral.sh/uv/install.sh | sh
+source $HOME/.local/bin/env
+apt install nvidia-driver-550 -y
+apt install nvidia-utils-550-server -y
+# Configure nvidia container docker 
 cd -L
-git clone https://github.com/saracoglumert/fu27soma-ma.git
+git clone -b local --single-branch https://github.com/saracoglum98/fu27soma-ma.git
 cd fu27soma-ma
 chmod +x manage.sh
 ```

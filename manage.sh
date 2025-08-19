@@ -4,6 +4,7 @@ clear
 
 CONFIG_FILE="config.yaml"
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+LOCAL_IP=$(hostname -I | awk '{print $1}')
 
 tool_read_yaml() {
     local keys="$1"
@@ -235,7 +236,7 @@ if [ "$1" = "build" ]; then
     toc=$(date +%s)
     echo -e "⌛️ Build took $(printf "%d minutes %d seconds" $(( ($toc - $tic) / 60 )) $(( ($toc - $tic) % 60 )))"
     echo -e "🎉 All services are running"
-    echo -e "🌐 Access the web app at http://localhost:3000\n"
+    echo -e "🌐 Access the application at http://$LOCAL_IP:3000\n"
 fi
 
 if [ "$1" = "start" ]; then
