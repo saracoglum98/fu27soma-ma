@@ -7,6 +7,7 @@
 - nvidia drivers
 - solve debug output
 - add user to docker group - README
+- communication-app - LOCAL_IP - instead of localhost
 
 ## Infrastructure
 - remove unnecessary files
