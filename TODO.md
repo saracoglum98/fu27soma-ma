@@ -3,6 +3,11 @@
 ## Insights
 - Max File Size for Knowledge Item - 20 MB
 
+## Son
+- nvidia drivers
+- solve debug output
+- add user to docker group - README
+
 ## Infrastructure
 - remove unnecessary files
 - better Readme

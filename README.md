@@ -1,12 +1,12 @@
 # fu27soma-ma
 
 ## 1. Preparation
-Install Debian 13 on x86 based machine with a CUDA enabled NVIDIA GPU. Make sure to enable SSH server during the installation and note your username.
+Install Debian 13 on x86 based machine with a CUDA enabled NVIDIA GPU. Make sure to enable SSH server during the installation and note your username. Do not forget to replace **{USERNAME}** with the username that you have set during the installation.
 
 SSH into the machine and add your user into the *sudoers* group by running the following code block:
 ```
 su -l
-adduser {YOURUSERNAME} sudo
+adduser {USERNAME} sudo
 exit
 exit
 ```
@@ -23,7 +23,17 @@ chmod +x init.sh
 ./init.sh
 ```
 
-Finally, the machine will reboot itself. After the OS boots up, the host machine is ready for operation.
+Add the your user to *docker* group: 
+```
+su -l
+adduser {USERNAME} sudo
+exit
+```
+
+Finally, reboot the machine using the command below. After the OS boots up, the host machine is ready for operation.
+```
+sudo reboot
+```
 
 ## 2. Managing the Framework
 

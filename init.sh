@@ -1,7 +1,8 @@
-# Initialize the environment
+# Set non-interactive mode
 DEBIAN_FRONTEND=noninteractive
 
-
+# Disable sleep
+sudo systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.target
 
 # General dependencies
 sudo apt install -y yq curl ffmpeg uidmap zsh fuse libfuse2 libasound2t64 xvfb xauth npm
@@ -29,9 +30,5 @@ echo 'llm-se() { ~/fu27soma-ma/manage.sh "$@" ;}' >> ~/.bashrc
 echo 'llm-se() { ~/fu27soma-ma/manage.sh "$@" ;}' >> ~/.zshrc
 echo 'export TERM=xterm' >> ~/.bashrc
 echo 'export TERM=xterm' >> ~/.zshrc
-sudo systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.target
-
-
-sudo reboot
 
 # pkill lms.AppImage
