@@ -1,9 +1,9 @@
 # fu27soma-ma
 
 ## 1. Preparation
-Install Debian 13 on x86 based machine with a CUDA enabled NVIDIA GPU. Make sure to enable SSH server during the installation and note your username. Do not forget to replace **{USERNAME}** with the username that you have set during the installation.
+Install Debian 13 on x86 based machine with a CUDA enabled NVIDIA GPU. Make sure to enable SSH server during the installation and note your username. Do not forget to replace **{USERNAME}** with the username that you have set during the installation. Some of the commands will ask for your root password.
 
-SSH into the machine and add your user into the *sudoers* group by running the following code block:
+SSH into the machine, add your user into the *sudoers* group, and logout by running the following code block:
 ```
 su -l
 adduser {USERNAME} sudo
@@ -23,10 +23,10 @@ chmod +x init.sh
 ./init.sh
 ```
 
-Add the your user to *docker* group: 
+Add your user to *docker* group: 
 ```
 su -l
-adduser {USERNAME} sudo
+adduser {USERNAME} docker
 exit
 ```
 
@@ -39,7 +39,7 @@ sudo reboot
 
 The default configraution will use CPU only for LLM inference. If the host machine is a GPU enabled machine, you will have to edit the configuration file accordingly.  Using `nano config.yaml`, or another method, change the `type: cpu` to `type: gpu`. If you want to do LLM inference on CPU only, you can skip this step. If you want to do further configuration for each microservice, you can have a look at `.env` file and `Dockerfile` files for each layer under `layers` folder. However, this is not suggested unless you know what you are doing.
 
-You can use the alias `llm-se` to manage the codebase. run `llm-se help` and you will see the available options.
+You can use the alias `llm-se` to manage the codebase. Run `llm-se help` and you will see the available options.
 ```
 Usage: llm-se [command]
 
@@ -58,10 +58,10 @@ Commands:
 
 Run the command below to build the framework. The build process can take 5 to 30 minutes, depending on your host machine and internet connection.
 ```
-./manage.sh build
+llm-se build
 ```
 
 In addition, if you want to seed sample data after the build, run:
 ```
-./manage.sh build --seed
+llm-se seed
 ```
