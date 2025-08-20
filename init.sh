@@ -27,7 +27,11 @@ echo -e "y\ny\ny" | npx --yes lmstudio install-cli
 chsh -s $(which zsh)
 echo 'llm-se() { ~/fu27soma-ma/manage.sh "$@" ;}' >> ~/.bashrc
 echo 'llm-se() { ~/fu27soma-ma/manage.sh "$@" ;}' >> ~/.zshrc
+echo 'export TERM=xterm' >> ~/.bashrc
 echo 'export TERM=xterm' >> ~/.zshrc
-echo 'export TERM=xterm' >> ~/.zshrc
+sudo systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.target
+
 
 sudo reboot
+
+# pkill lms.AppImage
