@@ -13,8 +13,8 @@ curl -LsSf https://astral.sh/uv/install.sh | sh
 # LM studio
 mkdir exec
 wget https://installers.lmstudio.ai/linux/x64/0.3.20-4/LM-Studio-0.3.20-4-x64.AppImage -O exec/lms.AppImage
-chmod +x lms.AppImage
-nohup xvfb-run ./lms.AppImage --no-sandbox > /dev/null 2>&1 < /dev/null &
+chmod +x exec/lms.AppImage
+nohup xvfb-run ./exec/lms.AppImage --no-sandbox > /dev/null 2>&1 < /dev/null &
 echo -e "y\ny\ny" | npx --yes lmstudio install-cli
 
 # Final
