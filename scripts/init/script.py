@@ -128,7 +128,7 @@ def init_agents(model_name):
     print(f"Initializing agent for model: {model_name}")
     try:
         # Construct paths to model files
-        model_dir = os.path.join("../../models", model_name)
+        model_dir = os.path.join("../../agents", model_name)
         system_path = os.path.join(model_dir, "system.j2")
         user_path = os.path.join(model_dir, "user.j2")
         schema_path = os.path.join(model_dir, "schema.json")
