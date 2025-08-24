@@ -1,15 +1,10 @@
 # fu27soma-ma
 
 ## 1. Preparation
-Install Debian 13 on x86 based machine with a CUDA enabled NVIDIA GPU. Make sure to enable SSH server during the installation and note your username. Do not forget to replace **{USERNAME}** with the username that you have set during the installation. Some of the commands will ask for your root password.
+Suggested VM provider: Hetzner
+Suggested SSH Client: Kitty (Linux/MacOS) and MobaXterm (Windows)
 
-SSH into the machine, add your user into the *sudoers* group, and logout by running the following code block:
-```
-su -l
-adduser {USERNAME} sudo
-exit
-exit
-```
+Install Debian 13 on x86 based machine with a CUDA enabled NVIDIA GPU. Make sure to enable SSH server during the installation and run the following command blocks as *root* user.
 
 To install the dependencies and prepare the OS, SSH into the machine again and run the following commands:
 ```

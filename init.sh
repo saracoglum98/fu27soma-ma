@@ -2,10 +2,14 @@
 DEBIAN_FRONTEND=noninteractive
 
 # General dependencies
-sudo apt install -y yq curl ffmpeg uidmap fuse libfuse2 libasound2t64 xvfb xauth npm
+sudo apt install -y yq curl ffmpeg uidmap fuse libfuse2 libasound2t64 xvfb xauth npm libnspr4 libnss3 zsh
 
 # docker
 curl -fsSL get.docker.com | bash
+
+# zsh
+echo "y/ny/n" | sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+chsh -s $(which zsh)
 
 # uv package manager
 curl -LsSf https://astral.sh/uv/install.sh | sh
