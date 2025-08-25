@@ -8,9 +8,9 @@ Install Debian 13 on x86 based machine with a CUDA enabled NVIDIA GPU. Make sure
 
 To install the dependencies and prepare the OS, SSH into the machine again and run the following commands:
 ```
-sudo apt update -y
-sudo apt upgrade -y
-sudo apt install -y git
+apt update -y
+apt upgrade -y
+apt install -y git
 git clone https://github.com/saracoglum98/fu27soma-ma.git
 cd fu27soma-ma
 chmod +x manage.sh
@@ -20,7 +20,7 @@ chmod +x init.sh
 
 Finally, reboot the machine using the command below. After the OS boots up, the host machine is ready for operation.
 ```
-sudo reboot
+reboot
 ```
 
 ## 2. Managing the Framework
