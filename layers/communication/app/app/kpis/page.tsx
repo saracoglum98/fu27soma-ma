@@ -182,6 +182,8 @@ function KPIList({ items = [], onDelete, onEdit, type }: KPIListProps) {
 export default function KPIsPage() {
   const [qualitativeKPIs, setQualitativeKPIs] = useState<KPIResponse[]>([]);
   const [quantitativeKPIs, setQuantitativeKPIs] = useState<KPIResponse[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const fetchKPIs = async () => {
     try {
@@ -191,10 +193,14 @@ export default function KPIsPage() {
       ]);
       setQualitativeKPIs(qualitative || []);
       setQuantitativeKPIs(quantitative || []);
+      setError(null);
     } catch (error) {
       console.error('Failed to fetch KPIs:', error);
+      setError("Failed to fetch KPIs");
       setQualitativeKPIs([]);
       setQuantitativeKPIs([]);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -208,6 +214,7 @@ export default function KPIsPage() {
       await fetchKPIs();
     } catch (error) {
       console.error('Failed to create qualitative KPI:', error);
+      setError("Failed to create qualitative KPI");
     }
   };
 
@@ -217,17 +224,36 @@ export default function KPIsPage() {
       await fetchKPIs();
     } catch (error) {
       console.error('Failed to create quantitative KPI:', error);
+      setError("Failed to create quantitative KPI");
     }
   };
 
   const handleDelete = async (uuid: string) => {
-    await deleteKPI(uuid);
-    await fetchKPIs();
+    try {
+      await deleteKPI(uuid);
+      await fetchKPIs();
+      setError(null);
+    } catch (error) {
+      console.error('Failed to delete KPI:', error);
+      setError("Failed to delete KPI");
+    }
   };
 
   const handleEdit = async () => {
     await fetchKPIs();
   };
+
+  if (loading) {
+    return <div>Loading KPIs...</div>;
+  }
+
+  if (error) {
+    return (
+      <div className="flex justify-center items-center h-64 text-red-600">
+        {error}
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4">
