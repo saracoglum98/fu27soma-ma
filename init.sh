@@ -23,5 +23,5 @@ sleep 10
 echo -e "y\ny\ny" | npx --yes lmstudio install-cli
 
 # Final
-echo 'llm-se() { ~/fu27soma-ma/manage.sh "$@" ;}' >> ~/.bashrc
-echo 'export TERM=xterm' >> ~/.bashrc
+echo 'llm-se() { ~/fu27soma-ma/manage.sh "$@" ;}' >> ~/.zshrc
+echo 'export TERM=xterm' >> ~/.zshrc
