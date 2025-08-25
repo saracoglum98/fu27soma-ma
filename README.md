@@ -1,8 +1,8 @@
 # fu27soma-ma
 
 ## 1. Preparation
-Suggested VM provider: Hetzner
-Suggested SSH Client: Kitty (Linux/MacOS) and MobaXterm (Windows)
+Suggested VM provider \t: Hetzner\n
+Suggested SSH Client  \t: Kitty (Linux/MacOS) and MobaXterm (Windows)
 
 Install Debian 13 on x86 based machine with a CUDA enabled NVIDIA GPU. Make sure to enable SSH server during the installation and run the following command blocks as *root* user.
 
@@ -11,18 +11,11 @@ To install the dependencies and prepare the OS, SSH into the machine again and r
 sudo apt update -y
 sudo apt upgrade -y
 sudo apt install -y git
-git clone -b local --single-branch https://github.com/saracoglum98/fu27soma-ma.git
+git clone https://github.com/saracoglum98/fu27soma-ma.git
 cd fu27soma-ma
 chmod +x manage.sh
 chmod +x init.sh
 ./init.sh
-```
-
-Add your user to *docker* group: 
-```
-su -l
-adduser {USERNAME} docker
-exit
 ```
 
 Finally, reboot the machine using the command below. After the OS boots up, the host machine is ready for operation.
