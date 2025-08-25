@@ -6,7 +6,7 @@ import {
   QuantitativeKPIUpdate,
 } from "../types/KPIs";
 
-const API_URL = "http://localhost:10000/kpi";
+const API_URL = `http://${process.env.NEXT_PUBLIC_HOST}:10000/kpi`;
 
 // Read Operations
 export const getQualitativeKPIs = async (): Promise<KPIResponse[]> => {

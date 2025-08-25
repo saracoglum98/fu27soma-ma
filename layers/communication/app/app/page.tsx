@@ -40,18 +40,20 @@ export default function DashboardPage() {
     fetchDashboardStats();
   }, []);
   
+  if (error) {
+    return (
+      <div className="flex justify-center items-center h-64 text-red-600">
+        {error}
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-black">Dashboard</h1>
       </div>
       
-      {error && (
-        <div className="text-red-600 bg-red-50 p-4 rounded-md">
-          {error}
-        </div>
-      )}
-
       {loading ? (
         <div className="text-gray-600">Loading dashboard stats...</div>
       ) : (

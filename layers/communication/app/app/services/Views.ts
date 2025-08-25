@@ -1,6 +1,6 @@
 import { CommonResponse } from '../types/CommonResponse';
 
-const API_URL = "http://localhost:10000/views";
+const API_URL = `http://${process.env.NEXT_PUBLIC_HOST}:10000/views`;
 
 type DashboardStats = {
   knowledge_items: number;

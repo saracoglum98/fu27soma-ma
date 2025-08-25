@@ -1,6 +1,6 @@
 import { CommonResponse } from '../types/CommonResponse';
 
-const API_URL = "http://localhost:10010/agent-calls";
+const API_URL = `http://${process.env.NEXT_PUBLIC_HOST}:10010/agent-calls`;
 
 /**
  * Analyzes a solution using KPI Analyst agent

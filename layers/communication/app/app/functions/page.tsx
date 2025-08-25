@@ -91,11 +91,8 @@ export default function FunctionsPage() {
 
   if (error) {
     return (
-      <div className="text-red-600">
+      <div className="flex justify-center items-center h-64 text-red-600">
         {error}
-        <Button onClick={fetchFunctions} className="ml-2">
-          Retry
-        </Button>
       </div>
     );
   }

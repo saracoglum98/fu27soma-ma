@@ -1,6 +1,6 @@
 import { Function } from "../types/Functions";
 
-const API_URL = "http://localhost:10000/functions";
+const API_URL = `http://${process.env.NEXT_PUBLIC_HOST}:10000/functions`;
 
 export const getAllFunctions = async (): Promise<Function[]> => {
   const response = await fetch(`${API_URL}`);

@@ -18,7 +18,7 @@ def process_sql_file(filename):
     logging.info(f"Starting to process SQL file: {filename}")
     try:
         postgres_conn = psycopg2.connect(
-            host="localhost",
+            host=os.getenv("NEXT_PUBLIC_HOST"),
             port="5432",
             database=os.getenv("POSTGRES_DB"),
             user=os.getenv("POSTGRES_USER"),
@@ -60,7 +60,7 @@ def upload_knowledge_items(uuid: str, filename: str):
             
             # Make the request to the API
             response = requests.put(
-                f"http://localhost:10000/knowledge_items/upload/{uuid}",
+                f"http://{os.getenv('NEXT_PUBLIC_HOST')}:10000/knowledge_items/upload/{uuid}",
                 files=files
             )
             
@@ -93,7 +93,7 @@ def attach_knowledge_items_to_options(option_uuid: str, knowledge_item_uuid: str
     try:
         # Make the request to the API
         response = requests.put(
-            f"http://localhost:10000/options/attach/knowledge/{option_uuid}/{knowledge_item_uuid}"
+            f"http://{os.getenv('NEXT_PUBLIC_HOST')}:10000/options/attach/knowledge/{option_uuid}/{knowledge_item_uuid}"
         )
         
         # Check if request was successful

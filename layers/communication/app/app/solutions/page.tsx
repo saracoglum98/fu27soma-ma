@@ -102,7 +102,11 @@ export default function SolutionsPage() {
   }
 
   if (error) {
-    return <div className="text-red-500">{error}</div>;
+    return (
+      <div className="flex justify-center items-center h-64 text-red-600">
+        {error}
+      </div>
+    );
   }
 
   return (

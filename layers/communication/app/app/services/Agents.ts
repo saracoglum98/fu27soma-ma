@@ -1,6 +1,6 @@
 import { Agent, AgentUpdate } from "../types/Agents";
 
-const API_URL = "http://localhost:10020/agents";
+const API_URL = `http://${process.env.NEXT_PUBLIC_HOST}:10020/agents`;
 
 export const getAllAgents = async (): Promise<Agent[]> => {
   const response = await fetch(`${API_URL}`);

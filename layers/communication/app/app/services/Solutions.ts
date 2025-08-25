@@ -1,6 +1,6 @@
 import { Solution, SolutionCreate, SolutionUpdate, SolutionDisplayResponse } from "../types/Solutions";
 
-const API_URL = "http://localhost:10000/solutions";
+const API_URL = `http://${process.env.NEXT_PUBLIC_HOST}:10000/solutions`;
 
 export async function getAllSolutions(): Promise<Solution[]> {
   const response = await fetch(`${API_URL}/`);

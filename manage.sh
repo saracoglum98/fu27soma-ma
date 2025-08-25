@@ -130,7 +130,7 @@ init() {
 }
 
 env_create() {
-    echo -e "🛠️  Setting environment variables\n"
+    echo -e "🛠️ Setting environment variables\n"
     cp .env layers/communication/.env
     cp .env layers/knowledge/.env
     cp .env layers/llm/.env
@@ -155,13 +155,13 @@ clear() {
 
 seed() {
     echo -e "🌱 Seeding sample knowledge\n"
-    cd scripts/seed  > /dev/null 2>&1
-    uv venv  > /dev/null 2>&1
-    source .venv/bin/activate  > /dev/null 2>&1
-    uv pip install -r requirements.txt  > /dev/null 2>&1
-    python script.py  > /dev/null 2>&1
-    deactivate  > /dev/null 2>&1
-    rm -rf .venv  > /dev/null 2>&1
+    cd $SCRIPT_DIR/scripts/seed
+    uv venv
+    source .venv/bin/activate
+    uv pip install -r requirements.txt
+    python script.py
+    deactivate
+    rm -rf .venv
     cd $SCRIPT_DIR
 }
 
@@ -207,7 +207,7 @@ fi
 if [ "$1" = "build" ]; then
     redirect=$(get_output_redirect)
     tic=$(date +%s)
-    echo -e "🪜  Preparing to build\n"
+    echo -e "🪜 Preparing to build\n"
     eval "service_destroy \"communication-app\" $redirect"
     eval "service_destroy \"llm-inference\" $redirect"
     eval "service_destroy \"llm-api\" $redirect"
