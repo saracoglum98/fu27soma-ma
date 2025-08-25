@@ -31,10 +31,6 @@ lms server start
 lms server stop
 sed -i 's/127.0.0.1/0.0.0.0/g' "/root/.lmstudio/.internal/http-server-config.json"
 sed -i 's/"enableLocalService": false/"enableLocalService": true/g' "/root/.config/LM Studio/settings.json"
-#sed -i 's/old_string/new_string/g' filename
-# change in place - config/LM Studio/settings.json
-# change in place - /.lmstudio/.internal/http-server
-#sleep 10
 
 # Final
 echo 'llm-se() { ~/fu27soma-ma/manage.sh "$@" ;}' >> ~/.zshrc
