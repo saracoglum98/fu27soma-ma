@@ -1,6 +1,59 @@
 import re
 import httpx
+from fastapi import HTTPException
+from dotenv import load_dotenv
 
+load_dotenv()
+
+
+async def get_agent_schema(agent_name: str):
+    async with httpx.AsyncClient(timeout=180.0) as agent_client:
+        agent_response = await agent_client.get(
+            "http://management-api:10020/agents/{}".format(agent_name)
+        )
+        if agent_response.status_code == 404:
+            raise HTTPException(status_code=404, detail="Agent 'kpi-analyst' not found")
+        agent_config = agent_response.json()
+    return agent_config
+
+async def call_agent(agent_name: str, prompt: str):
+    agent_config = await get_agent_schema(agent_name)
+    
+    match agent_name:
+        case "kpi-analyst":
+            model_name = "kpi-analyst"
+        case "sysml-expert":
+            model_name = "sysml-expert"
+        case "ma-solver":
+            model_name = "ma"
+        case "ma-optimizer":
+            model_name = "ma"
+    
+    api_endpoint = "http://{}:1234/v1/chat/completions".format(os.getenv("NEXT_PUBLIC_HOST"))
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer dummy-token",}   
+    
+    payload = {
+            "model": model_name,
+            "messages": [
+                {
+                    "role": "system",
+                    "content": agent_config["prompt_system"]
+                },
+                {"role": "user", "content": prompt}
+            ],
+        }
+    
+    async with httpx.AsyncClient(timeout=180.0) as client:
+            response = await client.post(
+                api_endpoint,
+                headers=headers,
+                json=payload,
+                timeout=180.0
+        )
+    
+    return agent_config
 
 async def generate_kpi_analyst_schema(kpis: list, num_of_solutions: int):
     """Generate schema for KPI analyst based on input KPIs.

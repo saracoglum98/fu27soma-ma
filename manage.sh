@@ -157,13 +157,13 @@ lms_start() {
     echo -e "🤖\tStarting LLM Inference Engine\n"
     nohup xvfb-run -a ./exec/lms.AppImage --no-sandbox > /dev/null 2>&1 < /dev/null &
     sleep 5
-    lms server start
+    lms server start --cors > /dev/null 2>&1 < /dev/null &
 }
 
 lms_stop() {
-    lms server stop
+    lms server stop > /dev/null 2>&1 < /dev/null &
     sleep 5
-    pkill -f "xvfb-run -a ./exec/lms.AppImage --no-sandbox"
+    pkill -f "xvfb-run -a ./exec/lms.AppImage --no-sandbox" > /dev/null 2>&1 < /dev/null &
 }
 
 # Check if help argument is provided

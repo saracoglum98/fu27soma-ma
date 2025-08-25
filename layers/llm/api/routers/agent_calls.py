@@ -106,7 +106,7 @@ async def kpi_analyst(solution_uuid: str, mytype: str="initial"):
         kpi_schema = await generate_kpi_analyst_schema(kpis, num_of_solutions)
 
         # OpenAI-compatible endpoint configuration
-        api_endpoint = "http://host.docker.internal:1234/v1/chat/completions"
+        api_endpoint = "http://{}:1234/v1/chat/completions".format(os.getenv("NEXT_PUBLIC_HOST"))
         headers = {
             "Content-Type": "application/json",
             "Authorization": "Bearer dummy-token",
@@ -304,7 +304,7 @@ async def sysml_expert(solution_uuid: str):
         context = "\n\n---\n\n".join(context_documents)
 
         # OpenAI-compatible endpoint configuration
-        api_endpoint = "http://host.docker.internal:1234/v1/chat/completions"
+        api_endpoint = "http://{}:1234/v1/chat/completions".format(os.getenv("NEXT_PUBLIC_HOST"))
         headers = {
             "Content-Type": "application/json",
             "Authorization": "Bearer dummy-token",
@@ -473,7 +473,7 @@ async def ma_solver(solution_uuid: str, num_of_solutions: int):
         }
 
         # OpenAI-compatible endpoint configuration
-        api_endpoint = "http://host.docker.internal:1234/v1/chat/completions"
+        api_endpoint = "http://172.18.0.1:1234/v1/chat/completions"
         headers = {
             "Content-Type": "application/json",
             "Authorization": "Bearer dummy-token",
@@ -626,7 +626,7 @@ async def ma_optimizer(solution_uuid: str, prompt: str):
         }
 
         # OpenAI-compatible endpoint configuration
-        api_endpoint = "http://host.docker.internal:1234/v1/chat/completions"
+        api_endpoint = "http://{}:1234/v1/chat/completions".format(os.getenv("NEXT_PUBLIC_HOST"))
         headers = {
             "Content-Type": "application/json",
             "Authorization": "Bearer dummy-token",

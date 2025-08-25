@@ -23,6 +23,8 @@ services:
     restart: unless-stopped
     networks:
       - app-network
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
   llm-finetuning:
     build:
       context: ./finetuning
