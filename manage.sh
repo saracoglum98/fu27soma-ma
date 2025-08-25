@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/zsh
 
 clear
 
@@ -72,7 +72,7 @@ tool_container_status() {
 layer_build() {
     local folder=$1
     cd "$SCRIPT_DIR/layers/$folder"
-    echo -e "🚀 Building $folder"
+    echo -e "🚀\tBuilding $folder"
     local redirect=$(get_output_redirect)
     eval "docker compose up -d --build --force-recreate $redirect"
     cd $SCRIPT_DIR
@@ -109,7 +109,7 @@ service_restart() {
 
 create_network() {
     local redirect=$(get_output_redirect)
-    echo -e "🌍 Creating network\n"
+    echo -e "🌍\tCreating network\n"
     eval "docker network inspect app-network --format='{{range .Containers}}{{.Name}} {{end}}' 2>/dev/null | xargs -r -n1 docker network disconnect -f app-network $redirect"
     eval "docker network rm app-network $redirect"
     eval "docker network create app-network $redirect"
@@ -118,7 +118,7 @@ create_network() {
 
 init() {
     local redirect=$(get_output_redirect)
-    echo -e "\n💨 Initializing services\n"
+    echo -e "\n💨\tInitializing services\n"
     cd scripts/init
     eval "uv venv $redirect"
     source .venv/bin/activate
@@ -130,7 +130,7 @@ init() {
 }
 
 env_create() {
-    echo -e "🛠️ Setting environment variables\n"
+    echo -e "🛠️\tSetting environment variables\n"
     cp .env layers/communication/.env
     cp .env layers/knowledge/.env
     cp .env layers/llm/.env
@@ -142,7 +142,7 @@ env_create() {
 }
 
 clear() {
-    echo -e "🧹 Clearing build related files\n"
+    echo -e "🧹\tClearing build related files\n"
     rm -rf layers/communication/.env
     rm -rf layers/knowledge/.env
     rm -rf layers/llm/.env
@@ -153,16 +153,17 @@ clear() {
     cd $SCRIPT_DIR
 }
 
-seed() {
-    echo -e "🌱 Seeding sample knowledge\n"
-    cd $SCRIPT_DIR/scripts/seed
-    uv venv
-    source .venv/bin/activate
-    uv pip install -r requirements.txt
-    python script.py
-    deactivate
-    rm -rf .venv
-    cd $SCRIPT_DIR
+lms_start() {
+    echo -e "🤖\tStarting LLM Inference Engine\n"
+    nohup xvfb-run -a ./exec/lms.AppImage --no-sandbox > /dev/null 2>&1 < /dev/null &
+    sleep 5
+    lms server start
+}
+
+lms_stop() {
+    lms server stop
+    sleep 5
+    pkill -f "xvfb-run -a ./exec/lms.AppImage --no-sandbox"
 }
 
 # Check if help argument is provided
@@ -201,13 +202,26 @@ if [ "$1" = "status" ]; then
 fi 
 
 if [ "$1" = "seed" ]; then
-    seed
+    echo -e "🌱\tSeeding sample knowledge\n"
+    cd $SCRIPT_DIR/scripts/seed
+    uv venv
+    source .venv/bin/activate
+    uv pip install -r requirements.txt
+    python script.py
+    deactivate
+    rm -rf .venv
+    cd $SCRIPT_DIR
 fi
 
 if [ "$1" = "build" ]; then
     redirect=$(get_output_redirect)
     tic=$(date +%s)
-    echo -e "🪜 Preparing to build\n"
+
+    #eval "docker rm $(docker ps -f status=exited -aq) $redirect"
+    #eval "docker rmi $(docker images -f "dangling=true" -q) $redirect"
+    #eval "docker volume rm $(docker volume ls -f "dangling=true" -q) $redirect"
+
+    echo -e "🪜\tPreparing to build\n"
     eval "service_destroy \"communication-app\" $redirect"
     eval "service_destroy \"llm-inference\" $redirect"
     eval "service_destroy \"llm-api\" $redirect"
@@ -219,12 +233,11 @@ if [ "$1" = "build" ]; then
     eval "service_destroy \"management-api\" $redirect"
     eval "service_destroy \"management-data\" $redirect"
     eval "service_destroy \"management-logs\" $redirect"
-    #eval "docker rm $(docker ps -f status=exited -aq) $redirect"
-    #eval "docker rmi $(docker images -f "dangling=true" -q) $redirect"
-    #eval "docker volume rm $(docker volume ls -f "dangling=true" -q) $redirect"
+
     
     create_network
     env_create
+    lms_start
     layer_build "knowledge"
     layer_build "llm"
     layer_build "communication"
@@ -234,12 +247,13 @@ if [ "$1" = "build" ]; then
     
     clear
     toc=$(date +%s)
-    echo -e "⌛️ Build took $(printf "%d minutes %d seconds" $(( ($toc - $tic) / 60 )) $(( ($toc - $tic) % 60 )))"
-    echo -e "🎉 All services are running"
-    echo -e "🌐 Access the application at http://$LOCAL_IP:3000\n"
+    echo -e "⌛️\tBuild took $(printf "%d minutes %d seconds" $(( ($toc - $tic) / 60 )) $(( ($toc - $tic) % 60 )))"
+    echo -e "🎉\tAll services are running"
+    echo -e "🌐\tAccess the application at http://$LOCAL_IP:3000\n"
 fi
 
 if [ "$1" = "start" ]; then
+    lms_start
     service_start "communication-app"
     service_start "llm-inference"
     service_start "llm-api"
@@ -255,6 +269,7 @@ if [ "$1" = "start" ]; then
 fi
 
 if [ "$1" = "stop" ]; then
+    lms_stop
     service_stop "communication-app"
     service_stop "llm-inference"
     service_stop "llm-api"

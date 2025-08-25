@@ -247,15 +247,22 @@ def init_sysml_knowledge():
         print(f"Error initializing SysML knowledge: {str(e)}")
         traceback.print_exc()
 
+def load_lms():
+    os.system("lms load {} --identifier embedding".format(os.getenv("MODEL_EMBEDDING")))
+    os.system("lms load {} --identifier ma".format(os.getenv("MODEL_MA")))
+    os.system("lms load {} --identifier kpi-analyst".format(os.getenv("MODEL_KPI_ANALYST")))
+    #os.system("lms load {} --identifier sysml-expert".format(os.getenv("MODEL_SYSML_EXPERT")))
+
 if __name__ == "__main__":
     print("Starting initialization...")
     init_minio()
     init_postgres_knowledge()
     init_postgres_management()
     init_qdrant()
-    init_ollama()
+    #init_ollama()
     init_agents('sysml-expert')
     init_agents('ma-solver')
     init_agents('kpi-analyst')
     init_agents('ma-optimizer')
-    init_sysml_knowledge()
+    #init_sysml_knowledge()
+    load_lms()
