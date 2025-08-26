@@ -155,15 +155,19 @@ clear() {
 
 lms_start() {
     echo -e "🤖\tStarting LLM Inference Engine\n"
-    nohup xvfb-run -a ./exec/lms.AppImage --no-sandbox > /dev/null 2>&1 < /dev/null &
+    nohup xvfb-run -a ./exec/lms/lm-studio --no-sandbox > /dev/null 2>&1 < /dev/null &
     sleep 5
     lms server start --cors > /dev/null 2>&1 < /dev/null &
+    # Load models here
+    #lms load nomic-embed-text-v1.5.Q4_K_M.gguf -y --identifier embedding
+    lms load nomic-embed-text-v1.5-GGUF -y --identifier embedding
+    lms load Grok-3-reasoning-gemma3-12B-distilled-HF-GGUF -y --identifier main
 }
 
 lms_stop() {
     lms server stop > /dev/null 2>&1 < /dev/null &
     sleep 5
-    pkill -f "xvfb-run -a ./exec/lms.AppImage --no-sandbox" > /dev/null 2>&1 < /dev/null &
+    pkill -f "lm-studio" > /dev/null 2>&1 < /dev/null &
 }
 
 # Check if help argument is provided
@@ -237,13 +241,13 @@ if [ "$1" = "build" ]; then
     
     create_network
     env_create
-    lms_start
     layer_build "knowledge"
     layer_build "llm"
     layer_build "communication"
     layer_build "management"
     layer_build "sysml"
     init
+    lms_start
     
     clear
     toc=$(date +%s)

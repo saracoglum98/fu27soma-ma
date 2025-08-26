@@ -248,9 +248,12 @@ def init_sysml_knowledge():
         traceback.print_exc()
 
 def load_lms():
-    os.system("lms load {} --identifier embedding".format(os.getenv("MODEL_EMBEDDING")))
-    os.system("lms load {} --identifier ma".format(os.getenv("MODEL_MA")))
-    os.system("lms load {} --identifier kpi-analyst".format(os.getenv("MODEL_KPI_ANALYST")))
+    # Only get
+    os.system("lms get -y \"Grok-3-reasoning-gemma3-12B-distilled-HF-GGUF\"")
+    os.system("lms get -y \"nomic-embed-text-v1.5-GGUF\"")
+    #os.system("lms load {} --identifier embedding".format(os.getenv("MODEL_EMBEDDING")))
+    #os.system("lms load {} --identifier ma".format(os.getenv("MODEL_MA")))
+    #os.system("lms load {} --identifier kpi-analyst".format(os.getenv("MODEL_KPI_ANALYST")))
     #os.system("lms load {} --identifier sysml-expert".format(os.getenv("MODEL_SYSML_EXPERT")))
 
 if __name__ == "__main__":
