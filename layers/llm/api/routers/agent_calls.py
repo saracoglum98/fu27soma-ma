@@ -473,7 +473,7 @@ async def ma_solver(solution_uuid: str, num_of_solutions: int):
         }
 
         # OpenAI-compatible endpoint configuration
-        api_endpoint = "http://172.18.0.1:1234/v1/chat/completions"
+        api_endpoint = "http://{}:1234/v1/chat/completions".format(os.getenv("NEXT_PUBLIC_HOST"))
         headers = {
             "Content-Type": "application/json",
             "Authorization": "Bearer dummy-token",
@@ -500,7 +500,7 @@ async def ma_solver(solution_uuid: str, num_of_solutions: int):
             user_prompt = user_prompt.replace("%solution_data%", json.dumps(solution_data, indent=2))
 
         payload = {
-            "model": "expert",
+            "model": "main",
             "messages": [
                 {
                     "role": "system",
