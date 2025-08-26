@@ -33,7 +33,7 @@ async def kpi_analyst(solution_uuid: str, mytype: str="initial"):
         qdrant_client = my_qdrant()
 
         # Fetch solution details from the knowledge API
-        async with httpx.AsyncClient(timeout=180.0) as client:
+        async with httpx.AsyncClient(timeout=600.0) as client:
             print(f"Fetching solution details for UUID: {solution_uuid}")
             response = await client.get(
                 f"http://knowledge-api:10000/solutions/{solution_uuid}/display"
@@ -87,7 +87,7 @@ async def kpi_analyst(solution_uuid: str, mytype: str="initial"):
         # Use the previously prepared solutions_data
 
         # Fetch KPIs for the prompt
-        async with httpx.AsyncClient(timeout=180.0) as client:
+        async with httpx.AsyncClient(timeout=600.0) as client:
             # Fetch qualitative KPIs
             response = await client.get("http://knowledge-api:10000/kpi/all")
             
@@ -113,7 +113,7 @@ async def kpi_analyst(solution_uuid: str, mytype: str="initial"):
         }
 
         # Fetch agent configuration
-        async with httpx.AsyncClient(timeout=180.0) as agent_client:
+        async with httpx.AsyncClient(timeout=600.0) as agent_client:
             print("Fetching agent configuration for kpi-analyst")
             agent_response = await agent_client.get(
                 "http://management-api:10020/agents/kpi-analyst"
@@ -150,12 +150,12 @@ async def kpi_analyst(solution_uuid: str, mytype: str="initial"):
         }
 
         # Make the request to the LLM
-        async with httpx.AsyncClient(timeout=180.0) as client:
+        async with httpx.AsyncClient(timeout=600.0) as client:
             response = await client.post(
                 api_endpoint,
                 headers=headers,
                 json=payload,
-                timeout=180.0
+                timeout=600.0
             )
             
             if response.status_code != 200:
@@ -241,7 +241,7 @@ async def sysml_expert(solution_uuid: str):
         qdrant_client = my_qdrant()
 
         # Fetch solution details from the knowledge API
-        async with httpx.AsyncClient(timeout=180.0) as client:
+        async with httpx.AsyncClient(timeout=600.0) as client:
             print(f"Fetching solution details for UUID: {solution_uuid}")
             response = await client.get(
                 f"http://knowledge-api:10000/solutions/{solution_uuid}/display"
@@ -329,7 +329,7 @@ async def sysml_expert(solution_uuid: str):
             conn.close()
 
         # Fetch agent configuration
-        async with httpx.AsyncClient(timeout=180.0) as agent_client:
+        async with httpx.AsyncClient(timeout=600.0) as agent_client:
             print("Fetching agent configuration for 'sysml-expert'")
             agent_response = await agent_client.get(
                 "http://management-api:10020/agents/sysml-expert"
@@ -428,7 +428,7 @@ async def ma_solver(solution_uuid: str, num_of_solutions: int):
         qdrant_client = my_qdrant()
 
         # Fetch solution details from the knowledge API
-        async with httpx.AsyncClient(timeout=180.0) as client:
+        async with httpx.AsyncClient(timeout=600.0) as client:
             print(f"Fetching solution details for UUID: {solution_uuid}")
             response = await client.get(
                 f"http://knowledge-api:10000/solutions/{solution_uuid}/display"
@@ -481,7 +481,7 @@ async def ma_solver(solution_uuid: str, num_of_solutions: int):
 
         # Prepare the chat completion request with context and solution data
         # Fetch agent configuration
-        async with httpx.AsyncClient(timeout=180.0) as agent_client:
+        async with httpx.AsyncClient(timeout=600.0) as agent_client:
             print("Fetching agent configuration for 'expert'")
             agent_response = await agent_client.get(
                 "http://management-api:10020/agents/ma-solver"
@@ -580,7 +580,7 @@ async def ma_optimizer(solution_uuid: str, prompt: str):
         qdrant_client = my_qdrant()
 
         # Fetch solution details from the knowledge API
-        async with httpx.AsyncClient(timeout=180.0) as client:
+        async with httpx.AsyncClient(timeout=600.0) as client:
             print(f"Fetching solution details for UUID: {solution_uuid}")
             response = await client.get(
                 f"http://knowledge-api:10000/solutions/{solution_uuid}/display"
@@ -633,7 +633,7 @@ async def ma_optimizer(solution_uuid: str, prompt: str):
         }
 
         # Fetch agent configuration
-        async with httpx.AsyncClient(timeout=180.0) as agent_client:
+        async with httpx.AsyncClient(timeout=600.0) as agent_client:
             print("Fetching agent configuration for 'ma-optimizer'")
             agent_response = await agent_client.get(
                 "http://management-api:10020/agents/ma-optimizer"
@@ -722,7 +722,7 @@ async def ma_optimizer(solution_uuid: str, prompt: str):
             # Trigger KPI analysis after optimization
             print(f"Triggering KPI analysis for solution {solution_uuid}")
             try:
-                async with httpx.AsyncClient(timeout=180.0) as client:
+                async with httpx.AsyncClient(timeout=600.0) as client:
                     kpi_response = await client.get(
                         f"http://llm-api:10010/agent-calls/kpi-analyst/{solution_uuid}/final"
                     )

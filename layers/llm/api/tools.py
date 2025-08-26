@@ -7,7 +7,7 @@ load_dotenv()
 
 
 async def get_agent_schema(agent_name: str):
-    async with httpx.AsyncClient(timeout=180.0) as agent_client:
+    async with httpx.AsyncClient(timeout=600.0) as agent_client:
         agent_response = await agent_client.get(
             "http://management-api:10020/agents/{}".format(agent_name)
         )
@@ -45,12 +45,12 @@ async def call_agent(agent_name: str, prompt: str):
             ],
         }
     
-    async with httpx.AsyncClient(timeout=180.0) as client:
+    async with httpx.AsyncClient(timeout=600.0) as client:
             response = await client.post(
                 api_endpoint,
                 headers=headers,
                 json=payload,
-                timeout=180.0
+                timeout=600.0
         )
     
     return agent_config
