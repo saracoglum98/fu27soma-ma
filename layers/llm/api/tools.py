@@ -29,7 +29,7 @@ async def call_agent(agent_name: str, prompt: str):
         case "ma-optimizer":
             model_name = "ma"
     
-    api_endpoint = "http://{}:1234/v1/chat/completions".format(os.getenv("NEXT_PUBLIC_HOST"))
+    api_endpoint = "http://{}:1234/v1/chat/completions".format(os.getenv("LMSTUDIO_HOST"))
     headers = {
         "Content-Type": "application/json",
         "Authorization": "Bearer dummy-token",}   
