@@ -1,4 +1,16 @@
 services:
+  sysml-engine:
+    build:
+      context: ./engine
+      dockerfile: Dockerfile
+    container_name: sysml-engine
+    ports:
+      - "9999:9999"
+    env_file:
+      - .env
+    restart: unless-stopped
+    networks:
+      - app-network
   sysml-api:
     build:
       context: ./api

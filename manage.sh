@@ -247,7 +247,7 @@ if [ "$1" = "build" ]; then
     layer_build "management"
     layer_build "sysml"
     init
-    lms_start
+    #lms_start
     
     clear
     toc=$(date +%s)

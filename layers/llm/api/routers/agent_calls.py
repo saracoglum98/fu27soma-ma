@@ -104,6 +104,8 @@ async def kpi_analyst(solution_uuid: str, mytype: str="initial"):
 
         # Generate KPI analyst schema
         kpi_schema = await generate_kpi_analyst_schema(kpis, num_of_solutions)
+        
+        print(kpi_schema)
 
         # OpenAI-compatible endpoint configuration
         api_endpoint = "http://{}:1234/v1/chat/completions".format(os.getenv("LMSTUDIO_HOST"))
@@ -364,14 +366,12 @@ async def sysml_expert(solution_uuid: str):
         }
 
         print(f"Making request to OpenAI-compatible endpoint: {api_endpoint}")
-        print(f"Payload: {json.dumps(payload, indent=2)}")
 
         async with httpx.AsyncClient(timeout=int(os.getenv("MODEL_TIMEOUT"))) as llm_client:
             llm_response = await llm_client.post(
                 api_endpoint, json=payload, headers=headers
             )
             print(f"Response status: {llm_response.status_code}")
-            print(f"Response body: {llm_response.text}")
 
             if llm_response.status_code != 200:
                 raise HTTPException(
@@ -516,14 +516,12 @@ async def ma_solver(solution_uuid: str, num_of_solutions: int):
         }
 
         print(f"Making request to OpenAI-compatible endpoint: {api_endpoint}")
-        print(f"Payload: {json.dumps(payload, indent=2)}")
 
         async with httpx.AsyncClient(timeout=int(os.getenv("MODEL_TIMEOUT"))) as llm_client:
             llm_response = await llm_client.post(
                 api_endpoint, json=payload, headers=headers
             )
             print(f"Response status: {llm_response.status_code}")
-            print(f"Response body: {llm_response.text}")
 
             if llm_response.status_code != 200:
                 raise HTTPException(
@@ -670,14 +668,12 @@ async def ma_optimizer(solution_uuid: str, prompt: str):
         }
 
         print(f"Making request to OpenAI-compatible endpoint: {api_endpoint}")
-        print(f"Payload: {json.dumps(payload, indent=2)}")
 
         async with httpx.AsyncClient(timeout=int(os.getenv("MODEL_TIMEOUT"))) as llm_client:
             llm_response = await llm_client.post(
                 api_endpoint, json=payload, headers=headers
             )
             print(f"Response status: {llm_response.status_code}")
-            print(f"Response body: {llm_response.text}")
 
             if llm_response.status_code != 200:
                 raise HTTPException(

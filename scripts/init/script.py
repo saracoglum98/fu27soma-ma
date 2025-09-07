@@ -22,7 +22,7 @@ def chunk_text(text: str):
 def embed_text(text: str):
     embeddings = OllamaEmbeddings(
         model=os.getenv("MODEL_EMBEDDING"),
-        base_url="http://localhost:11434"
+        base_url=f"http://{os.getenv('NEXT_PUBLIC_HOST')}:11434"
     )
     return embeddings.embed_query(text)
 
@@ -56,7 +56,7 @@ def init_postgres_knowledge():
     # Initialize PostgreSQL
     print("Initializating PostgreSQL")
     postgres_conn = psycopg2.connect(
-        host="localhost",
+        host=os.getenv("NEXT_PUBLIC_HOST"),
         port="5432",
         database=os.getenv("POSTGRES_DB"),
         user=os.getenv("POSTGRES_USER"),
@@ -77,7 +77,7 @@ def init_postgres_management():
     # Initialize PostgreSQL
     print("Initializating PostgreSQL")
     postgres_conn = psycopg2.connect(
-        host="localhost",
+        host=os.getenv("NEXT_PUBLIC_HOST"),
         port="5433",
         database=os.getenv("POSTGRES_DB"),
         user=os.getenv("POSTGRES_USER"),
@@ -97,7 +97,7 @@ def init_postgres_management():
 def init_qdrant():
     # Initialize Qdrant
     print("Initializating Qdrant")
-    qdrant_client = QdrantClient(host="localhost", port=6333)
+    qdrant_client = QdrantClient(host=os.getenv("NEXT_PUBLIC_HOST"), port=6333)
 
     qdrant_client.create_collection(
         collection_name=os.getenv("QDRANT_DEFAULT_COLLECTION"),
@@ -114,15 +114,15 @@ def init_ollama():
     # Initialize Ollama client and pull llama2 model
     print("Initializating Ollama")
     ollama_client = ollama.Client(
-        host="http://localhost:11434"  # Default Ollama API endpoint
+        host=f"http://{os.getenv('NEXT_PUBLIC_HOST')}:11434"  # Default Ollama API endpoint
     )
 
     ollama_client.pull(os.getenv("MODEL_EMBEDDING"))
-    models = os.getenv("MODELS_THINKING").split(",")
-    for model in models:
-        model = model.strip()
-        if model:
-            ollama_client.pull(model)
+    #models = os.getenv("MODELS_THINKING").split(",")
+    #for model in models:
+    #    model = model.strip()
+    #    if model:
+    #        ollama_client.pull(model)
 
 def init_agents(model_name):
     print(f"Initializing agent for model: {model_name}")
@@ -147,7 +147,7 @@ def init_agents(model_name):
             
         # Connect to management database
         postgres_conn = psycopg2.connect(
-            host="localhost",
+            host=os.getenv("NEXT_PUBLIC_HOST"),
             port="5433",
             database=os.getenv("POSTGRES_DB"),
             user=os.getenv("POSTGRES_USER"),
@@ -236,7 +236,7 @@ def init_sysml_knowledge():
                     ))
                 
                 # Insert into Qdrant
-                qdrant_client = QdrantClient(host="localhost", port=6333)
+                qdrant_client = QdrantClient(host=os.getenv("NEXT_PUBLIC_HOST"), port=6333)
                 qdrant_client.upsert(
                     collection_name=os.getenv("QDRANT_SYSML_COLLECTION"),
                     points=points
@@ -262,7 +262,7 @@ if __name__ == "__main__":
     init_postgres_knowledge()
     init_postgres_management()
     init_qdrant()
-    #init_ollama()
+    init_ollama()
     init_agents('sysml-expert')
     init_agents('ma-solver')
     init_agents('kpi-analyst')

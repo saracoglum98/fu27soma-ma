@@ -195,6 +195,20 @@ async def knowledge_item_upload(uuid: str, file: UploadFile):
         qdrant_client = my_qdrant()
         qdrant_client.upsert(collection_name=os.getenv("QDRANT_DEFAULT_COLLECTION"),points=points)
         
+        # First check if the knowledge item exists
+        print(f"DEBUG: Looking for knowledge item with UUID: {uuid} (type: {type(uuid)})")
+        cur.execute("SELECT uuid FROM knowledge_items WHERE uuid = %s", (uuid,))
+        existing_item = cur.fetchone()
+        print(f"DEBUG: Found existing item: {existing_item}")
+        if existing_item is None:
+            # Let's also check what UUIDs are actually in the database
+            cur.execute("SELECT uuid FROM knowledge_items")
+            all_uuids = cur.fetchall()
+            print(f"DEBUG: All UUIDs in database: {all_uuids}")
+            cur.close()
+            conn.close()
+            raise HTTPException(status_code=404, detail=f"Knowledge item with UUID {uuid} not found")
+        
         # Update knowledge item with URL and length
         cur.execute(
             """
@@ -203,7 +217,7 @@ async def knowledge_item_upload(uuid: str, file: UploadFile):
             WHERE uuid = %s
             RETURNING uuid, name, url, length, size, type, content
             """,
-            (url.replace('http://knowledge-object', 'http://localhost'), len(content), content, file_size, file.content_type, str(uuid))
+            (url.replace('http://knowledge-object', 'http://localhost'), len(content), content, file_size, file.content_type, uuid)
         )
         updated_item = cur.fetchone()
         
