@@ -247,7 +247,11 @@ if [ "$1" = "build" ]; then
     layer_build "management"
     layer_build "sysml"
     init
-    #lms_start
+    
+    # Only start LM Studio in headless mode
+    if [ "$2" = "headless" ]; then
+        lms_start
+    fi
     
     clear
     toc=$(date +%s)
