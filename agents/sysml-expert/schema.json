@@ -1,9 +1,10 @@
 {
   "name": "sysml_response",
-  "strict": "true",
-  "schema": {
-    "type": "object",
-    "properties": {
+  "strict": true,
+    "schema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
       "sysml": {
         "type": "string",
         "description": "SysML v2 representation of the system"

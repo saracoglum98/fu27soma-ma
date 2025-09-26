@@ -4,8 +4,8 @@ Instructions:
 1. Extract the KPIs from the input array (both qualitative and quantitative)
 2. Review each solution's reasoning and executive summary carefully
 3. For each solution, evaluate its performance against ALL KPIs
-4. For qualitative KPIs: Assign a rating of "low", "medium", or "high" and specify if "high_is_better" or "low_is_better"
-5. For quantitative KPIs: Compare against the target value and assign "hit" or "miss"
+4. For qualitative KPIs: Assign a rating of "low", "medium", "high", or "n/a" and specify if "high_is_better" or "low_is_better"
+5. For quantitative KPIs: Compare against the target value and assign "hit", "miss", or "n/a"
 
 Sample Input:
 {
@@ -97,11 +97,13 @@ For Qualitative KPIs:
 - High: Solution demonstrates exceptional performance
 - Medium: Solution shows standard or acceptable performance
 - Low: Solution shows below-average performance
+- N/A: Insufficient data to safely assess the KPI
 Also specify whether high_is_better or low_is_better for the metric.
 
 For Quantitative KPIs:
 - Hit: Solution meets or exceeds the target value
 - Miss: Solution falls short of the target value
+- N/A: Insufficient data to safely assess the KPI
 
 When evaluating each KPI:
 1. Review the solution's reasoning and executive summary
@@ -117,11 +119,11 @@ Output Format:
       "solution_index": 1,
       "ratings": {
         "qualitative_kpi_name": {
-          "rating": "low|medium|high",
+          "rating": "low|medium|high|n/a",
           "direction": "high_is_better|low_is_better"
         },
         "quantitative_kpi_name": {
-          "rating": "hit|miss"
+          "rating": "hit|miss|n/a"
         }
       }
     }
@@ -136,3 +138,4 @@ Important:
 - Be consistent in rating criteria across solutions
 - Consider alignment scores and key compromises from executive summaries
 - Take into account risk assessments when determining ratings
+- Use "n/a" when there is insufficient data to safely assess the KPI

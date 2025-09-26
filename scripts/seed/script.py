@@ -4,6 +4,7 @@ import os
 import requests
 import time
 import logging
+import mimetypes
 
 # Configure logging
 logging.basicConfig(
@@ -56,7 +57,12 @@ def upload_knowledge_items(uuid: str, filename: str):
         
         # Prepare the file for upload
         with open(f'{os.getenv("SEED_DATA_FOLDER")}/{os.getenv("SEED_DATA_FOLDER_RAW")}/{filename}', "rb") as file:
-            files = {'file': (os.path.basename(filename), file)}
+            # Detect MIME type based on file extension
+            mime_type, _ = mimetypes.guess_type(filename)
+            if mime_type is None:
+                mime_type = 'application/octet-stream'  # Default fallback
+            
+            files = {'file': (os.path.basename(filename), file, mime_type)}
             
             # Make the request to the API
             response = requests.put(

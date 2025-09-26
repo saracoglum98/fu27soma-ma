@@ -73,9 +73,10 @@ NEXT_PUBLIC_HOST="localhost"
 LMSTUDIO_HOST="host.docker.internal"
 ```
 ### 3.2 Headless Deployment
+Assuming the Public IP of your host machine is 123.123.123.123, set the related environment variables as shown below.
 ```
-NEXT_PUBLIC_HOST="12.23.13.31"
-LMSTUDIO_HOST="12.23.13.31"
+NEXT_PUBLIC_HOST="123.123.123.123"
+LMSTUDIO_HOST="123.123.123.123"
 ```
 ## 4. Building
 Run one of the following commands to build the framework. The build process can take 5 to 30 minutes, depending on your host machine and internet connection.

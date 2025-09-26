@@ -1,10 +1,25 @@
 #!/bin/zsh
 
-clear
-
 CONFIG_FILE="config.yaml"
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-LOCAL_IP=$(hostname -I | awk '{print $1}')
+
+# Get the appropriate IP address based on the operating system
+get_local_ip() {
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        # macOS - get local network IP
+        LOCAL_IP=$(ifconfig | grep "inet " | grep -v 127.0.0.1 | awk '{print $2}' | head -1)
+    else
+        # Linux (VPS) - get public IP
+        LOCAL_IP=$(hostname -I | awk '{print $1}')
+    fi
+    
+    # Fallback if the above methods fail
+    if [ -z "$LOCAL_IP" ]; then
+        LOCAL_IP=$(curl -s ifconfig.me 2>/dev/null || echo "localhost")
+    fi
+}
+
+get_local_ip
 
 tool_read_yaml() {
     local keys="$1"
@@ -192,6 +207,7 @@ if [ "$1" = "status" ]; then
     echo -e "Management \t API \t\t\t$(tool_container_status "management-api")"
     echo -e "Management \t Data \t\t\t$(tool_container_status "management-data")"
     echo -e "Management \t Logs \t\t\t$(tool_container_status "management-logs")"
+    echo -e "Management \t Auth \t\t\t$(tool_container_status "management-auth")"
     echo
     echo -e "LLM \t\t API \t\t\t$(tool_container_status "llm-api")"
     echo -e "LLM \t\t Inference Engine \t$(tool_container_status "llm-inference")"
@@ -207,23 +223,20 @@ fi
 
 if [ "$1" = "seed" ]; then
     echo -e "🌱\tSeeding sample knowledge\n"
+    local redirect=$(get_output_redirect)
     cd $SCRIPT_DIR/scripts/seed
-    uv venv
+    eval "uv venv $redirect"
     source .venv/bin/activate
-    uv pip install -r requirements.txt
-    python script.py
+    eval "uv pip install -r requirements.txt $redirect"
+    eval "python script.py $redirect"
     deactivate
-    rm -rf .venv
+    eval "rm -rf .venv $redirect"
     cd $SCRIPT_DIR
 fi
 
 if [ "$1" = "build" ]; then
     redirect=$(get_output_redirect)
     tic=$(date +%s)
-
-    #eval "docker rm $(docker ps -f status=exited -aq) $redirect"
-    #eval "docker rmi $(docker images -f "dangling=true" -q) $redirect"
-    #eval "docker volume rm $(docker volume ls -f "dangling=true" -q) $redirect"
 
     echo -e "🪜\tPreparing to build\n"
     eval "service_destroy \"communication-app\" $redirect"
@@ -237,6 +250,7 @@ if [ "$1" = "build" ]; then
     eval "service_destroy \"management-api\" $redirect"
     eval "service_destroy \"management-data\" $redirect"
     eval "service_destroy \"management-logs\" $redirect"
+    eval "service_destroy \"management-auth\" $redirect"
 
     
     create_network
@@ -273,6 +287,7 @@ if [ "$1" = "start" ]; then
     service_start "management-api"
     service_start "management-data"
     service_start "management-logs"
+    service_start "management-auth"
     echo -e "\n🎉 All services started\n"
 fi
 
@@ -289,6 +304,7 @@ if [ "$1" = "stop" ]; then
     service_stop "management-api"
     service_stop "management-data"
     service_stop "management-logs"
+    service_stop "management-auth"
     echo -e "\n🎉 All services stopped\n"
 fi
 
@@ -304,10 +320,13 @@ if [ "$1" = "restart" ]; then
     service_restart "management-api"
     service_restart "management-data"
     service_restart "management-logs"
+    service_restart "management-auth"
     echo -e "\n🎉 All services restarted\n"
 fi
 
 if [ "$1" = "destroy" ]; then
+    redirect=$(get_output_redirect)
+    echo -e "💣\tDestroying all services\n"
     service_destroy "communication-app"
     service_destroy "llm-inference"
     service_destroy "llm-api"
@@ -319,14 +338,12 @@ if [ "$1" = "destroy" ]; then
     service_destroy "management-api"
     service_destroy "management-data"
     service_destroy "management-logs"
+    service_destroy "management-auth"
+    eval "docker rm $(docker ps -f status=exited -aq) $redirect"
+    eval "docker rmi $(docker images -f "dangling=true" -q) $redirect"
+    eval "docker volume rm $(docker volume ls -f "dangling=true" -q) $redirect"
     echo -e "\n🎉 All services destroyed\n"
 fi
-
-if [ "$1" = "read" ]; then
-    test=$(tool_read_yaml "deployment.type")
-    echo "Test: $test"
-fi
-
 
 
 

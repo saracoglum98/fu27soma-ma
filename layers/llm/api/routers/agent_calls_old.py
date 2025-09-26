@@ -107,11 +107,11 @@ async def kpi_analyst(solution_uuid: str, mytype: str="initial"):
         
         print(kpi_schema)
 
-        # OpenAI API endpoint configuration
-        api_endpoint = "https://api.openai.com/v1/chat/completions"
+        # OpenAI-compatible endpoint configuration
+        api_endpoint = "http://{}:1234/v1/chat/completions".format(os.getenv("LMSTUDIO_HOST"))
         headers = {
             "Content-Type": "application/json",
-            "Authorization": f"Bearer {os.getenv('OPENAI_API_KEY')}",
+            "Authorization": "Bearer dummy-token",
         }
 
         # Fetch agent configuration
@@ -137,7 +137,7 @@ async def kpi_analyst(solution_uuid: str, mytype: str="initial"):
 
         # Use the previously generated schema for validation
         payload = {
-            "model": "gpt-4o",
+            "model": "expert",
             "messages": [
                 {
                     "role": "system",
@@ -147,7 +147,7 @@ async def kpi_analyst(solution_uuid: str, mytype: str="initial"):
             ],
             "response_format": {
                 "type": "json_schema",
-                "json_schema": kpi_schema
+                "json_schema": {"schema": kpi_schema}
             }
         }
 
@@ -187,14 +187,8 @@ async def kpi_analyst(solution_uuid: str, mytype: str="initial"):
                 else:
                     content_json = cleaned_content
                 
-                # Extract only the solutions array for storage (schema expects a list)
-                if isinstance(content_json, dict) and "solutions" in content_json:
-                    solutions_array = content_json["solutions"]
-                else:
-                    solutions_array = content_json
-                
                 # Convert to a clean JSON string without escapes
-                clean_json = json.dumps(solutions_array, ensure_ascii=False, separators=(',', ':'))
+                clean_json = json.dumps(content_json, ensure_ascii=False, separators=(',', ':'))
             except json.JSONDecodeError:
                 # If it's not valid JSON, store as a simple string
                 clean_json = json.dumps({"content": cleaned_content}, ensure_ascii=False, separators=(',', ':'))
@@ -311,11 +305,11 @@ async def sysml_expert(solution_uuid: str):
         # Combine all context documents
         context = "\n\n---\n\n".join(context_documents)
 
-        # OpenAI API endpoint configuration
-        api_endpoint = "https://api.openai.com/v1/chat/completions"
+        # OpenAI-compatible endpoint configuration
+        api_endpoint = "http://{}:1234/v1/chat/completions".format(os.getenv("LMSTUDIO_HOST"))
         headers = {
             "Content-Type": "application/json",
-            "Authorization": f"Bearer {os.getenv('OPENAI_API_KEY')}",
+            "Authorization": "Bearer dummy-token",
         }
 
         # Prepare solution data for LLM
@@ -356,7 +350,7 @@ async def sysml_expert(solution_uuid: str):
             user_prompt = user_prompt.replace("%result_data%", json.dumps(result_data, indent=2))
 
         payload = {
-            "model": "gpt-4o",
+            "model": "expert",
             "messages": [
                 {
                     "role": "system",
@@ -372,18 +366,14 @@ async def sysml_expert(solution_uuid: str):
         }
 
         print(f"Making request to OpenAI-compatible endpoint: {api_endpoint}")
-        print(f"Request payload: {json.dumps(payload, indent=2)}")
 
         async with httpx.AsyncClient(timeout=int(os.getenv("MODEL_TIMEOUT"))) as llm_client:
             llm_response = await llm_client.post(
                 api_endpoint, json=payload, headers=headers
             )
             print(f"Response status: {llm_response.status_code}")
-            print(f"Response headers: {dict(llm_response.headers)}")
-            print(f"Response text: {llm_response.text}")
 
             if llm_response.status_code != 200:
-                print(f"LLM request failed with status {llm_response.status_code}: {llm_response.text}")
                 raise HTTPException(
                     status_code=llm_response.status_code,
                     detail=f"LLM request failed: {llm_response.text}",
@@ -425,9 +415,6 @@ async def sysml_expert(solution_uuid: str):
             
             return {"data": clean_json}
 
-    except HTTPException:
-        # Re-raise HTTPExceptions to preserve the original status code and detail
-        raise
     except Exception as e:
         print(f"Error in sysml endpoint: {str(e)}")
         print(traceback.format_exc())
@@ -485,11 +472,11 @@ async def ma_solver(solution_uuid: str, num_of_solutions: int):
             "req_business": solution["req_business"]
         }
 
-        # OpenAI API endpoint configuration
-        api_endpoint = "https://api.openai.com/v1/chat/completions"
+        # OpenAI-compatible endpoint configuration
+        api_endpoint = "http://{}:1234/v1/chat/completions".format(os.getenv("LMSTUDIO_HOST"))
         headers = {
             "Content-Type": "application/json",
-            "Authorization": f"Bearer {os.getenv('OPENAI_API_KEY')}",
+            "Authorization": "Bearer dummy-token",
         }
 
         # Prepare the chat completion request with context and solution data
@@ -513,7 +500,7 @@ async def ma_solver(solution_uuid: str, num_of_solutions: int):
             user_prompt = user_prompt.replace("%solution_data%", json.dumps(solution_data, indent=2))
 
         payload = {
-            "model": "gpt-4o-mini",
+            "model": "main",
             "messages": [
                 {
                     "role": "system",
@@ -529,18 +516,14 @@ async def ma_solver(solution_uuid: str, num_of_solutions: int):
         }
 
         print(f"Making request to OpenAI-compatible endpoint: {api_endpoint}")
-        print(f"Request payload: {json.dumps(payload, indent=2)}")
 
         async with httpx.AsyncClient(timeout=int(os.getenv("MODEL_TIMEOUT"))) as llm_client:
             llm_response = await llm_client.post(
                 api_endpoint, json=payload, headers=headers
             )
             print(f"Response status: {llm_response.status_code}")
-            print(f"Response headers: {dict(llm_response.headers)}")
-            print(f"Response text: {llm_response.text}")
 
             if llm_response.status_code != 200:
-                print(f"LLM request failed with status {llm_response.status_code}: {llm_response.text}")
                 raise HTTPException(
                     status_code=llm_response.status_code,
                     detail=f"LLM request failed: {llm_response.text}",
@@ -580,24 +563,8 @@ async def ma_solver(solution_uuid: str, num_of_solutions: int):
             finally:
                 conn.close()
             
-            # Trigger KPI analysis after solving
-            print(f"Triggering KPI analysis for solution {solution_uuid}")
-            try:
-                async with httpx.AsyncClient(timeout=600.0) as client:
-                    kpi_response = await client.get(
-                        f"http://llm-api:10010/agent-calls/kpi-analyst/{solution_uuid}/initial"
-                    )
-                    if kpi_response.status_code != 200:
-                        print(f"Warning: KPI analysis failed with status {kpi_response.status_code}: {kpi_response.text}")
-            except Exception as e:
-                print(f"Warning: Failed to trigger KPI analysis: {str(e)}")
-                # Don't raise the exception - we don't want to fail the solving if KPI analysis fails
-            
             return {"data": cleaned_content}
 
-    except HTTPException:
-        # Re-raise HTTPExceptions to preserve the original status code and detail
-        raise
     except Exception as e:
         print(f"Error in solve endpoint: {str(e)}")
         print(traceback.format_exc())
@@ -656,11 +623,11 @@ async def ma_optimizer(solution_uuid: str, prompt: str):
             "prompt": prompt  # Include the optimization prompt
         }
 
-        # OpenAI API endpoint configuration
-        api_endpoint = "https://api.openai.com/v1/chat/completions"
+        # OpenAI-compatible endpoint configuration
+        api_endpoint = "http://{}:1234/v1/chat/completions".format(os.getenv("LMSTUDIO_HOST"))
         headers = {
             "Content-Type": "application/json",
-            "Authorization": f"Bearer {os.getenv('OPENAI_API_KEY')}",
+            "Authorization": "Bearer dummy-token",
         }
 
         # Fetch agent configuration
@@ -685,7 +652,7 @@ async def ma_optimizer(solution_uuid: str, prompt: str):
             user_prompt = user_prompt.replace("%user_prompt%", prompt)
 
         payload = {
-            "model": "gpt-4o",
+            "model": "expert",
             "messages": [
                 {
                     "role": "system",
@@ -701,18 +668,14 @@ async def ma_optimizer(solution_uuid: str, prompt: str):
         }
 
         print(f"Making request to OpenAI-compatible endpoint: {api_endpoint}")
-        print(f"Request payload: {json.dumps(payload, indent=2)}")
 
         async with httpx.AsyncClient(timeout=int(os.getenv("MODEL_TIMEOUT"))) as llm_client:
             llm_response = await llm_client.post(
                 api_endpoint, json=payload, headers=headers
             )
             print(f"Response status: {llm_response.status_code}")
-            print(f"Response headers: {dict(llm_response.headers)}")
-            print(f"Response text: {llm_response.text}")
 
             if llm_response.status_code != 200:
-                print(f"LLM request failed with status {llm_response.status_code}: {llm_response.text}")
                 raise HTTPException(
                     status_code=llm_response.status_code,
                     detail=f"LLM request failed: {llm_response.text}",
@@ -767,9 +730,6 @@ async def ma_optimizer(solution_uuid: str, prompt: str):
             
             return {"data": cleaned_content}
 
-    except HTTPException:
-        # Re-raise HTTPExceptions to preserve the original status code and detail
-        raise
     except Exception as e:
         print(f"Error in optimizer endpoint: {str(e)}")
         print(traceback.format_exc())

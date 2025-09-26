@@ -79,66 +79,78 @@ async def generate_kpi_analyst_schema(kpis: list, num_of_solutions: int):
         if kpi["type"] not in ["qualitative", "quantitative"]:
             raise ValueError(f"Invalid KPI type '{kpi['type']}'. Must be 'qualitative' or 'quantitative'")
     schema = {
-        "type": "array",
-        "minItems": num_of_solutions,
-        "maxItems": num_of_solutions,
-        "items": {
+        "name": "kpi_analysis_response",
+        "strict": True,
+        "schema": {
             "type": "object",
+            "additionalProperties": False,
             "properties": {
-                "solution_id": {
-                    "type": "integer",
-                    "minimum": 1
-                },
-                "qualitative_analysis": {
+                "solutions": {
                     "type": "array",
-                    "minItems": len([kpi for kpi in kpis if kpi["type"] == "qualitative"]),
-                    "maxItems": len([kpi for kpi in kpis if kpi["type"] == "qualitative"]),
+                    "minItems": num_of_solutions,
+                    "maxItems": num_of_solutions,
                     "items": {
                         "type": "object",
+                        "additionalProperties": False,
                         "properties": {
-                            "kpi": {
-                                "type": "string",
-                                "enum": [kpi["key"] for kpi in kpis if kpi["type"] == "qualitative"]
+                            "solution_id": {
+                                "type": "integer",
+                                "minimum": 1
                             },
-                            "assessment": {
-                                "type": "string",
-                                "enum": ["low", "medium", "high"]
+                            "qualitative_analysis": {
+                                "type": "array",
+                                "minItems": len([kpi for kpi in kpis if kpi["type"] == "qualitative"]),
+                                "maxItems": len([kpi for kpi in kpis if kpi["type"] == "qualitative"]),
+                                "items": {
+                                    "type": "object",
+                                    "additionalProperties": False,
+                                    "properties": {
+                                        "kpi": {
+                                            "type": "string",
+                                            "enum": [kpi["key"] for kpi in kpis if kpi["type"] == "qualitative"]
+                                        },
+                                        "assessment": {
+                                            "type": "string",
+                                            "enum": ["low", "medium", "high", "n/a"]
+                                        },
+                                        "rationale": {
+                                            "type": "string",
+                                            "description": "Brief explanation of the analysis"
+                                        }
+                                    },
+                                    "required": ["kpi", "assessment", "rationale"]
+                                },
                             },
-                            "rationale": {
-                                "type": "string",
-                                "description": "Brief explanation of the analysis"
+                            "quantitative_analysis": {
+                                "type": "array",
+                                "minItems": len([kpi for kpi in kpis if kpi["type"] == "quantitative"]),
+                                "maxItems": len([kpi for kpi in kpis if kpi["type"] == "quantitative"]),
+                                "items": {
+                                    "type": "object",
+                                    "additionalProperties": False,
+                                    "properties": {
+                                        "kpi": {
+                                            "type": "string",
+                                            "enum": [kpi["key"] for kpi in kpis if kpi["type"] == "quantitative"]
+                                        },
+                                        "assessment": {
+                                            "type": "string",
+                                            "enum": ["hit", "miss", "n/a"]
+                                        },
+                                        "rationale": {
+                                            "type": "string",
+                                            "description": "Brief explanation of the analysis"
+                                        }
+                                    },
+                                    "required": ["kpi", "assessment", "rationale"]
+                                },
                             }
                         },
-                        "required": ["kpi", "assessment", "rationale"]
-                    },
-                    "uniqueItems": True
-                },
-                "quantitative_analysis": {
-                    "type": "array",
-                    "minItems": len([kpi for kpi in kpis if kpi["type"] == "quantitative"]),
-                    "maxItems": len([kpi for kpi in kpis if kpi["type"] == "quantitative"]),
-                    "items": {
-                        "type": "object",
-                        "properties": {
-                            "kpi": {
-                                "type": "string",
-                                "enum": [kpi["key"] for kpi in kpis if kpi["type"] == "quantitative"]
-                            },
-                            "assessment": {
-                                "type": "string",
-                                "enum": ["hit", "miss"]
-                            },
-                            "rationale": {
-                                "type": "string",
-                                "description": "Brief explanation of the analysis"
-                            }
-                        },
-                        "required": ["kpi", "assessment", "rationale"]
-                    },
-                    "uniqueItems": True
+                        "required": ["solution_id", "qualitative_analysis", "quantitative_analysis"]
+                    }
                 }
             },
-            "required": ["solution_id", "qualitative_analysis", "quantitative_analysis"]
+            "required": ["solutions"]
         }
     }
     

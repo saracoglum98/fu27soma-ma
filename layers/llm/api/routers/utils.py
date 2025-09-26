@@ -50,14 +50,14 @@ async def convert(file: UploadFile):
         # Read file content
         file_content = await file.read()
 
-        # Create a temporary URL-like string for the file
-        temp_url = f"memory://{file.filename}"
+        # Create a temporary file-like object
+        temp_file = BytesIO(file_content)
 
         # Initialize MarkItDown
         md = MarkItDown(enable_plugins=False)
 
-        # Convert file content
-        result = md.convert_bytes(file_content, mime_type=file.content_type)
+        # Convert file content using the correct method
+        result = md.convert(temp_file)
 
         return {"data": result.text_content}
 

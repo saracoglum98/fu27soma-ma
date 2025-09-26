@@ -1,11 +1,13 @@
 {
   "name": "report_response",
-  "strict": "true",
-  "schema": {
-    "type": "object",
-    "properties": {
+  "strict": true,
+    "schema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
       "meta": {
         "type": "object",
+        "additionalProperties": false,
         "properties": {
           "solution_space": {
             "type": "string",
@@ -16,6 +18,7 @@
       },
       "executive_summary": {
         "type": "object",
+        "additionalProperties": false,
         "properties": {
           "decision_rationale": {
             "type": "string",
@@ -31,6 +34,7 @@
           },
           "alignment_score": {
             "type": "object",
+            "additionalProperties": false,
             "properties": {
               "customer_requirements": {
                 "type": "number",
@@ -54,6 +58,7 @@
         "type": "array",
         "items": {
           "type": "object",
+          "additionalProperties": false,
           "properties": {
             "function": {
               "type": "string",

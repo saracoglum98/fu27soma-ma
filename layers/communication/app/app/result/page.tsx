@@ -35,13 +35,13 @@ interface ExecutiveSummary {
 interface QualitativeKPIResult {
   kpi: string;
   rationale: string;
-  assessment: 'low' | 'medium' | 'high';
+  assessment: 'low' | 'medium' | 'high' | 'n/a';
 }
 
 interface QuantitativeKPIResult {
   kpi: string;
   rationale: string;
-  assessment: 'hit' | 'miss';
+  assessment: 'hit' | 'miss' | 'n/a';
 }
 
 interface KPIAnalysis {
@@ -191,7 +191,7 @@ function ResultContent() {
           </h1>
         </div>
         <div className="flex gap-2">
-          {!solution.result_initial_analysis && (
+          {(!solution.result_initial_analysis || !Array.isArray(solution.result_initial_analysis) || solution.result_initial_analysis.length === 0) && (
             <Button 
               onClick={() => handleKPIAnalysis('initial')} 
               disabled={analyzing}
@@ -335,7 +335,7 @@ function ResultContent() {
       </Tabs>
 
       {/* KPI Analysis Table */}
-      {solution.result_initial_analysis && (
+      {solution.result_initial_analysis && Array.isArray(solution.result_initial_analysis) && solution.result_initial_analysis.length > 0 && (
         <Card className="mt-6">
           <CardHeader>
             <CardTitle>KPI Analysis of Initial Solutions</CardTitle>
@@ -352,16 +352,16 @@ function ResultContent() {
                   <TableHeader>
                     <TableRow>
                       <TableHead>KPI</TableHead>
-                      {(solution.result_initial_analysis as any[]).map((_, index) => (
+                      {(solution.result_initial_analysis as any[] || []).map((_, index) => (
                         <TableHead key={index}>Solution {index + 1}</TableHead>
                       ))}
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {Array.from(new Set((solution.result_initial_analysis as any[]).flatMap(s => s.qualitative_analysis.map((a: QualitativeKPIResult) => a.kpi)))).map((kpi) => (
+                    {Array.from(new Set((solution.result_initial_analysis as any[] || []).flatMap(s => s.qualitative_analysis.map((a: QualitativeKPIResult) => a.kpi)))).map((kpi) => (
                       <TableRow key={kpi}>
                         <TableCell className="font-medium">{kpi}</TableCell>
-                        {(solution.result_initial_analysis as any[]).map((sol, index) => {
+                        {(solution.result_initial_analysis as any[] || []).map((sol, index) => {
                           const analysis = sol.qualitative_analysis.find((a: any) => a.kpi === kpi);
                           return (
                             <TableCell key={index}>
@@ -370,9 +370,10 @@ function ResultContent() {
                                   <span className={
                                     analysis?.assessment === 'high' ? 'text-green-600 font-semibold' :
                                     analysis?.assessment === 'medium' ? 'text-yellow-600' :
+                                    analysis?.assessment === 'n/a' ? 'text-blue-600 font-semibold' :
                                     'text-red-600'
                                   }>
-                                    {analysis?.assessment.charAt(0).toUpperCase() + analysis?.assessment.slice(1)}
+                                    {analysis?.assessment === 'n/a' ? 'N/A' : analysis?.assessment.charAt(0).toUpperCase() + analysis?.assessment.slice(1)}
                                   </span>
                                 </HoverCardTrigger>
                                 <HoverCardContent>
@@ -393,23 +394,27 @@ function ResultContent() {
                   <TableHeader>
                     <TableRow>
                       <TableHead>KPI</TableHead>
-                      {(solution.result_initial_analysis as any[]).map((_, index) => (
+                      {(solution.result_initial_analysis as any[] || []).map((_, index) => (
                         <TableHead key={index}>Solution {index + 1}</TableHead>
                       ))}
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {Array.from(new Set((solution.result_initial_analysis as any[]).flatMap(s => s.quantitative_analysis.map((a: QuantitativeKPIResult) => a.kpi)))).map((kpi) => (
+                    {Array.from(new Set((solution.result_initial_analysis as any[] || []).flatMap(s => s.quantitative_analysis.map((a: QuantitativeKPIResult) => a.kpi)))).map((kpi) => (
                       <TableRow key={kpi}>
                         <TableCell className="font-medium">{kpi}</TableCell>
-                        {(solution.result_initial_analysis as any[]).map((sol, index) => {
+                        {(solution.result_initial_analysis as any[] || []).map((sol, index) => {
                           const analysis = sol.quantitative_analysis.find((a: any) => a.kpi === kpi);
                           return (
                             <TableCell key={index}>
                               <HoverCard>
                                 <HoverCardTrigger>
-                                  <span className={analysis?.assessment === 'hit' ? 'text-green-600 font-semibold' : 'text-red-600'}>
-                                    {analysis?.assessment.charAt(0).toUpperCase() + analysis?.assessment.slice(1)}
+                                  <span className={
+                                    analysis?.assessment === 'hit' ? 'text-green-600 font-semibold' :
+                                    analysis?.assessment === 'n/a' ? 'text-blue-600 font-semibold' :
+                                    'text-red-600'
+                                  }>
+                                    {analysis?.assessment === 'n/a' ? 'N/A' : analysis?.assessment.charAt(0).toUpperCase() + analysis?.assessment.slice(1)}
                                   </span>
                                 </HoverCardTrigger>
                                 <HoverCardContent>
@@ -430,7 +435,7 @@ function ResultContent() {
       )}
 
       {/* Optimization Card */}
-      {solution.result_initial && solution.result_initial_analysis && (
+      {solution.result_initial && solution.result_initial_analysis && Array.isArray(solution.result_initial_analysis) && solution.result_initial_analysis.length > 0 && (
         <Card className="mt-6">
           <CardHeader>
             <CardTitle>Optimize</CardTitle>
@@ -454,7 +459,7 @@ function ResultContent() {
       )}
 
       {/* Final KPI Results */}
-      {solution.result_final && solution.result_initial_analysis && (
+      {solution.result_final && solution.result_initial_analysis && Array.isArray(solution.result_initial_analysis) && solution.result_initial_analysis.length > 0 && (
         <Card className="mt-6">
           <CardHeader>
             <CardTitle>Optimized Solution</CardTitle>
@@ -534,7 +539,7 @@ function ResultContent() {
                           </TableRow>
                         </TableHeader>
                         <TableBody>
-                          {(solution.result_final_analysis[0] as KPIAnalysis).qualitative_analysis.map((analysis, idx) => (
+                          {((solution.result_final_analysis as any[])?.[0] as KPIAnalysis)?.qualitative_analysis?.map((analysis, idx) => (
                             <TableRow key={idx}>
                               <TableCell className="font-medium">{analysis.kpi}</TableCell>
                               <TableCell>
@@ -543,9 +548,10 @@ function ResultContent() {
                                     <span className={
                                       analysis.assessment === 'high' ? 'text-green-600 font-semibold' :
                                       analysis.assessment === 'medium' ? 'text-yellow-600' :
+                                      analysis.assessment === 'n/a' ? 'text-blue-600 font-semibold' :
                                       'text-red-600'
                                     }>
-                                      {analysis.assessment.charAt(0).toUpperCase() + analysis.assessment.slice(1)}
+                                      {analysis.assessment === 'n/a' ? 'N/A' : analysis.assessment.charAt(0).toUpperCase() + analysis.assessment.slice(1)}
                                     </span>
                                   </HoverCardTrigger>
                                   <HoverCardContent>
@@ -568,14 +574,18 @@ function ResultContent() {
                           </TableRow>
                         </TableHeader>
                         <TableBody>
-                          {(solution.result_final_analysis[0] as KPIAnalysis).quantitative_analysis.map((analysis, idx) => (
+                          {((solution.result_final_analysis as any[])?.[0] as KPIAnalysis)?.quantitative_analysis?.map((analysis, idx) => (
                             <TableRow key={idx}>
                               <TableCell className="font-medium">{analysis.kpi}</TableCell>
                               <TableCell>
                                 <HoverCard>
                                   <HoverCardTrigger>
-                                    <span className={analysis.assessment === 'hit' ? 'text-green-600 font-semibold' : 'text-red-600'}>
-                                      {analysis.assessment.charAt(0).toUpperCase() + analysis.assessment.slice(1)}
+                                    <span className={
+                                      analysis.assessment === 'hit' ? 'text-green-600 font-semibold' :
+                                      analysis.assessment === 'n/a' ? 'text-blue-600 font-semibold' :
+                                      'text-red-600'
+                                    }>
+                                      {analysis.assessment === 'n/a' ? 'N/A' : analysis.assessment.charAt(0).toUpperCase() + analysis.assessment.slice(1)}
                                     </span>
                                   </HoverCardTrigger>
                                   <HoverCardContent>
