@@ -24,9 +24,6 @@ get_local_ip
 tool_read_yaml() {
     local keys="$1"
 
-    # Add leading dot for yq syntax
-    local yq_path=".$keys"
-
     # Check if yq is available
     if ! command -v yq >/dev/null 2>&1; then
         echo "Error: yq is not installed. Please install yq to use this script." >&2
@@ -39,12 +36,28 @@ tool_read_yaml() {
         return 1
     fi
 
-    # Try to read the YAML file with the path, using absolute path
-    if ! value=$(yq eval "$yq_path" "$SCRIPT_DIR/$CONFIG_FILE" 2>/dev/null); then
-        echo "Error: Failed to read YAML path: $yq_path from $SCRIPT_DIR/$CONFIG_FILE" >&2
-        echo "Available keys in config:" >&2
-        yq eval 'keys' "$SCRIPT_DIR/$CONFIG_FILE" 2>/dev/null >&2 || echo "Could not read config file" >&2
-        return 1
+    # Detect yq version and use appropriate syntax
+    local yq_version=$(yq --version 2>/dev/null | grep -oE '[0-9]+\.[0-9]+' | head -1)
+    local value=""
+    
+    # Check if this is the newer yq (v4+) which uses 'eval' syntax
+    if [[ "$yq_version" =~ ^[4-9]\. ]] || [[ "$OSTYPE" == "darwin"* ]]; then
+        # Newer yq syntax (macOS Homebrew yq)
+        local yq_path=".$keys"
+        if ! value=$(yq eval "$yq_path" "$SCRIPT_DIR/$CONFIG_FILE" 2>/dev/null); then
+            echo "Error: Failed to read YAML path: $yq_path from $SCRIPT_DIR/$CONFIG_FILE" >&2
+            echo "Available keys in config:" >&2
+            yq eval 'keys' "$SCRIPT_DIR/$CONFIG_FILE" 2>/dev/null >&2 || echo "Could not read config file" >&2
+            return 1
+        fi
+    else
+        # Older yq syntax (Ubuntu apt yq)
+        if ! value=$(yq r "$SCRIPT_DIR/$CONFIG_FILE" "$keys" 2>/dev/null); then
+            echo "Error: Failed to read YAML path: $keys from $SCRIPT_DIR/$CONFIG_FILE" >&2
+            echo "Available keys in config:" >&2
+            yq r "$SCRIPT_DIR/$CONFIG_FILE" --printMode p '**' 2>/dev/null >&2 || echo "Could not read config file" >&2
+            return 1
+        fi
     fi
 
     # Check if the value is null
