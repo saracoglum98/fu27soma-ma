@@ -36,13 +36,22 @@ tool_read_yaml() {
         return 1
     fi
 
-    # Detect yq version and use appropriate syntax
+    # Detect yq type and use appropriate syntax
     local yq_version=$(yq --version 2>/dev/null | grep -oE '[0-9]+\.[0-9]+' | head -1)
     local value=""
     
-    # Check if this is the newer yq (v4+) which uses 'eval' syntax
-    if [[ "$yq_version" =~ ^[4-9]\. ]] || [[ "$OSTYPE" == "darwin"* ]]; then
-        # Newer yq syntax (macOS Homebrew yq)
+    # Check if this is Python-based yq (from python-yq package)
+    if yq --help 2>&1 | grep -q "jq filter"; then
+        # Python-based yq syntax
+        if ! value=$(yq ".$keys" "$SCRIPT_DIR/$CONFIG_FILE" 2>/dev/null); then
+            echo "Error: Failed to read YAML path: .$keys from $SCRIPT_DIR/$CONFIG_FILE" >&2
+            echo "Available keys in config:" >&2
+            yq "keys" "$SCRIPT_DIR/$CONFIG_FILE" 2>/dev/null >&2 || echo "Could not read config file" >&2
+            return 1
+        fi
+    # Check if this is the newer Go-based yq (v4+) which uses 'eval' syntax
+    elif [[ "$yq_version" =~ ^[4-9]\. ]] || [[ "$OSTYPE" == "darwin"* ]] || yq eval --help >/dev/null 2>&1; then
+        # Newer Go-based yq syntax (macOS Homebrew yq)
         local yq_path=".$keys"
         if ! value=$(yq eval "$yq_path" "$SCRIPT_DIR/$CONFIG_FILE" 2>/dev/null); then
             echo "Error: Failed to read YAML path: $yq_path from $SCRIPT_DIR/$CONFIG_FILE" >&2
@@ -51,11 +60,11 @@ tool_read_yaml() {
             return 1
         fi
     else
-        # Older yq syntax (Ubuntu apt yq)
+        # Older Go-based yq syntax (Ubuntu apt yq)
         if ! value=$(yq r "$SCRIPT_DIR/$CONFIG_FILE" "$keys" 2>/dev/null); then
             echo "Error: Failed to read YAML path: $keys from $SCRIPT_DIR/$CONFIG_FILE" >&2
             echo "Available keys in config:" >&2
-            yq r "$SCRIPT_DIR/$CONFIG_FILE" --printMode p '**' 2>/dev/null >&2 || echo "Could not read config file" >&2
+            yq r "$SCRIPT_DIR/$CONFIG_FILE" 2>/dev/null >&2 || echo "Could not read config file" >&2
             return 1
         fi
     fi
